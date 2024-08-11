@@ -1,7 +1,8 @@
-import LoginPage from '@/app/components/Auth/Login/LoginPage'
+import SignUpPage from '@/app/components/Auth/SIgnUp/SignUpPage';
 import React from 'react'
+
 export const metadata = {
-    title: 'Open Journal System - Login',
+    title: 'Open Journal System - SignUp',
     metadataBase: new URL('https://google.com'),
     description:
       'Open Journal System!',
@@ -12,10 +13,12 @@ export const metadata = {
     ]
 };
 
-const Login = () => {
+const SignUp = () => {
   return (
-    <LoginPage/>
+    <>
+        <SignUpPage/>
+    </>
   )
 }
 
-export default Login
+export default SignUp
