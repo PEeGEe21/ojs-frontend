@@ -20,7 +20,7 @@ import Link from 'next/link';
 
 
 const dataSourceData = Array.from({
-    length: 100,
+    length: 10,
   }).map((_, i) => ({
     key: i++,
     id: i++,
@@ -171,7 +171,7 @@ const RolesTable = () => {
         });
     };
 
-      const deleteRole = (data) => {
+    const deleteRole = (data) => {
         Swal.fire({
             title: 'Are you sure?',
             text: 'You won\'t be able to revert this!',
@@ -182,11 +182,28 @@ const RolesTable = () => {
             confirmButtonText: 'Yes, delete it!',
             allowOutsideClick: () => !Swal.isLoading(), // Prevent clicking outside modal during loading
             showLoaderOnConfirm: true,
+            preConfirm: async (login) => {
+                const newData = dataSource.filter((item) => item.id !== data.id);
+                setDataSource(newData);
+                // try {
+                //   const githubUrl = `
+                //     https://api.github.com/users/${login}
+                //   `;
+                //   const response = await fetch(githubUrl);
+                //   if (!response.ok) {
+                //     return Swal.showValidationMessage(`
+                //       ${JSON.stringify(await response.json())}
+                //     `);
+                //   }
+                //   return response.json();
+                // } catch (error) {
+                //   Swal.showValidationMessage(`
+                //     Request failed: ${error}
+                //   `);
+                // }
+                },
         }).then((result) => {
             
-
-            const newData = dataSource.filter((item) => item.id !== data.id);
-            setDataSource(newData);
             if (result.isConfirmed) {
                 Swal.fire(
                 'Deleted!',
@@ -215,7 +232,7 @@ const RolesTable = () => {
             //     }
             //   );
         });
-      };
+    };
       
   return (
     <>
