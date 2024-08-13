@@ -17,3 +17,29 @@ export const successtoastOptions = {
     'aria-live': 'polite',
   },
 };
+
+export const successOptions = {
+    style: {
+      border: '1px solid #255625',
+      padding: '16px',
+      color: '#ffffff',
+      boxShadow: 'none',
+      fontSize: '14px',
+      background: 'green'
+  },
+  iconTheme: {
+      primary: '#398439',
+      secondary: '#FFF',
+  },
+}
+
+export const permissionLevelList = [
+  {
+    id: 1,
+    title: 'Admin'
+  },
+  {
+    id: 2,
+    title: 'Author'
+  }
+]

@@ -3,6 +3,9 @@
 import React, { useEffect, useState } from 'react';
 import { LoaderIcon2 } from '../IconComponent';
 import Swal from 'sweetalert2';
+import { useDisclosure } from '@chakra-ui/react';
+import {successOptions} from '@/app/lib/constants';
+import Link from 'next/link';
 import { 
     Form, 
     Button, 
@@ -16,7 +19,11 @@ import {
     Popconfirm ,
     Spin
 } from 'antd';
-import Link from 'next/link';
+import AddRoleModal from '@/app/components/Modals/roles/AddRoleModal';
+import EditRoleModal from '@/app/components/Modals/roles/EditRoleModal';
+import { permissionLevelList } from '@/app/lib/constants';
+import { Edit, Trash } from 'iconsax-react';
+import toast from 'react-hot-toast';
 
 
 const dataSourceData = Array.from({
@@ -24,8 +31,9 @@ const dataSourceData = Array.from({
   }).map((_, i) => ({
     key: i++,
     id: i++,
-    name: `Edward ${i++}`,
-    permissionLevel: `King ${i++}`,
+    title: `Edward ${i++}`,
+    description: `King ${i++}`,
+    permission_level: permissionLevelList[Math.floor(Math.random() * permissionLevelList.length)],
     submission: Math.random() < 0.5 ? 1 : 0,
     review: Math.random() < 0.5 ? 1 : 0,
     copyediting: Math.random() < 0.5 ? 1 : 0,
@@ -33,10 +41,25 @@ const dataSourceData = Array.from({
   }));
   
 const RolesTable = () => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [dataSource, setDataSource] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [dataSource, setDataSource] = useState([]);
+    const [currentRole, setCurrentRole] = useState(null);
+
+    const {
+        isOpen: roleIsOpen,
+        onOpen: onRoleOpen,
+        onClose: onRoleClose,
+    } = useDisclosure();
+    const {
+        isOpen: roleEditIsOpen,
+        onOpen: onRoleEditOpen,
+        onClose: onRoleEditClose,
+    } = useDisclosure();
+
+
+    const user = null;
 
     const columns = [
         {
@@ -49,30 +72,43 @@ const RolesTable = () => {
         {
             key: '1',
             title: 'Role Name',
-            dataIndex: 'name',
+            dataIndex: 'title',
             render: (text) => <a>{text}</a>,
         },
         {
             key: '2',
             title: 'Permission Level',
-            dataIndex: 'permissionLevel',
-            render: (text) => <a>{text}</a>,
+            dataIndex: 'permission_level',
+            render: (text) => <a>{text.title}</a>,
         },
         {
             key: '3',
             title: 'Submission',
             dataIndex: 'submission',
             render: (_, record) => (
-                <input type='checkbox' />
+                <div className='w-full text-center flex items-center justify-center'>
+                    <input 
+                        type='checkbox' 
+                        checked={record.submission === 1}
+                        onChange={() => handleSubmissionChange(record, record.submission)}
+                        className='h-4 w-4 cursor-pointer'
+                    />
+                </div>
             ),
-
         },
         {
             key: '4',
             title: 'Review',
             dataIndex: 'review',
             render: (_, record) => (
-                <input type='checkbox' />
+                <div className='w-full text-center flex items-center justify-center'>
+                    <input 
+                        type='checkbox' 
+                        checked={record.review === 1}
+                        onChange={() => handleReviewChange(record, record.review)}
+                        className='h-4 w-4 cursor-pointer'
+                    />
+                </div>
             ),
         },
         {
@@ -80,7 +116,15 @@ const RolesTable = () => {
             title: 'CopyEditing',
             dataIndex: 'copyediting',
             render: (_, record) => (
-                <input type='checkbox' />
+                <div className='w-full text-center flex items-center justify-center'>
+                    <input 
+                        type='checkbox' 
+                        checked={record.copyediting === 1}
+                        onChange={() => handleCopyEditingChange(record, record.copyediting)}
+                        className='h-4 w-4 cursor-pointer'
+                    />
+                </div>
+
             ),
         },
         {
@@ -88,7 +132,15 @@ const RolesTable = () => {
             title: 'Production',
             dataIndex: 'production',
             render: (_, record) => (
-                <input type='checkbox' />
+                <div className='w-full text-center flex items-center justify-center'>
+                    <input 
+                        type='checkbox' 
+                        checked={record.production === 1}
+                        onChange={() => handleProductionChange(record, record.production)}
+                        className='h-4 w-4 cursor-pointer'
+                    />
+                </div>
+                
             ),
         },
         {
@@ -96,8 +148,19 @@ const RolesTable = () => {
             key: '7',
             render: (_, record) => (
             <Space size="middle">
-                <a>Edit</a>
-                <a onClick={(e)=>deleteRole(record)}>Delete</a>
+                <button 
+                    className="flex btn btn-info items-center gap-1 text-xs" 
+                    onClick={() => {
+                        setCurrentRole(record);
+                        onRoleEditOpen();
+                      }}>
+                    <Edit size={14}/> Edit
+                </button>
+                <button 
+                    className="flex btn btn-red items-center gap-1 text-xs" 
+                    onClick={(e)=>deleteRole(record)}>
+                        <Trash size={12}/> Delete
+                </button>
             </Space>
             ),
             // render: (_, record) => {
@@ -154,22 +217,184 @@ const RolesTable = () => {
       }, [])
     
 
-    const handleCheckboxChange = async (key) => {
-        const newData = dataSource.map(item => {
-            if (item.key === key) {
-            return { ...item, submission: item.submission === 1 ? 0 : 1 };
-            }
-            return item;
-        });
-        setDataSource(newData);
+    const handleSubmissionChange = async(record, status) => {
+        let key = record.key
+        // key = "undefined";
+        var msg = '';
+        if (key == "undefined") {
+            msg = "Record key is not defined:";
+            console.error(msg);
+            toast.error(msg, {
+                position: "top-right"
+            });
+            return;
+        }
+
+        console.log(record, 'record')
+        setCurrentRole(record);        
+        if(record){
+            try {
+                    
+                const updatedRecord = { ...record, submission: record.submission === 1 ? 0 : 1 };
+                const updatedDataSource = dataSource.map(item => 
+                    item.id === record.id ? updatedRecord : item
+                );
+
+                console.log(updatedRecord, 'updatedRecord')
+
         
-        // Call API to update the backend
-        await fetch('/api/update-submission', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ key, submission: item.submission === 1 ? 0 : 1 })
-        });
+                setDataSource(updatedDataSource);
+                msg = 'Successfully Updated!!'
+                toast.success(msg, {
+                    successOptions,
+                    position: "top-right"
+                });
+
+        
+            //   const response = await updateTaskPriorityStatus(user.status, user.id);
+        
+            //   if (response.success) {
+            //     user.status = response.data.status;
+            //     const updatedStatus = null;
+            //     // const updatedStatus = await getStatuses(currentUser?.id);
+            //     setDataSource(updatedStatus);
+                
+            //   } else {
+            //     toast.error(response.message);
+            //   }
+        
+            } catch (err) {
+                console.log(err, 'err');
+                toast.error(err.message);
+            }
+        }
     };
+
+    const handleReviewChange = async(record, status) => {
+        let key = record.key
+        // key = "undefined";
+        var msg = '';
+        if (key == "undefined") {
+            msg = "Record key is not defined:";
+            console.error(msg);
+            toast.error(msg, {
+                position: "top-right"
+            });
+            return;
+        }
+        console.log(record, 'record')
+        setCurrentRole(record);        
+        if(record){
+            try {
+                    
+                const updatedRecord = { ...record, review: record.review === 1 ? 0 : 1 };
+                const updatedDataSource = dataSource.map(item => 
+                    item.id === record.id ? updatedRecord : item
+                );
+                console.log(updatedRecord, 'updatedRecord')
+                setDataSource(updatedDataSource);
+
+                msg = 'Successfully Updated!!'
+                toast.success(msg, {
+                    successOptions,
+                    position: "top-right"
+                });
+        
+            } catch (err) {
+                console.log(err, 'err');
+                toast.error(err.message);
+            }
+        }
+    };
+
+    const handleCopyEditingChange = async(record, status) => {
+        let key = record.key
+        // key = "undefined";
+        var msg = '';
+        if (key == "undefined") {
+            msg = "Record key is not defined:";
+            console.error(msg);
+            toast.error(msg, {
+                position: "top-right"
+            });
+            return;
+        }
+        setCurrentRole(record);        
+        if(record){
+            try {
+                    
+                const updatedRecord = { ...record, copyediting: record.copyediting === 1 ? 0 : 1 };
+                const updatedDataSource = dataSource.map(item => 
+                    item.id === record.id ? updatedRecord : item
+                );
+                console.log(updatedRecord, 'updatedRecord')
+                setDataSource(updatedDataSource);
+
+                msg = 'Successfully Updated!!'
+                toast.success(msg, {
+                    successOptions,
+                    position: "top-right"
+                });
+            } catch (err) {
+                console.log(err, 'err');
+                toast.error(err.message);
+            }
+        }
+    };
+
+    const handleProductionChange = async(record, status) => {
+        let key = record.key
+        // key = "undefined";
+        var msg = '';
+        if (key == "undefined") {
+            msg = "Record key is not defined:";
+            console.error(msg);
+            toast.error(msg, {
+                position: "top-right"
+            });
+            return;
+        }
+        setCurrentRole(record);        
+        if(record){
+            try {
+                    
+                const updatedRecord = { ...record, production: record.production === 1 ? 0 : 1 };
+                const updatedDataSource = dataSource.map(item => 
+                    item.id === record.id ? updatedRecord : item
+                );
+                console.log(updatedRecord, 'updatedRecord')
+                setDataSource(updatedDataSource);
+                msg = 'Successfully Updated!!'
+                toast.success(msg, {
+                    successOptions,
+                    position: "top-right"
+                });
+            } catch (err) {
+                console.log(err, 'err');
+                toast.error(err.message);
+            }
+        }
+    };
+
+    useEffect(() => {
+    }, [currentRole]);
+
+    // const handleCheckboxChange = async (key) => {
+    //     const newData = dataSource.map(item => {
+    //         if (item.key === key) {
+    //         return { ...item, submission: item.submission === 1 ? 0 : 1 };
+    //         }
+    //         return item;
+    //     });
+    //     setDataSource(newData);
+        
+    //     // Call API to update the backend
+    //     await fetch('/api/update-submission', {
+    //         method: 'POST',
+    //         headers: { 'Content-Type': 'application/json' },
+    //         body: JSON.stringify({ key, submission: item.submission === 1 ? 0 : 1 })
+    //     });
+    // };
 
     const deleteRole = (data) => {
         Swal.fire({
@@ -234,45 +459,70 @@ const RolesTable = () => {
         });
     };
       
-  return (
-    <>
-        {isLoading ? 
-        (
-            <div className='h-full flex items-center justify-center'>
-                <LoaderIcon2
-                    extraClass="text-[#034343]"
-                    className="animate-spin"
-                />
-            </div>
-        ) :(
-            <Flex gap="middle" vertical>
-                <Flex align="center" gap="middle" justify='end'>
-                    <Flex align="center" gap="middle">
-
-                        
-                    </Flex>
-                    <Button type="primary" onClick={start} loading={loading}>
-                        Reload
-                    </Button>
-                    <Button type="default" onClick={start} loading={loading}>
-                        Add Role
-                    </Button>
-                </Flex>
-                <Table 
-                    // rowSelection={rowSelection} 
-                    columns={columns} 
-                    dataSource={dataSource}
-                    bordered
-                    rowClassName="editable-row"
-                    pagination={{
-                        pageSize: 25,
-                        // onChange: cancel,
-                    }}
+    return (
+        <>
+            {isLoading ? 
+            (
+                <div className='h-full flex items-center justify-center'>
+                    <LoaderIcon2
+                        extraClass="text-[#034343]"
+                        className="animate-spin"
                     />
-            </Flex>
+                </div>
+            ) :(
+                <Flex gap="middle" vertical>
+                    <Flex align="center" gap="middle" justify='end'>
+                        <Flex align="center" gap="middle">
+
+                            
+                        </Flex>
+                        <Button type="primary" onClick={start} loading={loading}>
+                            Reload
+                        </Button>
+                        <Button type="default" onClick={onRoleOpen} loading={loading}>
+                            Add Role
+                        </Button>
+                    </Flex>
+                    <Table 
+                        // rowSelection={rowSelection} 
+                        columns={columns} 
+                        dataSource={dataSource}
+                        bordered
+                        rowClassName="editable-row"
+                        pagination={{
+                            pageSize: 25,
+                            // onChange: cancel,
+                        }}
+                        />
+                </Flex>
+            )}
+
+            {/* {currentRole ? ( */}
+                <AddRoleModal
+                    isOpen={roleIsOpen}
+                    onClose={onRoleClose}
+                    dataSource={dataSource}
+                />
+            {/* ) : (
+                ''
+            )} */}
+
+
+        {currentRole ? (
+            <EditRoleModal
+                user={user}
+                isOpen={roleEditIsOpen}
+                onClose={onRoleEditClose}
+                dataSource={dataSource}
+                currentRole={currentRole}
+                setDataSource={setDataSource}
+                setCurrentRole={setCurrentRole}
+            />
+        ) : (
+            ' '
         )}
-    </>
-  )
+        </>
+    )
 }
 
 export default RolesTable

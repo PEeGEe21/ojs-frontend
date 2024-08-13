@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
+import { useDisclosure } from '@chakra-ui/react';
 import { 
     Form, 
     Button, 
@@ -17,8 +18,11 @@ import {
 } from 'antd';
 import Link from 'next/link';
 import {LoaderIcon, LoaderIcon2} from '../IconComponent';
+import {successOptions} from '@/app/lib/constants';
 import { Edit, PenTool, PenTool2, Trash } from 'iconsax-react';
 import toast from 'react-hot-toast';
+import EditUserModal from '../Modals/user/EditUserModal';
+import { getRandomRoles } from '@/app/utils/common';
 
 const EditableCell = ({
     editing,
@@ -66,7 +70,8 @@ const dataSourceData = Array.from({
     lname: `King ${i}`,
     username: `testuser${i}`,
     email: `mail${i}@gmail.com`,
-    status: Math.random() < 0.5 ? 1 : 0
+    status: Math.random() < 0.5 ? 1 : 0,
+    roles: getRandomRoles(),
     //   description: `testtttt ${i++}`,
     //   tags: ['loser'],
 }));
@@ -80,8 +85,14 @@ const UsersTable = () => {
     const [data, setData] = useState(dataSource);
     const [editingKey, setEditingKey] = useState('');
     const [currentUser, setCurrentUser] = useState({});
+    const [user, setUser] = useState(null);
     const [statusState, setStatusState] = useState('');
     const [isSavingStatus, setIsSavingStatus] = useState({});
+    const {
+        isOpen: userEditIsOpen,
+        onOpen: onUserEditOpen,
+        onClose: onUserEditClose,
+    } = useDisclosure();
 
     const isEditing = (record) => record.key === editingKey;
     const edit = (record) => {
@@ -142,6 +153,7 @@ const UsersTable = () => {
                     <button
                         className={`btn btn-sm flex items-center gap-2 ${record.status == 1 ? 'btn-success' : 'btn-danger'}`}
                         disabled={isSavingStatus[record.key]}
+                        aria-disabled={`${isSavingStatus[record.key] ? 'true' : 'false'}`}
                         onClick={
                             // setIsSavingStatus(true);
                             // setCurrentUser(record);
@@ -184,9 +196,18 @@ const UsersTable = () => {
                     </span>
                     ) : (
                         <Space size="middle">
-                            <button className="flex btn btn-info items-center gap-1 text-xs" disabled={editingKey !== ''} onClick={() => edit(record)}>
+                            <button 
+                                className="flex btn btn-info items-center gap-1 text-xs" 
+                                onClick={() => {
+                                    setCurrentUser(record);
+                                    onUserEditOpen();
+                                  }}
+                            >
                                 <Edit size={14}/>Edit
                             </button>
+                            {/* <button className="flex btn btn-info items-center gap-1 text-xs" disabled={editingKey !== ''} onClick={() => edit(record)}>
+                                <Edit size={14}/>Edit
+                            </button> */}
                             <button className='flex btn btn-red items-center gap-1 text-xs  ' onClick={(e)=>deleteUser(record)}><Trash size={12}/> Delete</button>
                         </Space>
                     )
@@ -306,21 +327,10 @@ const UsersTable = () => {
 
                     msg = 'Successfully '+ (updatedRecord.status === 1 ? 'Activated' : 'Deactivated')  + '!!'
                     toast.success(msg, {
-                        style: {
-                            border: '1px solid #255625',
-                            padding: '16px',
-                            color: '#ffffff',
-                            boxShadow: 'none',
-                            fontSize: '14px',
-                            background: 'green'
-                        },
-                        iconTheme: {
-                            primary: '#398439',
-                            secondary: '#FFFAEE',
-                        },
+                        successOptions,
                         position: "top-right"
                     });
-                }, 500); // Slight delay to ensure state update
+                }, 500);
 
         
             //   const response = await updateTaskPriorityStatus(user.status, user.id);
@@ -432,9 +442,9 @@ const UsersTable = () => {
                                 </Button>
                                 {hasSelected ? `Selected ${selectedRowKeys.length} items` : null}
                             </Flex>
-                            <Link href={'/admin/users/roles'} className="btn-primary">
+                            {/* <Link href={'/admin/users/roles'} className="btn-primary">
                                 Roles
-                            </Link>
+                            </Link> */}
                         </Flex>
                         <Table 
                             // rowSelection={rowSelection} 
@@ -454,6 +464,20 @@ const UsersTable = () => {
                             />
                     </Flex>
                 </Form>
+            )}
+
+            {currentUser ? (
+                <EditUserModal
+                    user={user}
+                    isOpen={userEditIsOpen}
+                    onClose={onUserEditClose}
+                    dataSource={dataSource}
+                    currentUser={currentUser}
+                    setDataSource={setDataSource}
+                    setCurrentUser={setCurrentUser}
+                />
+            ) : (
+                ' '
             )}
         </>
     );
