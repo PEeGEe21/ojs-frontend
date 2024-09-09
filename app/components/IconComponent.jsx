@@ -114,6 +114,20 @@ const TwitterIcon = () => {
     </svg>
   );
 };
+const TwitterIcon2 = ({width=24, height=24}) => {
+  return (
+    <svg width={width} height={height} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g clipPath="url(#clip0_3163_5508)">
+        <path d="M3.64212 4.4469L10.0768 13.0508L3.60156 20.0459H5.05899L10.7281 13.9214L15.3085 20.0459H20.2678L13.471 10.9582L19.4981 4.4469H18.0407L12.8199 10.0873L8.60144 4.4469H3.64212ZM5.78532 5.5206H8.06361L18.1243 18.9725H15.8461L5.78532 5.5206Z" fill="#D4D6DB"/>
+      </g>
+      <defs>
+        <clipPath id="clip0_3163_5508">
+          <rect width={width} height={height} fill="currentColor"/>
+        </clipPath>
+      </defs>
+    </svg>
+  );
+};
 const InstagramIcon = () => {
   return (
     <svg
@@ -444,8 +458,8 @@ const LoaderIcon = ({ extraClass }) => {
     <>
       <svg
         className={`${
-          extraClass ? extraClass : 'text-white'
-        } motion-reduce:hidden animate-spin h-5 w-5 `}
+          extraClass ? extraClass : 'text-white h-5 w-5'
+        } motion-reduce:hidden animate-spin  `}
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"
@@ -651,6 +665,7 @@ export {
   AlertTriangle,
   CloseIcon,
   TwitterIcon,
+  TwitterIcon2,
   InstagramIcon,
   LinkedInIcon,
   YoutubeIcon,

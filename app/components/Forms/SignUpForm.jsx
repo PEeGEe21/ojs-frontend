@@ -7,8 +7,8 @@ import axios from 'axios';
 import { useRouter, useSearchParams } from 'next/navigation';
 import SocialLogin from './FormComponents/SocialLogin';
 import { LoaderIcon } from '../IconComponent';
-import setAuthToken from '@/app/lib/setAuthToken';
-import { ToasterAlert } from '@/app/lib/utilFunctions';
+import setAuthToken from '../../lib/setAuthToken';
+import { ToasterAlert } from '../../lib/utilFunctions';
 
 const SignUpForm = () => {
   const [error, setError] = useState(null);
@@ -232,6 +232,43 @@ const SignUpForm = () => {
             Confirm Password
           </label>
         </div>
+
+
+          <div>
+            <div className="flex items-center mb-1 ">
+              <label className="">
+                Sign Up as
+              </label>
+            </div>
+
+            <div>
+              <label htmlFor="signup_as_author" className="mr-4 text-sm cursor-pointer">
+                <input
+                  type="radio"
+                  id="signup_as_author"
+                  className="mr-2"
+                  value={1}
+                  name="signup_as"
+                  required
+                  autoComplete="off"
+                />
+                Author
+              </label>
+              <label htmlFor="signup_as_reader" className='text-sm cursor-pointer'>
+                <input
+                  type="radio"
+                  id="signup_as_reader"
+                  className="mr-2"
+                  defaultChecked
+                  value={2}
+                  name="signup_as"
+                  required
+                  autoComplete="off"
+                />
+                Reader
+              </label>
+            </div>
+          </div>
         
 
           <button
@@ -239,7 +276,7 @@ const SignUpForm = () => {
             // onClick={(e) => handleSubmit}
             className="w-full h-50 bg-[#013434] py-3 px-3 mt-4 hover:shadow-md transition-all duration-300 ease rounded text-sm text-white  flex items-center justify-center" 
             disabled={loading}
-            aria-disabled={`${loading ? 'true' : 'false'}`}
+            aria-disabled={loading}
           >
             {loading ? (
               <>

@@ -1,4 +1,4 @@
-import RolesTable from '@/app/components/Tables/RolesTable'
+import RolesTable from '../../../../components/Tables/RolesTable'
 import React from 'react'
 
 const Page = () => {

@@ -32,4 +32,4 @@ const MainComponent = () => {
   )
 }
 
-export default MainComponent
+export default MainComponent;

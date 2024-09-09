@@ -7,8 +7,8 @@ import {
   ModalBody,
   ModalCloseButton,
 } from '@chakra-ui/react';
-import EditUserForm from '@/app/components/Forms/EditUserForm';
-import { getFullName } from '@/app/utils/common';
+import EditUserForm from '../../../components/Forms/EditUserForm';
+import { getFullName } from '../../../utils/common';
 
 const EditUserModal = ({
   user,

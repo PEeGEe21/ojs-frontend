@@ -1,4 +1,4 @@
-import LoginPage from '@/app/components/Auth/Login/LoginPage'
+import LoginPage from '../../components/Auth/Login/LoginPage'
 import React from 'react'
 export const metadata = {
     title: 'Open Journal System - Login',

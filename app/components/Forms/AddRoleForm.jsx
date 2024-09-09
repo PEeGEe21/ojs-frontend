@@ -12,9 +12,9 @@ import { useRouter } from 'next/navigation';
 import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
 // import { host } from '../routes';
-import { _getUser } from '@/app/lib/utilFunctions';
+import { _getUser } from '../../lib/utilFunctions';
 import { LoaderIcon } from '../IconComponent';
-import { permissionLevelList } from '@/app/lib/constants';
+import { permissionLevelList } from '../../lib/constants';
 
 const AddRoleForm = ({ onClose, dataSource }) => {
   const [user, setUser] = useState(null);
@@ -197,7 +197,7 @@ const AddRoleForm = ({ onClose, dataSource }) => {
           className="h-10  w-auto whitespace-nowrap py-2 px-3 bg-[#008080] text-white transition ease-in duration-200 text-center text-sm font-semibold shadow-md rounded flex items-center justify-center gap-2 "
           onClick={handleSubmit}
           disabled={isSaving}
-          aria-disabled={`${isSaving ? 'true' : 'false'}`}
+          aria-disabled={isSaving}
         >
           {isSaving ? (
             <>

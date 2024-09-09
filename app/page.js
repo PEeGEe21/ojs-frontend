@@ -1,5 +1,5 @@
-import MainComponent from "@/app/components/HomePage/MainComponent";
 
+import MainComponent from './components/HomePage/MainComponent'
 export const metadata = {
   title: 'Open Journal System - OJS',
   metadataBase: new URL('https://google.com'),
@@ -14,6 +14,7 @@ export const metadata = {
 
 export default function Home() {
   return (
+
     <MainComponent/>
   )
 }

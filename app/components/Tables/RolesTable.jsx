@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { LoaderIcon2 } from '../IconComponent';
 import Swal from 'sweetalert2';
 import { useDisclosure } from '@chakra-ui/react';
-import {successOptions} from '@/app/lib/constants';
+import {successOptions} from '../../lib/constants';
 import Link from 'next/link';
 import { 
     Form, 
@@ -19,9 +19,9 @@ import {
     Popconfirm ,
     Spin
 } from 'antd';
-import AddRoleModal from '@/app/components/Modals/roles/AddRoleModal';
-import EditRoleModal from '@/app/components/Modals/roles/EditRoleModal';
-import { permissionLevelList } from '@/app/lib/constants';
+import AddRoleModal from '../../components/Modals/roles/AddRoleModal';
+import EditRoleModal from '../../components/Modals/roles/EditRoleModal';
+import { permissionLevelList } from '../../lib/constants';
 import { Edit, Trash } from 'iconsax-react';
 import toast from 'react-hot-toast';
 
@@ -214,7 +214,7 @@ const RolesTable = () => {
         }, 100);
         console.log(dataSource, 'dataSource')
 
-      }, [])
+      }, [dataSource])
     
 
     const handleSubmissionChange = async(record, status) => {

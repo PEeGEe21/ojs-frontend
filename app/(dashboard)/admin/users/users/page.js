@@ -1,5 +1,5 @@
 import React from 'react'
-import UsersTable from '@/app/components/Tables/UsersTable'
+import UsersTable from '../../../../components/Tables/UsersTable'
 
 const Page = () => {
   return (

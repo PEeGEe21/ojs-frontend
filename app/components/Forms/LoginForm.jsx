@@ -7,8 +7,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 // import { host } from '../routes';
 import SocialLogin from './FormComponents/SocialLogin';
 import { LoaderIcon } from '../IconComponent';
-import setAuthToken from '@/app/lib/setAuthToken';
-import { ToasterAlert } from '@/app/lib/utilFunctions';
+import setAuthToken from '../../lib/setAuthToken';
+import { ToasterAlert } from '../../lib/utilFunctions';
 
 const LoginForm = () => {
   const searchParams = useSearchParams();
@@ -160,7 +160,7 @@ const LoginForm = () => {
             onClick={(e) => loginUser}
             className="w-full h-50 bg-[#013434] py-3 px-3 mt-2 hover:shadow-md transition-all duration-300 ease rounded text-sm text-white flex items-center justify-center"
             disabled={loading}
-            aria-disabled={`${loading ? 'true' : 'false'}`}
+            aria-disabled={isSaving}
           >
             {loading ? (
               <>

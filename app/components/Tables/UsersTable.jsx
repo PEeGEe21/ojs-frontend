@@ -18,11 +18,11 @@ import {
 } from 'antd';
 import Link from 'next/link';
 import {LoaderIcon, LoaderIcon2} from '../IconComponent';
-import {successOptions} from '@/app/lib/constants';
+import {successOptions} from '../../lib/constants';
 import { Edit, PenTool, PenTool2, Trash } from 'iconsax-react';
 import toast from 'react-hot-toast';
 import EditUserModal from '../Modals/user/EditUserModal';
-import { getRandomRoles } from '@/app/utils/common';
+import { getRandomRoles } from '../../utils/common';
 
 const EditableCell = ({
     editing,
@@ -153,7 +153,7 @@ const UsersTable = () => {
                     <button
                         className={`btn btn-sm flex items-center gap-2 ${record.status == 1 ? 'btn-success' : 'btn-danger'}`}
                         disabled={isSavingStatus[record.key]}
-                        aria-disabled={`${isSavingStatus[record.key] ? 'true' : 'false'}`}
+                        aria-disabled={isSavingStatus[record.key]}
                         onClick={
                             // setIsSavingStatus(true);
                             // setCurrentUser(record);
