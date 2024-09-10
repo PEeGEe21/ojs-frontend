@@ -160,7 +160,7 @@ const LoginForm = () => {
             onClick={(e) => loginUser}
             className="w-full h-50 bg-[#013434] py-3 px-3 mt-2 hover:shadow-md transition-all duration-300 ease rounded text-sm text-white flex items-center justify-center"
             disabled={loading}
-            aria-disabled={isSaving}
+            aria-disabled={loading}
           >
             {loading ? (
               <>
