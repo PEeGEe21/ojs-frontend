@@ -28,7 +28,7 @@ const LoginForm = () => {
     e.preventDefault();
 
     axios
-      .post(`${hostUrl}/api/auth/login-email`, {
+      .post(`${hostUrl}/api/auth/login`, {
         email: email,
         password: password,
       })
@@ -36,14 +36,19 @@ const LoginForm = () => {
         if (res.data.success) {
           toast.success(res.data.message);
           // toast.success(res.data.message, 'success');
-          let token = res?.data?.accessToken;
+          let token = res?.data?.access_token;
           let user = res?.data?.user;
           // const role = res?.data?.user?.role;
-          localStorage.setItem('accessProjectUserToken', token);
-          localStorage.setItem('project-tracker-user', JSON.stringify(user));
+          localStorage.setItem('accessOJSUserToken', token);
+          localStorage.setItem('ojs-user', JSON.stringify(user));
           setAuthToken(token);
           setTimeout(() => {
-            push(`/dashboard`);
+            if(user?.defaultRole?.id === 1) {
+              push(`/admin/analytics`);
+            }
+            if(user?.defaultRole?.id === 3) {
+              push(`/author/analytics`);
+            }
           }, 300);
         } else {
           setError(true);
@@ -165,7 +170,7 @@ const LoginForm = () => {
             {loading ? (
               <>
                 <LoaderIcon
-                  extraClass="text-white"
+                  extraClass="text-white h-5 w-5"
                   className="animate-spin mr-1"
                 />
               </>

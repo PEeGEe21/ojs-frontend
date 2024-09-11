@@ -14,6 +14,8 @@ const SignUpForm = () => {
   const [error, setError] = useState(null);
   const [errMessage, setErrMessage] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [signupAs, setSignupAs] = useState(2);
+
   const password = React.useRef(null);
   const email = React.useRef(null);
   const fname = React.useRef(null);
@@ -24,6 +26,10 @@ const SignUpForm = () => {
   const { push } = useRouter();
 
   const hostUrl = process.env.NEXT_PUBLIC_AUTH_URL;
+
+  const handleSignupAsChange = (event) => {
+    setSignupAs(event.target.value); // Capture the selected radio button value
+  };
 
   console.log('hostUrl', hostUrl);
   const successtoastOptions = {
@@ -55,7 +61,11 @@ const SignUpForm = () => {
       fname: fname.current.value,
       lname: lname.current.value,
       username: username.current.value,
+      signup_as: JSON.parse(signupAs),
     };
+
+    // console.log(data, 'data')
+    // return
 
     axios
       .post(`${hostUrl}/api/auth/signup`, data)
@@ -247,10 +257,12 @@ const SignUpForm = () => {
                   type="radio"
                   id="signup_as_author"
                   className="mr-2"
-                  value={1}
+                  value={3}
                   name="signup_as"
                   required
                   autoComplete="off"
+                  onChange={handleSignupAsChange}
+                  checked={signupAs === '3'} 
                 />
                 Author
               </label>
@@ -259,11 +271,12 @@ const SignUpForm = () => {
                   type="radio"
                   id="signup_as_reader"
                   className="mr-2"
-                  defaultChecked
                   value={2}
                   name="signup_as"
                   required
                   autoComplete="off"
+                  onChange={handleSignupAsChange}
+                  checked={signupAs === '2'}
                 />
                 Reader
               </label>
@@ -281,7 +294,7 @@ const SignUpForm = () => {
             {loading ? (
               <>
                 <LoaderIcon
-                  extraClass="text-white"
+                  extraClass="text-white h-5 w-5"
                   className="animate-spin mr-1"
                 />
               </>
