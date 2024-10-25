@@ -24,11 +24,12 @@ import { Category } from 'react-iconly';
 // import { LogoutIcon } from './IconComponent';
 import './nav.css';
 
-const Sidebar = ({ user }) => {
+const Sidebar = ({ isOpen, toggleSidebar, userRole  }) => {
   const pathname = usePathname();
 
   // const [activeDropdown, setActiveDropdown] = useState(null);
   const [activeDropdowns, setActiveDropdowns] = useState([]);
+  const [currentMenu, setCurrentMenu] = useState([]);
   const [isDropdown, setIsDropdown] = useState(true);
 
   const wrapperClasses = classNames(
@@ -140,70 +141,9 @@ const Sidebar = ({ user }) => {
   const authorMenuLinks = [
     {
       label: 'Submissions',
-      href: '/admin/submissions',
+      href: '/author/submissions',
       icon: <Category size={16} />,
       isDropdownMenu: false,
-    },
-    {
-      label: 'Analytics',
-      href: '/admin/analytics',
-      action: (e, index) => {
-        e.preventDefault();
-        showDropdown(index);
-      },
-      icon: <Briefcase size={16} />,
-      projects: true,
-      isDropdownMenu: false,
-      submenu: [
-        {
-          label: 'Project 1',
-          href: '/admin/analytics/project/1',
-          icon: <Category size={16} />,
-          isDropdownMenu: false,
-        }
-      ]
-    },
-    {
-      label: 'Users & Roles',
-      href: '/admin/users',
-      icon: <Profile2User size={16} />,
-      isDropdownMenu: true,
-      action: (e, index) => {
-        e.preventDefault();
-        showDropdown(index);
-      },
-      submenu: [
-        {
-          label: 'Users',
-          href: '/admin/users/users',
-          icon: <Category size={16} />,
-          isDropdownMenu: false,
-        },
-        {
-          label: 'Roles',
-          href: '/admin/users/roles',
-          icon: <Category size={16} />,
-          isDropdownMenu: false,
-        }
-      ]
-    },
-    {
-      label: 'Settings',
-      href: '/admin/settings',
-      action: (e, index) => {
-        e.preventDefault();
-        showDropdown(index);
-      },
-      icon: <Setting3 size={16} />,
-      isDropdownMenu: true,
-      submenu: [
-        {
-          label: 'Website',
-          href: '/admin/settings/website',
-          icon: <Category size={16} />,
-          isDropdownMenu: false,
-        }
-      ]
     },
     // {
     //   label: 'Sign Out',
@@ -216,6 +156,23 @@ const Sidebar = ({ user }) => {
     //   isDropdownMenu: false,
     // },
   ];
+
+  useEffect(() => {
+    // const menuToShow = () =>{
+      switch (userRole){
+        case 'admin':
+          setCurrentMenu(menuLinks);
+          break;
+        case 'author':
+          setCurrentMenu(authorMenuLinks);
+          break;
+        default:
+          setCurrentMenu(menuLinks);
+          break;
+      }
+    // }
+  }, [userRole]);
+
 
   // useEffect(() => {
   //   const dropdownIndices = menuLinks
@@ -253,6 +210,12 @@ const Sidebar = ({ user }) => {
                     alt="logo dash"
                   />
                 </Link> */}
+                <Link
+                  href={'/dashboard'}
+                  className="flex items-center w-full justify-center h-full text-white capitalize text-2xl "
+                >
+                  OJS
+                </Link>
               </div>
             </div>
           </div>
@@ -260,7 +223,7 @@ const Sidebar = ({ user }) => {
           <nav className="mt-6 md:mt-3 grow">
             <div className=" flex-wrap flex gap-4 flex-col">
               {/* (isDropdown && menuItem.projects) || */}
-              {menuLinks.map((menuItem, index) => (
+              {currentMenu.map((menuItem, index) => (
                 (menuItem.isDropdownMenu ? 
                     <div onClick={(e) => menuItem?.action(e, index)} key={menuItem.label}>
                     <div
