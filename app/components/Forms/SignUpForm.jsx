@@ -8,7 +8,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import SocialLogin from './FormComponents/SocialLogin';
 import { LoaderIcon } from '../IconComponent';
 import setAuthToken from '../../lib/setAuthToken';
-import { ToasterAlert } from '../../lib/utilFunctions';
+import { hostUrl, ToasterAlert } from '../../lib/utilFunctions';
 
 const SignUpForm = () => {
   const [error, setError] = useState(null);
@@ -24,8 +24,6 @@ const SignUpForm = () => {
   const cpassword = React.useRef(null);
 
   const { push } = useRouter();
-
-  const hostUrl = process.env.NEXT_PUBLIC_AUTH_URL;
 
   const handleSignupAsChange = (event) => {
     setSignupAs(event.target.value); // Capture the selected radio button value
@@ -68,7 +66,7 @@ const SignUpForm = () => {
     // return
 
     axios
-      .post(`${hostUrl}/api/auth/signup`, data)
+      .post(`${hostUrl}auth/signup`, data)
       .then((res) => {
         if (res.data.success) {
           toast.success(res.data.message, successtoastOptions);

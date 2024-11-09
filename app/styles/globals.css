@@ -3,9 +3,6 @@
 @tailwind utilities;
 
 :root {
-  /* --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255; */
 }
 
 .btn-info {
@@ -61,5 +58,136 @@
 
 .ql-container.ql-snow{
     height: 300px;
+}
+
+
+/* tesimonial carousel */
+.testimonial-content h1 {
+  margin: 0;
+  color: #fff;
+  width: 100%;
+  font-size: 60px;
+  font-weight: bold;
+  line-height: 65px;
+  text-transform: uppercase;
+}
+
+.testimonial-content .testimonial_tg-description {
+  color: #666;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.testimonial-content .testimonial_tg-description {
+  padding: 30px 0;
+}
+
+.testimonial .owl-carousel .owl-nav button.owl-prev,
+.testimonial .owl-carousel .owl-nav button.owl-next,
+.testimonial .owl-carousel button.owl-dot {
+  background: none;
+}
+
+.testimonial .owl-nav .owl-prev,
+.testimonial .owl-nav .owl-next {
+  transition: all 0.5s !important;
+}
+
+.testimonial .owl-nav .owl-prev:hover,
+.testimonial .owl-nav .owl-next:hover {
+  transition: all 0.5s !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+}
+
+.testimonial .owl-nav .owl-prev,
+.testimonial .owl-nav .owl-next {
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  min-width: 50px;
+  min-height: 50px;
+  position: absolute;
+  display: block;
+  z-index: 100;
+  border-radius: 35px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.3) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  top: 40%;
+
+  /* transform: matrix(1, 0, 0, 1, -90, -35); */
+  /* left: 100%; */
+}
+
+.testimonial .owl-nav .owl-next span,
+.testimonial .owl-nav .owl-prev span {
+  font-size: 24px !important;
+  color: #fff;
+  display: block;
+  line-height: 70px;
+  z-index: 2;
+  position: relative;
+}
+
+.testimonial .owl-nav .owl-prev {
+  left: 0px;
+  transition: left 300ms ease-out;
+}
+.testimonial .owl-nav .owl-next {
+  right: 0px;
+  transition: right 300ms ease-out;
+}
+
+.testimonial_author h3 {
+  /* margin: 0; */
+  color: #404040;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 18px;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.testimonial_author span {
+  width: 100%;
+  /* margin-top: 10px; */
+  color: #666;
+  font-size: 14px;
+  line-height: 17px;
+  padding: 5px 0 0;
+  text-align: center;
+}
+
+@media only screen and (max-width: 568px) {
+  .testimonial .owl-nav .owl-next span,
+  .testimonial .owl-nav .owl-prev span {
+    line-height: 40px;
   }
+}
+@media only screen and (max-width: 568px) {
+  .testimonial .owl-nav .owl-prev,
+  .testimonial .owl-nav .owl-next {
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    min-width: 50px;
+    min-height: 50px;
+
+    /* transform: matrix(1, 0, 0, 1, -90, -35); */
+    /* left: 100%; */
+  }
+}
+
+.owl-carousel .owl-nav.disabled,
+.owl-carousel .owl-dots.disabled {
+  display: block;
+}
+
+
+.slick-track {
+  display: flex !important;
+  gap: 1rem !important;  /* Adds gap between slides */
+}
 

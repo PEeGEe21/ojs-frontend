@@ -1,43 +1,40 @@
 "use client";
-import React, { use, useEffect, useRef, useState,useMemo } from "react";
+import React, { use, useEffect, useRef, useState,useMemo, useContext } from "react";
 import {
     Box,
     Button,
-    IconButton,
-    Menu,
-    MenuButton,
-    MenuItem,
-    MenuList,
-    RangeSlider,
-    RangeSliderFilledTrack,
-    RangeSliderThumb,
-    RangeSliderTrack,
-    Stack,
-    Step,
-    StepDescription,
-    StepIcon,
-    StepIndicator,
-    StepNumber,
-    Stepper,
-    StepSeparator,
-    StepStatus,
-    StepTitle,
     Text,
     useDisclosure,
     useSteps,
-} from "@chakra-ui/react";
-import "react-quill/dist/quill.snow.css";
+    Table,
+    Thead,
+    Tbody,
+    Tfoot,
+    Tr,
+    Th,
+    Td,
+    TableCaption,
+    TableContainer,
+} from '@chakra-ui/react'
+import "react-quill-new/dist/quill.snow.css";
 import dynamic from "next/dynamic";
 import { ArrowLeft2, Danger ,ArrowLeft} from "iconsax-react";
 import { MdOutlineRadioButtonChecked } from "react-icons/md";
 import Link from "next/link";
 import Image from "next/image";
 import Papa from "papaparse";
+import { TagField } from '../../../../components/TagField';
+import useTags  from '../../../../hooks/useTags';
 import { LoaderIcon } from '../../../../components/IconComponent';
+import UploadFileSubmissionModal from '../../../../components/Modals/UploadFileSubmissionModal';
 import { motion } from "framer-motion";
 import { Checkmark } from "@carbon/icons-react";
 import { useRouter } from "next/navigation";
 import { Progress, useToast } from "@chakra-ui/react";
+import { hostUrl } from "../../../../lib/utilFunctions";
+import axios from "axios";
+import { JournalContext } from "../../../../utils/journalContext";
+import {modules, styles} from "../../../../lib/constants";
 
 const steps = [
     { title: "Section Policy", description: "select the type of airdrop to use" },
@@ -47,12 +44,16 @@ const steps = [
 ];
 
 export default function CreateSubmission() {
+    const { selectedJournal } = useContext(JournalContext);
+    const [user, setUser] = useState(null);
+    const [uploads, setUploads] = useState([]);
+    const [currentUpload, setCurrentUpload] = useState(null);
     const [activeStep, setActiveStep] = useState(0);
     const [isConnected, setIsConnected] = useState(0);
-    const [editorNote, setEditorNote] = useState('');
+    const [editorsNote, setEditorsNote] = useState('');
     const [airDropType, setAirDropType] = useState(null);
+    const [currentSubmission, setCurrentSubmission] = useState(null);
     const [saleVesting, setSaleVesting] = useState(false);
-    const stepperRef = useRef(null);
     const [fileName, setFileName] = useState("");
     const [jsonRecipients, setJsonRecipients] = useState([]);
     const [totalTokens, setTotalTokens] = useState(0);
@@ -63,10 +64,34 @@ export default function CreateSubmission() {
     const [addressError, setAddressError] = useState(false);
     const [nextDisabled, setNextDisabled] = useState(false);
     const [userTokenBalance, setUserTokenBalance] = useState(0);
-    const [insufficientBalance, setInsufficientBalance] = useState(false);
+    const [isPreviouslyPublished, setIsPreviouslyPublished] = useState(false);
+    const [isUrlReference, setIsUrlReference] = useState(false);
+    const [isFormattedCorrectly, setIsFormattedCorrectly] = useState(false);
+    const [isAuthorGuideLines, setIsAuthorGuideLines] = useState(false);
+    const [isAcceptDataCollection, setIsAcceptDataCollection] = useState(false);
+    const [prefix, setPrefix] = useState('');
+    const [title, setTitle] = useState('');
+    const [subTitle, setSubTitle] = useState('');
+    const [abstract, setAbstract] = useState('');
+    const stepperRef = useRef(null);
+    const MAX_TAGS = 10;
+
+    const { tags, handleAddTag, handleRemoveTag } = useTags(MAX_TAGS); // pass the maximum tags
+
     const router = useRouter();
     const toast = useToast();
-    const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }),[]);
+    const {
+        isOpen: uploadFileIsOpen,
+        onOpen: onUploadFileOpen,
+        onClose: onUploadFileClose,
+      } = useDisclosure();
+    // const ReactQuill = useMemo(() => dynamic(() => import('react-quill'), { ssr: false }),[]);
+    const ReactQuill = useMemo(() => dynamic(() => import('react-quill-new'), { 
+        ssr: false,
+        loading: () => <div className="border border-[#464849] h-72 animate-pulse bg-gray-100" />
+    }), []);
+
+
 
     const {
         isOpen: makePaymentAirdropOpen,
@@ -79,6 +104,54 @@ export default function CreateSubmission() {
             stepperRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
         }
     }, [activeStep]);
+
+    const getUser = async ()=>{
+        try{
+            if (localStorage.getItem('ojs-user')){
+                const data = await JSON.parse(
+                    localStorage.getItem("ojs-user")
+                );
+                setUser(data)
+                
+            }else{
+                router.push("/auth/login")
+            }
+        }catch(err){}
+    };
+
+    const getSubmission = async ()=>{
+        try{
+            console.log(localStorage.getItem('ojs-current-submission'))
+            if (localStorage.getItem('ojs-current-submission')){
+                const data = await JSON.parse(
+                    localStorage.getItem("ojs-current-submission")
+                );
+                console.log(data, 'datumm')
+                if(data.journalId === Number(selectedJournal.id)){
+                    setCurrentSubmission(data)
+                    setPrefix(data.prefix)
+                    setTitle(data.title)
+                    setSubTitle(data.subTitle)
+                    setAbstract(data.abstract)
+                    // tags = JSON.parse(data.keywords);
+                    setEditorsNote(data.editorsNote)
+                    setIsPreviouslyPublished(data.is_previously_published == 1 ? true : false)
+                    setIsUrlReference(data.url_reference == 1 ? true : false)
+                    setIsFormattedCorrectly(data.formatted_correctly == 1 ? true : false)
+                    setIsAuthorGuideLines(data.author_guidelines == 1 ? true : false)
+                    setIsAcceptDataCollection(data.accept_data_collection == 1 ? true : false)
+                }
+                console.log(isPreviouslyPublished,data,data.is_previously_published, currentSubmission, 'deerer')
+            }else{
+                
+            }
+        }catch(err){}
+    };
+
+    useEffect(()=>{
+        getUser();
+        getSubmission();
+    }, [])
 
     useEffect(() => {
         if (tokenAddress && isConnected) {
@@ -118,20 +191,45 @@ export default function CreateSubmission() {
     }, [tokenAddress, isConnected]);
 
     useEffect(() => {
-        if (activeStep === 1 && !jsonRecipients.length) {
-            setNextDisabled(true);
+        if (activeStep === 1 && !uploads.length) {
+            setNextDisabled(false);
         } else if (activeStep === 2 && (!tokenAddress || !airDropTitle)) {
-            setNextDisabled(true);
+            setNextDisabled(false);
         } else {
             setNextDisabled(false);
         }
-    }, [jsonRecipients, airDropTitle, tokenAddress, tokenDetails]);
+    }, [uploads, airDropTitle, tokenAddress, tokenDetails]);
 
     const handleNext = () => {
         if (activeStep < steps.length - 1) {
-            setActiveStep((prevStep) => ++prevStep);
-            setNextDisabled(true);
+            if(activeStep === 0){
+                if(!currentSubmission)
+                    handleSaveInitialState();
+                else
+                    setActiveStep((prevStep) => ++prevStep);
+            }
+            if(activeStep === 1){
+                setActiveStep((prevStep) => ++prevStep);
+            }
+
+            if(activeStep === 2){
+                // if(currentSubmission == '')
+                    handleSaveSubmissionFields();
+                // else
+                    // setActiveStep((prevStep) => ++prevStep);
+            }
+            // if(activeStep === 3){
+            //     handleFinishSubmission();
+            // }
+
+            // setNextDisabled(true);
         }
+    };
+    const handleClose = () => {
+        // if (activeStep < steps.length - 1) {
+            setActiveStep((prevStep) => 0);
+            // setNextDisabled(true);
+        // }
     };
 
     const handleFileChange = (e) => {
@@ -172,6 +270,222 @@ export default function CreateSubmission() {
         } else {
             setFileName("");
             setShowLoader(false);
+        }
+    };
+
+    const handleSaveInitialState = async () => {
+        if(!selectedJournal){
+            toast({
+                title: "Please select a journal.",
+                description: "Failed",
+                status: "error",
+                duration: 2000,
+                position: "top-right",
+            });
+            return;
+        }
+
+        if(!isPreviouslyPublished || !isUrlReference || !isUrlReference || !isFormattedCorrectly || !isAuthorGuideLines || !isAcceptDataCollection){
+            toast({
+                title: "Error please tick all boxes.",
+                description: "Failed",
+                status: "error",
+                duration: 2000,
+                position: "top-right",
+            });
+            return;
+        }
+
+        const data = {
+            userId: Number(user?.id),
+            editorsNote: editorsNote,
+            is_previously_published: isPreviouslyPublished ? 1 : 0,
+            url_reference: isUrlReference ? 1 : 0,
+            formatted_correctly: isFormattedCorrectly ? 1 : 0,
+            author_guidelines: isAuthorGuideLines ? 1 : 0,
+            accept_data_collection: isAcceptDataCollection ? 1 : 0,
+            journalId: selectedJournal?.id,
+        };
+
+        try {
+            setShowLoader(true);
+            console.log(data)
+
+            //save to db
+            const resp = await axios.post(hostUrl + "submissions/create-submission", data);
+            console.log(resp)
+
+            if (resp.data.success) {
+                console.log(resp)
+                setCurrentSubmission(resp.data.submission)
+                localStorage.setItem('ojs-current-submission', JSON.stringify(resp.data.submission));
+                toast({
+                    title: "Submission created successfully.",
+                    description: "Successfully created",
+                    status: "success",
+                    duration: 2000,
+                    position: "top-right",
+                });
+                setActiveStep((prevStep) => ++prevStep);
+            } else{
+                toast({
+                    title: "Error creating submission.",
+                    description: "Failed",
+                    status: "error",
+                    duration: 2000,
+                    position: "top-right",
+                });
+            }
+            setShowLoader(false);
+        } catch (error) {
+            console.error("failed to create submission", error);
+            toast({
+                title: "Error creating submission.",
+                description: "Failed",
+                status: "error",
+                duration: 2000,
+                position: "top-right",
+            });
+            setShowLoader(false);
+        } finally {
+            // setShowLoader(false);
+        }
+    };
+
+    const handleSaveSubmissionFields = async () => {
+
+        console.log(prefix, title, subTitle, abstract)
+        if(!prefix || !title || !subTitle || !abstract){
+            toast({
+                title: "Error all required fields.",
+                description: "Failed",
+                status: "error",
+                duration: 2000,
+                position: "top-right",
+            });
+            return;
+        }
+
+        const data = {
+            userId: Number(user?.id),
+            id: Number(currentSubmission?.id),
+            prefix: prefix,
+            title: title,
+            subTitle: subTitle,
+            abstract: abstract,
+            keywords: JSON.stringify(tags) ,
+        };
+        console.log(data, 'data')
+
+        try {
+            setShowLoader(true);
+            console.log(data)
+
+            //save to db
+            const resp = await axios.post(hostUrl + "submissions", data);
+            console.log(resp)
+
+            if (resp.data.success) {
+                console.log(resp)
+                const currentSubmission = JSON.parse(localStorage.getItem('ojs-current-submission'));
+
+                // Update properties as needed
+                const updatedSubmission = {
+                    ...currentSubmission,
+                    ...resp.data.submission,  // Merge in updated data
+                };
+
+                console.log(updatedSubmission, 'updated')
+
+                // Save the updated object back to local storage
+                localStorage.setItem('ojs-current-submission', JSON.stringify(updatedSubmission));
+                setCurrentSubmission(resp.data.submission)
+
+                toast({
+                    title: "Submission created successfully.",
+                    description: "Successfully created",
+                    status: "success",
+                    duration: 2000,
+                    position: "top-right",
+                });
+                setActiveStep((prevStep) => ++prevStep);
+            } else{
+                toast({
+                    title: "Error creating submission.",
+                    description: "Failed",
+                    status: "error",
+                    duration: 2000,
+                    position: "top-right",
+                });
+            }
+            setShowLoader(false);
+        } catch (error) {
+            console.error("failed to create submission", error);
+            toast({
+                title: "Error creating submission.",
+                description: "Failed",
+                status: "error",
+                duration: 2000,
+                position: "top-right",
+            });
+            setShowLoader(false);
+        } finally {
+            // setShowLoader(false);
+        }
+    };
+
+    const handleFinishSubmission = async () => {
+
+        const data = {
+            userId: Number(user?.id),
+            id: Number(currentSubmission?.id),
+        };
+
+        try {
+            setShowLoader(true);
+            console.log(data)
+
+            //save to db
+            const resp = await axios.post(hostUrl + "submissions/final-save", data);
+            console.log(resp)
+
+            if (resp.data.success) {
+                console.log(resp)
+                const currentSubmission = localStorage.getItem('ojs-current-submission');
+                if(currentSubmission){
+                    localStorage.removeItem('ojs-current-submission');
+                }
+                setCurrentSubmission(null)
+                toast({
+                    title: "Submission saved successfully.",
+                    description: "Successfully created",
+                    status: "success",
+                    duration: 2000,
+                    position: "top-right",
+                });
+                router.push('/author/submissions');
+            } else{
+                toast({
+                    title: "Error creating submission.",
+                    description: "Failed",
+                    status: "error",
+                    duration: 2000,
+                    position: "top-right",
+                });
+            }
+            setShowLoader(false);
+        } catch (error) {
+            console.error("failed to create submission", error);
+            toast({
+                title: "Error creating submission.",
+                description: "Failed",
+                status: "error",
+                duration: 2000,
+                position: "top-right",
+            });
+            setShowLoader(false);
+        } finally {
+            // setShowLoader(false);
         }
     };
 
@@ -245,6 +559,15 @@ export default function CreateSubmission() {
         }
     };
 
+    console.log(isPreviouslyPublished, 'hereeee')
+
+
+    const handleIsPreviouslyPublishedChange = () => {
+        setIsPreviouslyPublished((prev)=>!prev);
+        console.log(isPreviouslyPublished, 'isPreviouslyPublished')
+
+    };
+
     const isActive = (index) => activeStep === index;
     const isCompleted = (index) => activeStep > index;
 
@@ -311,7 +634,7 @@ export default function CreateSubmission() {
                                         <p
                                             className={`text-[0.625rem] sm:text-sm md:text-base font-medium mb-0.5 ${
                                                 isActive(index) ? "text-[#EA6A32]" : ""
-                                            } ${isCompleted(index) ? "text-white" : "text-[#A8B8C2]"}`}
+                                            } ${isCompleted(index) ? "text-[#313131]" : "text-[#A8B8C2]"}`}
                                         >
                                             {step.title}
                                         </p>
@@ -337,13 +660,14 @@ export default function CreateSubmission() {
                                             Section Policy
                                         </h3>
 
-                                        <div className="grid grid-cols-1 w-full gap-5 py-4">
+                                        <div className="grid grid-cols-1 w-full gap-8 py-4">
                                             <div
                                             >
-                                                <div>
+                                                <div className="mb-2">
                                                     <h3 className="text-[#212121] font-semibold text-base mb-2">
                                                         Submission Requirements
                                                     </h3>
+                                                    <p className="text-[#828e96] text-sm">You must read and acknowledge that you've completed the requirements below before proceeding.</p>
                                                 </div>
                                                 <div className="py-2 w-full text-left">
                                                     
@@ -351,14 +675,80 @@ export default function CreateSubmission() {
                                                     <ul className="space-y-2">
                                                         
                                                         <li>
+                                                            <label htmlFor="is_previously_published" className="flex items-center justify-start gap-3 cursor-pointer">
+                                                                <input 
+                                                                    type="checkbox" 
+                                                                    checked={isPreviouslyPublished} 
+                                                                    id="is_previously_published" 
+                                                                    onChange={()=>{
+                                                                        setIsPreviouslyPublished((prev)=>!prev), 
+                                                                        console.log(isPreviouslyPublished)
+                                                                    }} 
+                                                                    name="is_previously_published" 
+                                                                />
+                                                                <p className="text-[#212121] text-sm">
+                                                                    The submission has not been previously published, nor is it before another journal for consideration (or an explanation has been provided in Comments to the Editor).
+                                                                </p>
+                                                            </label>
+                                                        </li>
+                                                        {/* <li>
                                                             <label className="flex items-center justify-start gap-3 cursor-pointer">
                                                                 <input type="checkbox"/>
                                                                 <p className="text-[#212121] text-sm">
-                                                                    Create an airdrop that instantly release tokens
-                                                                    to your recipients
+                                                                    The submission file is in OpenOffice, Microsoft Word, or RTF document file format.
                                                                 </p>
                                                             </label>
-
+                                                        </li> */}
+                                                        <li>
+                                                            <label htmlFor="url_reference" className="flex items-center justify-start gap-3 cursor-pointer">
+                                                                <input 
+                                                                    type="checkbox" 
+                                                                    checked={isUrlReference} 
+                                                                    id="url_reference" 
+                                                                    onChange={()=>{
+                                                                        setIsUrlReference((prev)=>!prev), 
+                                                                        console.log(isUrlReference)
+                                                                    }} 
+                                                                    name="url_reference" 
+                                                                />
+                                                                <p className="text-[#212121] text-sm">
+                                                                    Where available, URLs for the references have been provided.
+                                                                </p>
+                                                            </label>
+                                                        </li>
+                                                        <li>
+                                                            <label htmlFor="formatted_correctly" className="flex items-center justify-start gap-3 cursor-pointer">
+                                                                <input 
+                                                                    type="checkbox" 
+                                                                    id="formatted_correctly" 
+                                                                    checked={isFormattedCorrectly} 
+                                                                    onChange={()=>{
+                                                                        setIsFormattedCorrectly((prev)=>!prev), 
+                                                                        console.log(isFormattedCorrectly)
+                                                                    }} 
+                                                                    name="formatted_correctly" 
+                                                                />
+                                                                <p className="text-[#212121] text-sm">
+                                                                    The text is single-spaced; uses a 12-point font; employs italics, rather than underlining (except with URL addresses); and all illustrations, figures, and tables are placed within the text at the appropriate points, rather than at the end.
+                                                                </p>
+                                                            </label>
+                                                        </li>
+                                                        <li>
+                                                            <label htmlFor="author_guidelines"  className="flex items-center justify-start gap-3 cursor-pointer">
+                                                                <input 
+                                                                    type="checkbox" 
+                                                                    checked={isAuthorGuideLines} 
+                                                                    id="author_guidelines" 
+                                                                    onChange={()=>{
+                                                                        setIsAuthorGuideLines((prev)=>!prev), 
+                                                                        console.log(isAuthorGuideLines)
+                                                                    }} 
+                                                                    name="author_guidelines" 
+                                                                />
+                                                                <p className="text-[#212121] text-sm">
+                                                                    The text adheres to the stylistic and bibliographic requirements outlined in the Author Guidelines.
+                                                                </p>
+                                                            </label>
                                                         </li>
                                                     </ul>
                                                 </div>
@@ -372,17 +762,60 @@ export default function CreateSubmission() {
                                                 </div>
 
                                                 <div>
+                                                    {/* <div className="quill-wrapper">
+                                                        <ReactQuill 
+                                                            theme="snow"
+                                                            required
+                                                            value={editorsNote}
+                                                            onChange={(value) => {
+                                                                setEditorsNote(value);
+                                                                console.log(editorsNote);
+                                                            }}
+                                                            modules={modules}
+                                                            style={styles}
+                                                            className="border border-[#464849]"
+                                                        />
+                                                        
+                                                        <style jsx global>{`
+                                                            .quill-wrapper .ql-container {
+                                                                min-height: 240px;
+                                                            }
+                                                            .quill-wrapper .ql-editor {
+                                                                min-height: 240px;
+                                                            }
+                                                        `}</style>
+                                                    </div> */}
+
                                                     <ReactQuill
                                                         theme="snow"
                                                         required
-                                                        value={editorNote}
+                                                        modules={modules}
+                                                        style={styles}
+                                                        value={editorsNote}
                                                         onChange={(value) => {
-                                                            setEditorNote(value);
-                                                            console.log(editorNote)
+                                                            setEditorsNote(value);
+                                                            console.log(editorsNote)
                                                         }}
                                                         className="border border-[#464849] h-auto min-h-72"
                                                     />
                                                 </div>
+                                            </div>
+                                            <div>
+                                                <label className="flex items-center justify-start gap-3 cursor-pointer">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        id="accept_data_collection" 
+                                                        checked={isAcceptDataCollection} 
+                                                        onChange={()=>{
+                                                            setIsAcceptDataCollection((prev)=>!prev), 
+                                                            console.log(isAcceptDataCollection)
+                                                        }} 
+                                                        name="accept_data_collection" 
+                                                    />
+                                                    <p className="text-[#212121] text-sm">
+                                                        Yes I agree to have my data collected and stored.
+                                                    </p>
+                                                </label>
                                             </div>
                                         </div>
                                     </div>
@@ -393,152 +826,73 @@ export default function CreateSubmission() {
 
                             {activeStep === 1 ? (
                                 <>
-                                    <div className="bg-[#272727] px-3 md:px-6 py-3 md:py-6 rounded-lg stepper">
+                                    <div className="bg-white px-3 md:px-6 py-3 md:py-6 rounded-lg">
+                                        <div className="flex items-center justify-between gap-2">
+
+                                            <h3 className="font-medium text-[#212121] text-lg mb-2">
+                                                Upload Submission
+                                            </h3>
+                                            <button 
+                                                onClick={onUploadFileOpen}
+                                                className="w-auto whitespace-nowrap py-2 md:py-3 px-3 md:px-5 bg-[#313131] text-white transition ease-in duration-200 text-center text-sm font-semibold shadow-md rounded flex items-center justify-center gap-2 "
+                                            >
+                                                <p className="">Upload File</p>
+                                            </button>
+                                        </div>
+ 
                                         <div>
-                                            <div>
-                                                <h3 className="font-medium text-white text-lg mb-2">
-                                                    Add Recipients
-                                                </h3>
-                                                <div className="text-[#AFACAB] space-y-4">
-                                                    <div className="space-y-1">
-                                                        <p className="text-sm">
-                                                            Upload an existing CSV file, making sure the
-                                                            columns match our{" "}
-                                                            <Link
-                                                                href="https://thrustpad.finance/airdrop_template.csv"
-                                                                target="_blank"
-                                                                className="text-[#FFA178]"
-                                                            >
-                                                                template document
-                                                            </Link>
-                                                            , to add recipients.
-                                                        </p>
-                                                        {/* <p className="text-sm">
-                                                            You can upload one CSV file to use as
-                                                            tiers if you would like to apply varying
-                                                            quantities of tokens.
-                                                        </p> */}
-                                                        <p className="text-sm">
-                                                            You can also select from our pre-populated lists
-                                                            of well-liked projects.
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            <div className="overflow-x-auto md:overflow-x-auto py-4 text-[#313131] scrollbar-change rounded-md">
+                                                <Table variant='unstyled' className=' table-bordered'>
+                                                    <Thead className='bg-[#F7FAFC] border-b border-[#e7ecf1]'>
+                                                    <Tr>
+                                                        <Th width={10}>#</Th>
+                                                        <Th width={'30%'}>Title</Th>
+                                                        <Th>Action</Th>
+                                                    </Tr>
+                                                    </Thead>
+                                                    <Tbody className=' w-full px-4 divide-y divide-[#e7ecf1]'>
 
-                                            <div className="py-4 mt-6">
-                                                <div className="flex items-center justify-end mb-3">
-                                                    <h3 className="text-sm text-[#AFACAB]">
-                                                        Total Recipients:{" "}
-                                                        <span className="text-[#F0EDED] text-lg font-medium">
-                                                            {jsonRecipients.length}
-                                                        </span>
-                                                    </h3>
-                                                </div>
-                                                <div className="flex items-center justify-end mb-3">
-                                                    <h3 className="text-sm text-[#AFACAB]">
-                                                        Total Tokens Needed:{" "}
-                                                        <span className="text-[#F0EDED] text-lg font-medium">
-                                                            {totalTokens}
-                                                        </span>
-                                                    </h3>
-                                                </div>
-                                                <div className="flex gap-4 items-center flex-wrap lg:flex-nowrap">
-                                                    <div className="flex flex-shrink-0 flex-col gap-1 relative w-full max-w-full md:max-w-xs h-full">
-                                                        <label
-                                                            htmlFor="recipients"
-                                                            className="border-[#464849] border-dashed px-2 py-4 w-full  h-full min-h-52 md:min-h-96  border rounded-md flex items-center justify-center cursor-pointer"
-                                                        >
-                                                            <div>
-                                                                <div className="text-sm text-[#A8B8C2] text-center">
-                                                                    {fileName ? (
-                                                                        <div className="text-base text-[#FFA178]">
-                                                                            {fileName}
-                                                                        </div>
-                                                                    ) : (
-                                                                        <>
-                                                                            <div className="flex flex-col gap-1">
-                                                                                <span className="text-[#FFA178] ">
-                                                                                    Upload a CSV file
-                                                                                </span>
-                                                                                <span>
-                                                                                    {" "}
-                                                                                    or Drag and drop to
-                                                                                    upload
-                                                                                </span>
-                                                                            </div>
-                                                                        </>
-                                                                    )}
-                                                                </div>
-                                                            </div>
+                                                        {uploads?.length < 1 &&
+                                                            <Tr>
+                                                                <Td colSpan={8} className="px-2 py-4 text-base whitespace-nowrap text-center">
+                                                                    <span className="text-[#313131] text-base">
+                                                                        No data found
+                                                                    </span>
+                                                                </Td>
+                                                            </Tr>
+                                                        }
 
-                                                            <input
-                                                                type="file"
-                                                                id="recipients"
-                                                                className="block px-2 py-4 w-full text-sm text-white border-[#464849] focus:outline-none focus:border-[#524F4D] border border-dashed bg-transparent  h-full rounded-md focus:outline-0 text-center flex items-center justify-center hidden"
-                                                                name="recipients"
-                                                                required
-                                                                accept=".csv"
-                                                                onChange={handleFileChange}
-                                                            />
-                                                        </label>
-                                                    </div>
+                                                        {uploads?.length > 0 && uploads?.map((upload, index) => {
 
-                                                    <div className="overflow-x-auto flex scrollbar-change pb-2 gap-3">
-                                                        {[
-                                                            { name: "grasp", logo: "grasp" },
-                                                            { logo: "sail", name: "SailFish" },
-                                                            { logo: "thrust", name: "Thrustpad" },
-                                                        ].map((item, index) => (
-                                                            <div
-                                                                key={item.name}
-                                                                className="flex flex-col gap-1 min-w-64 max-w-72 w-64 h-full flex-shrink-0 border border-[#464849] hover:border-[#FFA178] p-3 rounded-md group cursor-no-drop opacity-75"
-                                                            >
-                                                                <div className="w-full flex items-center justify-center max-h-42 h-42 opacity-75 bg-[#353333] rounded-lg">
-                                                                    <div className="flex size-28s relative overflow-hidden block object-contains w-full rounded-lg">
-                                                                        <img
-                                                                            src={`/images/partners/${item.logo}.png`}
-                                                                            className="rounded-lg  object-cover  h-30 w-96"
-                                                                        />
-                                                                    </div>
-                                                                </div>
-
-                                                                <div className=" flex-1 flex flex-col justify-between">
-                                                                    <div className="p-2 w-full flex justify-between items-start flex-col">
-                                                                        <span className="font-medium text-[#807D7C] text-xs">
-                                                                            Airdrop to holders of
+                                                            return (
+                                                                <Tr key={index} className='px-4 hover:bg-[#F7FAFC]'>
+                                                                    <Td className="px-2 py-4 text-base whitespace-nowrap">
+                                                                        <span className="text-[#313131] text-base">
+                                                                            {index + 1}
                                                                         </span>
-                                                                        <h3 className="font-medium text-[#FFFCFB] text-base capitalize">
-                                                                            {item.name}
-                                                                        </h3>
-                                                                    </div>
-                                                                    <div className="p-2 w-full flex justify-between items-start flex-col">
-                                                                        <span className="font-medium text-[#807D7C] text-xs">
-                                                                            Total Recipients
-                                                                        </span>
-                                                                        <h3 className="font-medium text-[#FFFCFB] text-base">
-                                                                            0
-                                                                        </h3>
-                                                                    </div>
-                                                                    <div className="flex justify-between flex-wrap lg:flex-nowrap items-center gap-1">
-                                                                        <div className="p-2 w-full flex justify-between items-start flex-col">
-                                                                            <span className="font-medium text-[#807D7C] text-xs">
-                                                                                Quantity per recipients
-                                                                            </span>
-                                                                            <h3 className="font-medium text-[#FFFCFB] text-base">
-                                                                                0
-                                                                            </h3>
+                                                                    </Td>
+                                                                    <Td className="px-2 py-4 whitespace-nowrap">
+                                                                        <div className='flex items-start justify-between text-sm'>
+                                                                            <p>
+                                                                                {upload.title}
+                                                                            </p>
                                                                         </div>
-                                                                        {/* group-hover:text-[#FFA178] group-hover:border-[#FFA178] */}
-                                                                        <button className="text-[#464849]  border border-[#343232] rounded-lg py-[10px] px-4 text-xs w-full md:w-auto  transition-all duration-300 ease-in-out">
-                                                                            Choose
-                                                                        </button>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
+                                                                    </Td>
+                                                                    
+                                                                    <Td className="px-2 py-4 text-sm whitespace-nowrap">
+                                                                        <div className="text-[#313131] text-xs flex items-center justify-center gap-2 flex-row">
+                                                                            {/* && status === 'In Progress'  */}
+                                                                            <button className='btn px-2 py-1 bg-[#e1e5ec] border border-[#e1e5ec] rounded text-[#666] flex items-center'>
+                                                                                Take Test
+                                                                            </button>
+                                                                        </div>
+                                                                    </Td>
+
+                                                                </Tr>
+                                                            )
+                                                        })}
+                                                    </Tbody>
+                                                </Table>
                                             </div>
                                         </div>
                                     </div>
@@ -549,56 +903,119 @@ export default function CreateSubmission() {
 
                             {activeStep === 2 ? (
                                 <>
-                                    <div className="bg-[#272727] px-3 md:px-6 py-3 md:py-6 rounded-lg">
+                                    <div className="bg-white px-3 md:px-6 py-3 md:py-6 rounded-lg">
                                         <div className="mt-3 lg:mt-6">
                                             <div className="flex w-full gap-5 items-center flex-wrap lg:flex-nowrap">
                                                 <div className="mb-6 flex flex-col gap-1 relative w-full lg:w-1/2">
                                                     <label
-                                                        htmlFor="address"
-                                                        className="text-sm text-[#FFFCFB] "
+                                                        htmlFor="prefix"
+                                                        className="text-sm text-[#212121] semibold"
                                                     >
-                                                        Token Address
+                                                        Prefix
                                                     </label>
 
                                                     <input
                                                         type="text"
-                                                        id="address"
+                                                        id="prefix"
+                                                        value={prefix}
+                                                        required
                                                         onChange={(e) => {
-                                                            // if (checksumAddress(e.target.value)) {
-                                                                console.log("checkSum");
-                                                                setAddressError(false);
-                                                                setTokenAddress(e.target.value);
-                                                            // } else {
-                                                                // setAddressError(true);
-                                                            // }
+                                                            setPrefix(e.target.value);
+                                                            console.log(prefix);
                                                         }}
-                                                        className={`block px-2 w-full text-sm text-white  ${
-                                                            addressError === true
-                                                                ? "border-red-500"
-                                                                : "border-[#464849]  focus:outline-none focus:border-[#524F4D]"
-                                                        }  border bg-transparent  h-12 rounded-md focus:outline-0`}
-                                                        placeholder="For example: 0x83E46e6E193B284d26f7A4B7D865B65952A50Bf2"
-                                                        name="address"
+                                                        className={`block px-2 w-full text-sm text-[#212121] border bg-transparent  h-12 rounded-md focus:outline-0`}
+                                                        name="prefix"
+                                                        placeholder="e.g A, The"
+                                                        autoComplete="off"
+                                                    />
+                                                    {/* <span className="helper text-xs">Example: A, The</span> */}
+                                                </div>
+
+                                                <div className="mb-6 flex flex-col gap-1 relative w-full lg:w-3/4">
+                                                    <label
+                                                        htmlFor="title"
+                                                        className="text-sm text-[#212121] semibold"
+                                                    >
+                                                        Title
+                                                    </label>
+ 
+                                                    <input
+                                                        type="text"
+                                                        id="title"
+                                                        required
+                                                        value={title}
+                                                        onChange={(e) => setTitle(e.target.value)}
+                                                        className="block px-2 w-full text-sm text-[#212121] focus:outline-none border-[#524F4D]  border bg-transparent  h-12 rounded-md focus:outline-0"
+                                                        placeholder="e.g Title"
+                                                        name="title"
+                                                        autoComplete="off"
+                                                    />
+                                                    {/* <span className="helper text-xs">&nbsp;</span> */}
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex w-full gap-5 items-center flex-wrap lg:flex-nowrap">
+                                                <div className="mb-6 flex flex-col gap-1 relative w-full">
+                                                    <label
+                                                        htmlFor="subtitle"
+                                                        className="text-sm text-[#212121] semibold"
+                                                    >
+                                                        Subtitle
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        id="subtitle"
+                                                        required
+                                                        value={subTitle}
+                                                        onChange={(e) => setSubTitle(e.target.value)}
+                                                        className="block px-2 w-full text-sm text-[#212121] focus:outline-none border-[#524F4D] border bg-transparent  h-12 rounded-md focus:outline-0"
+                                                        name="subtitle"
                                                         autoComplete="off"
                                                     />
                                                 </div>
+                                            </div>
 
-                                                <div className="mb-6 flex flex-col gap-1 relative w-full lg:w-1/2">
-                                                    <label
-                                                        htmlFor="airdrop_title"
-                                                        className="text-sm text-[#FFFCFB] "
-                                                    >
-                                                        Airdrop title
+                                            <div>
+                                                <div className="mb-6 flex flex-col gap-1 relative w-full">
+                                                    <label 
+                                                        htmlFor="abstract"
+                                                        className="text-sm text-[#212121] semibold ">
+                                                        Abstract
                                                     </label>
-
-                                                    <input
-                                                        type="text"
-                                                        id="airdrop_title"
-                                                        onChange={(e) => setAirDropTitle(e.target.value)}
-                                                        className="block px-2 w-full text-sm text-white border-[#464849] focus:outline-none focus:border-[#524F4D] border bg-transparent  h-12 rounded-md focus:outline-0"
-                                                        placeholder="e.g Pre Sale Airdrop"
-                                                        name="airdrop_title"
-                                                        autoComplete="off"
+                                                    {/* <div className="quill-wrapper">
+                                                        <ReactQuill 
+                                                            theme="snow"
+                                                            required
+                                                            value={abstract}
+                                                            onChange={(value) => {
+                                                                setEditorsNote(value);
+                                                                console.log(abstract);
+                                                            }}
+                                                            modules={modules}
+                                                            style={styles}
+                                                            className="border border-[#464849]"
+                                                        />
+                                                        
+                                                        <style jsx global>{`
+                                                            .quill-wrapper .ql-container {
+                                                                min-height: 240px;
+                                                            }
+                                                            .quill-wrapper .ql-editor {
+                                                                min-height: 240px;
+                                                            }
+                                                        `}</style>
+                                                    </div> */}
+                                                    <ReactQuill
+                                                        theme="snow"
+                                                        required
+                                                        value={abstract}
+                                                        modules={modules}
+                                                        style={styles}
+                                                        onChange={(value) => {
+                                                            setAbstract(value);
+                                                            console.log(abstract)
+                                                        }}
+                                                        className="border border-[#524F4D] h-auto min-h-72"
                                                     />
                                                 </div>
                                             </div>
@@ -607,38 +1024,19 @@ export default function CreateSubmission() {
                                                 <div className="mb-6 flex flex-col gap-1 relative w-full lg:w-1/2">
                                                     <label
                                                         htmlFor="name"
-                                                        className="text-sm text-[#FFFCFB] mb-1"
+                                                        className="text-sm text-[#212121] mb-1"
                                                     >
-                                                        Token Name
+                                                        KeyWords
                                                     </label>
-                                                    <input
-                                                        type="text"
-                                                        id="name"
-                                                        disabled
-                                                        value={tokenDetails?.token_name}
-                                                        className="block px-2 w-full text-sm text-white border-[#464849] focus:outline-none focus:border-[#524F4D] border bg-transparent  h-12 rounded-md focus:outline-0"
-                                                        name="name"
-                                                        autoComplete="off"
+
+                                                    <TagField
+                                                        tags={tags}
+                                                        addTag={handleAddTag}
+                                                        removeTag={handleRemoveTag}
+                                                        maxTags={MAX_TAGS}
                                                     />
                                                 </div>
 
-                                                <div className="mb-6 flex flex-col gap-1 relative w-full lg:w-1/2">
-                                                    <label
-                                                        htmlFor="symbol"
-                                                        className="text-sm text-[#FFFCFB] mb-1"
-                                                    >
-                                                        Token Symbol
-                                                    </label>
-                                                    <input
-                                                        type="text"
-                                                        id="symbol"
-                                                        value={tokenDetails?.token_symbol}
-                                                        disabled
-                                                        className="block px-2 w-full text-sm text-white border-[#464849] focus:outline-none focus:border-[#524F4D] border bg-transparent  h-12 rounded-md focus:outline-0"
-                                                        name="symbol"
-                                                        autoComplete="off"
-                                                    />
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -649,91 +1047,35 @@ export default function CreateSubmission() {
 
                             {activeStep === 3 ? (
                                 <>
-                                    <div className="bg-[#272727] px-3 md:px-6 py-3 md:py-6 rounded-lg">
-                                        <h3 className="font-medium text-white text-lg mb-2">
-                                            Airdrop Details
+                                    <div className="bg-white px-3 md:px-6 py-3 md:py-6 rounded-lg">
+                                        <h3 className="font-medium text-[#212121] text-lg mb-2">
+                                            Confirm Submission
                                         </h3>
 
                                         <div className="flex gap-6 py-2 flex-wrap lg:flex-nowrap ">
-                                            <div className="w-full md:w-full lg:w-7/12 space-y-8">
+                                            <div className="w-full">
                                                 <div>
-                                                    <div className="text-white border border-[#464849] rounded-lg py-[14px] px-5 flex flex-col w-full">
-                                                        <div className="p-2 w-full flex justify-between items-center">
+                                                    <div className="py-2 w-full flex justify-between items-center">
                                                             <h3 className=" font-medium text-[#898582] text-sm">
-                                                                Airdrop title
+                                                                Your submission has been uploaded and is ready to be sent. You may go back to review and adjust any of the informantion you have entered before continuing. When you are ready, click Finish Submission.
                                                             </h3>
                                                             <span className="font-medium text-[#FFFFFF] text-xs">
                                                                 {airDropTitle}
                                                             </span>
                                                         </div>
-                                                        <div className="p-2 w-full flex justify-between items-center">
-                                                            <h3 className=" font-medium text-[#898582] text-sm">
-                                                                Type
-                                                            </h3>
-                                                            <span className="font-medium text-[#FFFFFF] text-xs">
-                                                                Instant
-                                                            </span>
-                                                        </div>
-                                                        <div className="p-2 w-full flex justify-between items-center">
-                                                            <h3 className=" font-medium text-[#898582] text-sm">
-                                                                Total tokens
-                                                            </h3>
-                                                            <span className="font-medium text-[#FFFFFF] text-xs">
-                                                                {totalTokens} {tokenDetails?.token_symbol}
-                                                            </span>
-                                                        </div>
-                                                        <div className="p-2 w-full flex justify-between items-center">
-                                                            <h3 className=" font-medium text-[#898582] text-sm">
-                                                                Total recipients
-                                                            </h3>
-                                                            <span className="font-medium text-[#FFFFFF] text-xs">
-                                                                {jsonRecipients.length}
-                                                            </span>
-                                                        </div>
-                                                        <div className="p-2 w-full flex justify-between items-center">
-                                                            <h3 className=" font-medium text-[#898582] text-sm">
-                                                                Token name
-                                                            </h3>
-                                                            <span className="font-medium text-[#FFFFFF] text-xs">
-                                                                {tokenDetails?.token_name}
-                                                            </span>
-                                                        </div>
-                                                        <div className="p-2 w-full flex justify-between items-center">
-                                                            <h3 className=" font-medium text-[#898582] text-sm">
-                                                                Token symbol
-                                                            </h3>
-                                                            <span className="font-medium text-[#FFFFFF] text-xs">
-                                                                {tokenDetails?.token_symbol}
-                                                            </span>
-                                                        </div>
-                                                        <div className="p-2 w-full flex justify-between items-center">
-                                                            <h3 className=" font-medium text-[#898582] text-sm">
-                                                                Token address
-                                                            </h3>
-                                                            <span className="font-medium text-[#FFFFFF] text-xs">
-                                                                {tokenAddress}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                    {userTokenBalance <
-                                                        parseEther(totalTokens.toString()) && (
+                                                    
+                                                    {/* {userTokenBalance && ( */}
                                                         <div className="py-[18px] px-6 bg-red-200 rounded-lg mt-2">
                                                             <div className="flex items-start w-full gap-2 text-red-500">
                                                                 <span>
                                                                     <Danger size={22} />
                                                                 </span>
                                                                 <p className="text-sm text-red-500">
-                                                                    You do not have{" "}
-                                                                    <b>
-                                                                        {totalTokens}{" "}
-                                                                        {tokenDetails?.token_name}
-                                                                    </b>{" "}
-                                                                    in your wallet <b>{address}</b> to cover
-                                                                    airdrop distribution.
+                                                                    You will not be able to renter details after submission.
                                                                 </p>
                                                             </div>
                                                         </div>
-                                                    )}
+                                                    {/* )} */}
                                                 </div>
                                             </div>
                                         </div>
@@ -750,9 +1092,9 @@ export default function CreateSubmission() {
                                     showLoader ? (
                                         <button
                                             className="bg-[#DA5921] hover:bg-[#DA5921] min-w-[200px] whitespace-nowrap w-full md:w-auto
-                                        disabled:opacity-50 disabled:cursor-not-allowed rounded-lg 
-                                        transition-all duration-75 border-none px-5 
-                                        font-medium p-3 text-base text-white block flex items-center justify-center"
+                                            disabled:opacity-50 disabled:cursor-not-allowed rounded-lg 
+                                            transition-all duration-75 border-none px-5 
+                                            font-medium p-3 text-base text-white block flex items-center justify-center"
                                         >
                                             <LoaderIcon className="animate-spin size-32 text-white inline" />
                                         </button>
@@ -761,9 +1103,9 @@ export default function CreateSubmission() {
                                             disabled={nextDisabled}
                                             onClick={handleNext}
                                             className="bg-[#DA5921] hover:bg-[#DA5921] min-w-[200px] whitespace-nowrap w-full md:w-auto
-                                        disabled:opacity-50 disabled:cursor-not-allowed rounded-lg 
-                                        transition-all duration-75 border-none px-5 
-                                        font-medium p-3 text-base text-white block"
+                                            disabled:opacity-50 disabled:cursor-not-allowed rounded-lg 
+                                            transition-all duration-75 border-none px-5 
+                                            font-medium p-3 text-base text-white block"
                                         >
                                             Next
                                         </button>
@@ -773,23 +1115,33 @@ export default function CreateSubmission() {
                                         {showLoader ? (
                                             <button
                                                 className="bg-[#DA5921] hover:bg-[#DA5921] min-w-[200px] whitespace-nowrap w-full md:w-auto
-                                        disabled:opacity-50 disabled:cursor-not-allowed rounded-lg 
-                                        transition-all duration-75 border-none px-5 
-                                        font-medium p-3 text-base text-white block flex items-center justify-center"
+                                                disabled:opacity-50 disabled:cursor-not-allowed rounded-lg 
+                                                transition-all duration-75 border-none px-5 
+                                                font-medium p-3 text-base text-white block flex items-center justify-center"
                                             >
                                                 <LoaderIcon className="animate-spin size-32 text-white inline" />
                                             </button>
                                         ) : (
-                                            (
+                                            (<>
                                                 <button
-                                                    onClick={handleFinish}
+                                                    onClick={handleFinishSubmission}
                                                     className="bg-[#DA5921] hover:bg-[#DA5921] min-w-[200px] whitespace-nowrap w-full md:w-auto
-                                        disabled:opacity-50 disabled:cursor-not-allowed rounded-lg 
-                                        transition-all duration-75 border-none px-5 
-                                        font-medium p-3 text-base text-white block"
+                                                    disabled:opacity-50 disabled:cursor-not-allowed rounded-lg 
+                                                    transition-all duration-75 border-none px-5 
+                                                    font-medium p-3 text-base text-white block"
                                                 >
-                                                    Create Airdrop
+                                                    Finish Submission
                                                 </button>
+                                                <button
+                                                    onClick={handleClose}
+                                                    className="bg-[#A0AEC0] hover:bg-[#A0AEC0] min-w-[200px] whitespace-nowrap w-full md:w-auto
+                                                    disabled:opacity-50 disabled:cursor-not-allowed rounded-lg 
+                                                    transition-all duration-75 border-none px-5 
+                                                    font-medium p-3 text-base text-white block"
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </>
                                             )
                                         )}
                                     </>
@@ -801,6 +1153,20 @@ export default function CreateSubmission() {
 
             </div>
 
+
+
+            {/* {user ? ( */}
+                <UploadFileSubmissionModal 
+                    user={user}
+                    isOpen={uploadFileIsOpen}
+                    onClose={onUploadFileClose}
+                    currentUpload={currentUpload}
+                    uploadList={setUploads}
+                    setCurrentUpload={setCurrentUpload}
+                />
+            {/* ) : (
+                ''
+            )} */}
         </>
     );
 }

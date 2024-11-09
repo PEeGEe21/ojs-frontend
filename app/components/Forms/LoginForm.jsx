@@ -8,7 +8,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import SocialLogin from './FormComponents/SocialLogin';
 import { LoaderIcon } from '../IconComponent';
 import setAuthToken from '../../lib/setAuthToken';
-import { ToasterAlert } from '../../lib/utilFunctions';
+import { hostUrl, ToasterAlert } from '../../lib/utilFunctions';
 
 const LoginForm = () => {
   const searchParams = useSearchParams();
@@ -19,7 +19,6 @@ const LoginForm = () => {
   const [error, setError] = useState(null);
   const [errMessage, setErrMessage] = useState(null);
   const [loading, setLoading] = useState(false);
-  const hostUrl = process.env.NEXT_PUBLIC_AUTH_URL;
 
   const { push } = useRouter();
 
@@ -28,7 +27,7 @@ const LoginForm = () => {
     e.preventDefault();
 
     axios
-      .post(`${hostUrl}/api/auth/login`, {
+      .post(`${hostUrl}auth/login`, {
         email: email,
         password: password,
       })
@@ -43,11 +42,11 @@ const LoginForm = () => {
           localStorage.setItem('ojs-user', JSON.stringify(user));
           setAuthToken(token);
           setTimeout(() => {
-            if(user?.defaultRole?.id === 1) {
+            if(user?.defaultRole?.id == 1) {
               push(`/admin/analytics`);
             }
-            if(user?.defaultRole?.id === 3) {
-              push(`/author/analytics`);
+            if(user?.defaultRole?.id == 3) {
+              push(`/author/submissions`);
             }
           }, 300);
         } else {

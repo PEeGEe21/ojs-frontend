@@ -8,7 +8,9 @@ import toast, { Toaster } from 'react-hot-toast';
 import { successtoastOptions } from './constants';
 
 const isWindowDefined = typeof window !== 'undefined';
-const hostUrl = process.env.NEXT_PUBLIC_AUTH_URL;
+// const hostUrl = process.env.NEXT_PUBLIC_AUTH_URL;
+export const hostUrl = process.env.NEXT_PUBLIC_NODE_ENV === 'development' ? process.env.NEXT_PUBLIC_LOCAL_AUTH_URL :  process.env.NEXT_PUBLIC_AUTH_URL ;
+
 const projectUrl = hostUrl + '/api/projects/';
 const statusUrl = hostUrl + '/api/status/';
 const taskUrl = hostUrl + '/api/tasks/';
@@ -150,6 +152,38 @@ export const _getUser = () => {
     return null;
   }
 };
+
+
+export const handleRedirect = (role, push) => {  
+    const routes = {
+        author: '/author/submissions',
+        admin: '/admin/analytics',
+    };
+    push(routes[role] || '/auth/login');
+};
+
+export const slugify = (string) =>{
+  return string
+  .toString()
+  .trim()
+  .toLowerCase()
+  .replace(/\s+/g, "-")
+  .replace(/[^\w\-]+/g, "")
+  .replace(/\-\-+/g, "-")
+  .replace(/^-+/, "")
+  .replace(/-+$/, "");
+}
+
+export function shortenTitle(title) {
+  // console.log(title?.length)
+  if (title?.length < 20) {
+    // If the address is too short to be shortened, return it as is
+    return title;
+  }
+
+  const start = title?.slice(0, 14);
+  return `${start}...`;
+}
 
 export const ToasterAlert = (message, type) => {
   let alertTypes = {

@@ -12,6 +12,7 @@ import {
   LogoutCurve,
   Setting2,
   Setting3,
+  Eye,
 } from 'iconsax-react';
 import Image from 'next/image';
 import { Category } from 'react-iconly';
@@ -29,18 +30,35 @@ import {
 } from '@chakra-ui/react';
 
 import { Magicpen, More, NoteAdd, Trash, UserAdd } from 'iconsax-react';
+import { JournalContext } from '../../utils/journalContext';
+import toast from 'react-hot-toast';
 // import { menuLinks } from "../lib/constants";
 // import "../navbar.css";
 
 const Navbar = ({ user, isLoadingState }) => {
   const pathname = usePathname();
+  const router = useRouter();
+  const { journals, selectedJournal, handleJournalChange, isLoading } = useContext(JournalContext);
+
+  const handleSelectChange = (event) => {
+    const selectedId = event.target.value;
+    const journal = journals.find((j) => j.id === Number(selectedId));
+    handleJournalChange(journal);
+  };
+
+  const logout = () => {
+    localStorage.removeItem('ojs-user');
+    router.push('/auth/login');
+    toast.success('Successfully logged out')
+  };
+
   // console.log(isLoadingState, 'loading state');
   // const user = {
   //   username: 'praise',
   //   email: 'mailpraiseudeh@gmail.com',
   // };
 
-  const showDashMenu = null;
+
   return (
     <>
       <header className="bg-[#fff] border-b-[0.5px] border-[#F3F4F6] z-[999] h-14 ">
@@ -59,10 +77,14 @@ const Navbar = ({ user, isLoadingState }) => {
                 />
               </Link>
             </div> */}
-            <div className="md:block sm:hidden h-full">
-              <button>
-                <NotificationBing size={22} color="#008080" />
-              </button>
+            <div className="h-full">
+              <select onChange={handleSelectChange} value={selectedJournal?.id || ''} className='focus:outline-none'>
+                {journals.length > 0 && journals.map((journal) => (
+                  <option key={journal.id} value={journal.id}>
+                    {journal.name}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="w-full hidden  flex-grow lg:flex lg:items-center lg:w-auto justify-end h-full">
               
@@ -78,6 +100,12 @@ const Navbar = ({ user, isLoadingState }) => {
                     </span>
                   </>
                 ) : ( */}
+                <Link href={'/articles'} className='flex items-center gap-1 bg-[#008080] px-2 py-1 rounded-md text-[#F3F4F6]'>
+                  <Eye size={16} /> view site
+                </Link>
+                <button>
+                  <NotificationBing size={22} color="#008080" />
+                </button>
                   <div className="relative flex items-center justify-center z-[999] ">
                     <Menu className=" bg-card-background">
                       <MenuButton>
@@ -111,22 +139,23 @@ const Navbar = ({ user, isLoadingState }) => {
                         minWidth="150px"
                         maxWidth="150px"
                       >
-                        <MenuItem
+                        {/* <MenuItem
                           icon={<Profile2User size={14} />}
                           
-                          className="hover:bg-[#034343] transition duration-200 ease-in-out p-2"
+                          className="hover:bg-[#034343] transition duration-200 ease-in-out p-2 bg-[#008080]"
                         >
                           Profile
-                        </MenuItem>
-                        <MenuItem
+                        </MenuItem> */}
+                        {/* <MenuItem
                           icon={<Setting3 size={14} />}
-                          className="hover:bg-[#034343] transition duration-200 ease-in-out p-2"
+                          className="hover:bg-[#034343] transition duration-200 ease-in-out p-2 bg-[#008080]"
                         >
                           Settings
-                        </MenuItem>
+                        </MenuItem> */}
                         <MenuItem
                           icon={<LogoutCurve size={14} color="red" />}
-                          className="hover:bg-[#034343] transition duration-200 ease-in-out p-2"
+                          onClick={logout}
+                          className="hover:bg-[#034343] transition duration-200 ease-in-out p-2 bg-[#008080]"
                         >
                           Sign Out
                         </MenuItem>

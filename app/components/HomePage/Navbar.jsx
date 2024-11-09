@@ -4,33 +4,33 @@ import Link from 'next/link';
 import Image from 'next/image';
 // import "../../styles/navbar.css";
 import { ArrowDown, ArrowDown2, Global } from 'iconsax-react';
+import { shortenTitle } from '../../lib/utilFunctions';
 // import { MenuContext } from '@/app/utils/context';
 
-const Navbar = () => {
+const Navbar = ({user, start}) => {
   // const { toggle, showMenu } = useContext(MenuContext) || {};
   const showMenu = null;
   return (
     <>
+      
+      {!user && (
+      <marquee className='bg-[#008080] text-sm'>
+        <div className='py-1 text-white'>Join Us Today By <Link href='/auth/signup' className='underline font-semibold'>Signing Up</Link></div>
+      </marquee>)}
+      
       <header
-        className="z-50"
+        className="z-50 shadow-md"
         style={{ position: 'relative' }}
       >
         <div className="container mx-auto max-w-[1440px] px-4">
           <nav className="flex  flex-wrap items-center justify-between py-4">
             <div className="lg:order-1 w-auto lg:w-1/4 lg:text-center">
               <Link
-                href="/"
-                className="text-xl text-gray-800 font-semibold font-heading"
-              >
-                {/* <Image
-                  src="/images/logo.svg"
-                  width={150}
-                  height={150}
-                  alt="logo"
-                  priority
-                  className=""
-                /> */}
-              </Link>
+                  href={'/'}
+                  className="flex items-center w-full justify-start h-full text-gray-800 capitalize text-2xl font-extrabold "
+                >
+                  O.J.S
+                </Link>
             </div>
             <div className="lg:hidden">
               <button
@@ -77,42 +77,68 @@ const Navbar = () => {
 
             <div className="hidden lg:order-2 lg:block w-full lg:w-auto lg:text-center">
               <div className="navbar-menu flex items-center justify-end gap-5  ">
-                <Link
-                  className="text-[#11161F] hover:text-[#013434] px-6 py-2 menu relative text-center font-semibold group"
-                  href={
-                    '/'
-                  }
-                  target="_blank"
-                >
-                  <div className='relative'>
-                    How it works
-                    <span className="block absolute left-0 bottom-0 h-1 bg-[#013434] w-0 group-hover:w-full transition-all duration-300"></span>
-                  </div>
-                  
-                </Link>
                 
-
-                <Link
-                  href="/auth/login"
-                  className="text-[#11161F] hover:text-[#013434]  px-6 py-2 rounded-lg text-center font-semibold group"
-                >
-                  <div className='relative'>
-                    Login
-                    <span className="block absolute left-0 bottom-0 h-1 bg-[#013434] w-0 group-hover:w-full transition-all duration-300"></span>
-                  </div>
-                </Link>
-
+              {user ? 
+                  <Link
+                    className="text-[#11161F] hover:text-[#013434] px-6 py-2 menu relative text-center font-semibold group"
+                    href={
+                      '/'
+                    }
+                    target="_blank"
+                  >
+                    <div className='relative'>
+                      Articles
+                      <span className="block absolute left-0 bottom-0 h-1 bg-[#013434] w-0 group-hover:w-full transition-all duration-300"></span>
+                    </div>
+                    
+                  </Link>
+                : <></>
+              }
                 {/* 1E1E1E */}
-                <Link
-                  href="/auth/signup"
-                  className="text-[#1E1E1E] hover:text-[#013434] px-6 py-2 text-center font-semibold group"
-                >
+                {!user ? 
+                  <>
+                  <Link
+                    href="/auth/login"
+                    className="text-[#11161F] hover:text-[#013434]  px-6 py-2 rounded-lg text-center font-semibold group"
+                  >
+                    <div className='relative'>
+                      Login
+                      <span className="block absolute left-0 bottom-0 h-1 bg-[#013434] w-0 group-hover:w-full transition-all duration-300"></span>
+                    </div>
+                  </Link>
+
                   
-                  <div className='relative'>
-                    Sign up
-                    <span className="block absolute left-0 bottom-0 h-1 bg-[#013434] w-0 group-hover:w-full transition-all duration-300"></span>
-                  </div>
-                </Link>
+                  <Link
+                    href="/auth/signup"
+                    className="text-[#1E1E1E] hover:text-[#013434] px-6 py-2 text-center font-semibold group"
+                  >
+                    
+                    <div className='relative'>
+                      Sign up
+                      <span className="block absolute left-0 bottom-0 h-1 bg-[#013434] w-0 group-hover:w-full transition-all duration-300"></span>
+                    </div>
+                  </Link>
+                  </>
+                  : 
+                  <>
+                      <button
+                        className="text-[#353535] leading-7 "
+                        onClick={()=>start((user?.user_default_role).toLowerCase())}
+                      >
+                          {shortenTitle(user?.email)}
+                      </button>
+                    
+                      <div className="flex items-center justify-start gap-2 bg-card-background rounded-l-full h-auto">
+                        <Image
+                          src={'/images/navbar-img/avatar-1.png'}
+                          alt=""
+                          width={35}
+                          height={35}
+                          className="rounded-full"
+                        />
+                      </div>
+                  </>
+                }
               </div>
             </div>
           </nav>

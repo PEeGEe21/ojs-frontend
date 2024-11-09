@@ -1,0 +1,122 @@
+import React from 'react'
+import OwlCarousel from 'react-owl-carousel';
+import 'owl.carousel/dist/assets/owl.carousel.css'
+import 'owl.carousel/dist/assets/owl.theme.default.css'
+// import './testimonial.css'
+import Image from 'next/image';
+import { blurDataUrl } from '../../lib/constants';
+
+const EditorsCarousel = () => {
+    const state={
+        responsive:{
+            0:{
+                items:1
+            },
+            650:{
+                items:1
+            },			
+            1024:{
+                items:3
+            },
+            1200:{
+                items:5
+            }
+        }
+    }
+
+    const EditorsList = [
+        {
+            id: 1,
+            image: '/images/users/300_15.jpg',
+            name: 'Chris Holland',
+            books_published: 300,
+        },
+        {
+            id: 2,
+            image: '/images/users/300_17.jpg',
+            name: 'Mary Smith',
+            books_published: 30,
+    
+        },
+        {
+            id: 3,
+            image: '/images/users/300_25.jpg',
+            name: 'Travis Carter',
+            books_published: 2000,
+    
+        },
+        {
+            id: 4,
+            image: '/images/users/300_8.jpg',
+            name: 'Song Yu Jin',
+            books_published: 30,
+    
+        },
+        {
+            id: 5,
+            image: '/images/users/300_5.jpg',
+            name: 'Allyson Witherers',
+            books_published: 30,
+    
+        },
+        
+    ];
+
+    return (
+        <section className="py-24 sectionspace">
+            <div className="container max-w-[1440px] mx-auto px-4 py-5">
+                <OwlCarousel 
+                    items={1} 
+                    className="owl-theme" 
+                    loop
+                    nav 
+                    margin={0} 
+                    autoplay={false}
+                    smartSpeed= {300}
+                    autoplaySpeed= {1000}
+                    autoplayHoverPause={true}
+                    navspeed= {1000}
+                    paginationspeed= {1000}
+                    slidespeed={800}
+                    dots={false} 
+                    responsive={state.responsive}
+                    >
+                        {EditorsList.map((editor, index)=>(
+                            <div className="popular-authors relative rounded overflow-hidden shadow-md " key={editor.id}>
+                                
+                                <div className="">
+                                    <div className="relative overflow-hidden all-authors">
+                                        <div className="rounded relative h-[200px] md:h-[300px] overflow-hidden">
+                                            <Image 
+                                                src={editor.image} 
+                                                alt={'journal one'} 
+                                                className="w-full h-full object-cover object-center transition-transform duration-300 ease-in-out group-hover:scale-105" 
+                                                height={300}
+                                                width={800}
+                                                quality={100}
+                                                sizes="(max-width: 768px) 100vw, 800px"
+                                                placeholder="blur"
+                                                blurDataURL={blurDataUrl}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                                
+
+                                <div className="px-4 py-2 md:py-4 flex flex-col gap-2 text-left mt-0 lg:mt-2">
+
+                                    <div>
+                                        <span className="book-title text-gray-900 text-lg">{editor.name}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    
+                </OwlCarousel>
+
+            </div>
+        </section>  
+    )
+}
+
+export default EditorsCarousel
