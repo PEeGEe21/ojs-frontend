@@ -667,7 +667,7 @@ export default function CreateSubmission() {
                                                     <h3 className="text-[#212121] font-semibold text-base mb-2">
                                                         Submission Requirements
                                                     </h3>
-                                                    <p className="text-[#828e96] text-sm">You must read and acknowledge that you've completed the requirements below before proceeding.</p>
+                                                    <p className="text-[#828e96] text-sm">You must read and acknowledge that you&apos;ve completed the requirements below before proceeding.</p>
                                                 </div>
                                                 <div className="py-2 w-full text-left">
                                                     

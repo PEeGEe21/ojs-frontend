@@ -11,43 +11,6 @@ import { ArrowRight, ArrowRight2, ArrowRight3 } from 'iconsax-react'
 import { LoaderIcon } from '../IconComponent'
 import { blurDataUrl } from '../../lib/constants'
 
-export const PopAuthors = [
-    {
-        id: 1,
-        image: '/images/users/300_15.jpg',
-        name: 'Chris Holland',
-        books_published: 300,
-    },
-    {
-        id: 2,
-        image: '/images/users/300_17.jpg',
-        name: 'Mary Smith',
-        books_published: 30,
-
-    },
-    {
-        id: 3,
-        image: '/images/users/300_25.jpg',
-        name: 'Travis Carter',
-        books_published: 2000,
-
-    },
-    {
-        id: 4,
-        image: '/images/users/300_8.jpg',
-        name: 'Song Yu Jin',
-        books_published: 30,
-
-    },
-    {
-        id: 5,
-        image: '/images/users/300_5.jpg',
-        name: 'Allyson Witherers',
-        books_published: 30,
-
-    },
-    
-];
 
 const MainComponent = () => {
     const [user, setUser] = useState(null)
@@ -157,7 +120,7 @@ const MainComponent = () => {
             
                              (<div>
                             
-                                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 my-8  pb-5">
+                                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 my-8  pb-5">
                                     {journals.map((journal, index)=>(
                                         <Link href={`/journals/${journal.id}`} key={journal.id}>
                                             <div className="group rounded-md overflow-hidden hover:shadow-lg transition duration-300 ease border">

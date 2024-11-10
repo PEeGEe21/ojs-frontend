@@ -32,7 +32,7 @@ const Navbar = ({user, start}) => {
                   O.J.S
                 </Link>
             </div>
-            <div className="lg:hidden">
+            {/* <div className="lg:hidden">
               <button
                 className={`navbar-burger flex items-center py-2 px-3 text-[#11161F]  rounded relative transition-all duration-150 ease-linear ${
                   showMenu ? 'open' : ''
@@ -40,12 +40,10 @@ const Navbar = ({user, start}) => {
                 id="nav-icon3"
                 // onClick={toggle}
               >
-                {/* <div id="nav-icon3"> */}
                 <span></span>
                 <span></span>
                 <span></span>
                 <span></span>
-                {/* </div> */}
               </button>
               <nav
                 id="mobile-nav"
@@ -73,21 +71,21 @@ const Navbar = ({user, start}) => {
                   </li>
                 </ul>
               </nav>
-            </div>
+            </div> */}
 
-            <div className="hidden lg:order-2 lg:block w-full lg:w-auto lg:text-center">
+            <div className="order-2 block w-auto text-center">
               <div className="navbar-menu flex items-center justify-end gap-5  ">
                 
               {user ? 
                   <Link
-                    className="text-[#11161F] hover:text-[#013434] px-6 py-2 menu relative text-center font-semibold group"
+                    className="text-[#11161F] hover:text-[#013434] px-2 md:px-6 py-2 menu relative text-center font-semibold group"
                     href={
                       '/'
                     }
                     target="_blank"
                   >
                     <div className='relative'>
-                      Articles
+                      <span>Articles</span>
                       <span className="block absolute left-0 bottom-0 h-1 bg-[#013434] w-0 group-hover:w-full transition-all duration-300"></span>
                     </div>
                     
@@ -128,7 +126,7 @@ const Navbar = ({user, start}) => {
                           {shortenTitle(user?.email)}
                       </button>
                     
-                      <div className="flex items-center justify-start gap-2 bg-card-background rounded-l-full h-auto">
+                      {/* <div className="flex items-center justify-start gap-2 bg-card-background rounded-l-full h-auto">
                         <Image
                           src={'/images/navbar-img/avatar-1.png'}
                           alt=""
@@ -136,7 +134,7 @@ const Navbar = ({user, start}) => {
                           height={35}
                           className="rounded-full"
                         />
-                      </div>
+                      </div> */}
                   </>
                 }
               </div>
