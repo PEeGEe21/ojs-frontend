@@ -35,7 +35,7 @@ import toast from 'react-hot-toast';
 // import { menuLinks } from "../lib/constants";
 // import "../navbar.css";
 
-const Navbar = ({ user, isLoadingState }) => {
+const Navbar = ({ user, isLoadingState , userRole}) => {
   const pathname = usePathname();
   const router = useRouter();
   const { journals, selectedJournal, handleJournalChange, isLoading } = useContext(JournalContext);
@@ -77,15 +77,17 @@ const Navbar = ({ user, isLoadingState }) => {
                 />
               </Link>
             </div> */}
-            <div className="h-full">
-              <select onChange={handleSelectChange} value={selectedJournal?.id || ''} className='focus:outline-none'>
-                {journals.length > 0 && journals.map((journal) => (
-                  <option key={journal.id} value={journal.id}>
-                    {journal.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {userRole !== 'admin' &&
+              <div className="h-full">
+                <select onChange={handleSelectChange} value={selectedJournal?.id || ''} className='focus:outline-none'>
+                  {journals.length > 0 && journals.map((journal) => (
+                    <option key={journal.id} value={journal.id}>
+                      {journal.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            }
             <div className="w-full hidden  flex-grow lg:flex lg:items-center lg:w-auto justify-end h-full">
               
               <div className="lg:flex lg:items-center lg:w-auto gap-4">

@@ -32,13 +32,13 @@ const MainLayout = ({children}) => {
     }, [])
 
 
-    const userRole = "author"; 
+    const userRole = "admin"; 
     return (
         <>
             <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} userRole={userRole}/>
             <div className="flex-1 h-full overflow-y-auto scrollbar-change">
                 <main className="main-wrapper">
-                    <Navbar  user={user} toggleSidebar={toggleSidebar} />
+                    <Navbar  user={user} toggleSidebar={toggleSidebar} userRole={userRole}/>
                     <div className="max-w-7xl h-full py-2 lg:py-4 px-4 lg:px-4 mx-auto ">
                         {children}
                     </div>

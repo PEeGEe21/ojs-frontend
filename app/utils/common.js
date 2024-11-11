@@ -1,7 +1,9 @@
 import { permissionLevelList } from "../lib/constants";
 
 export const getFullName = (user) =>{
-    let fullname = user.fname + ' ' + user.lname;
+  console.log(user)
+  
+    let fullname = (user?.firstname??'') + ' ' + (user?.lastname??'');
     return fullname
 }
 

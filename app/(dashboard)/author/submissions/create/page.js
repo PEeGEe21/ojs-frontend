@@ -1064,7 +1064,6 @@ export default function CreateSubmission() {
                                                             </span>
                                                         </div>
                                                     
-                                                    {/* {userTokenBalance && ( */}
                                                         <div className="py-[18px] px-6 bg-red-200 rounded-lg mt-2">
                                                             <div className="flex items-start w-full gap-2 text-red-500">
                                                                 <span>
@@ -1075,7 +1074,6 @@ export default function CreateSubmission() {
                                                                 </p>
                                                             </div>
                                                         </div>
-                                                    {/* )} */}
                                                 </div>
                                             </div>
                                         </div>

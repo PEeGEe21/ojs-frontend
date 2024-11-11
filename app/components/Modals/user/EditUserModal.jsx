@@ -17,14 +17,19 @@ const EditUserModal = ({
   dataSource,
   currentUser,
   setDataSource,
-  setCurrentUser
+  setCurrentUser,
+  isEditingUser,
+  setIsEditingUser,
+  start,
+  roles
 }) => {
+  const heading = currentUser ? ('Edit ' + (getFullName(currentUser))) : 'Create'
   return (
     <>
       <Modal isOpen={isOpen} onClose={onClose} isCentered size="2xl">
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Edit {getFullName(currentUser)}</ModalHeader>
+          <ModalHeader>{heading}</ModalHeader>
           <ModalCloseButton />
           <EditUserForm
             onClose={onClose}
@@ -32,6 +37,10 @@ const EditUserModal = ({
             currentUser={currentUser}
             setDataSource={setDataSource}
             setCurrentUser={setCurrentUser}
+            isEditingUser={isEditingUser}
+            setIsEditingUser={setIsEditingUser}
+            start={start}
+            allRoles={roles}
           />
         </ModalContent>
       </Modal>

@@ -23,6 +23,8 @@ import { Edit, PenTool, PenTool2, Trash } from 'iconsax-react';
 import toast from 'react-hot-toast';
 import EditUserModal from '../Modals/user/EditUserModal';
 import { getRandomRoles } from '../../utils/common';
+import { hostUrl } from '../../lib/utilFunctions';
+import axios from 'axios';
 
 const EditableCell = ({
     editing,
@@ -36,7 +38,7 @@ const EditableCell = ({
   }) => {
     const inputNode = inputType === 'number' ? <InputNumber /> : <Input />;
     return (
-      <td {...restProps}>
+      <td {...restProps} key={index}>
         {editing ? (
           <Form.Item
             name={dataIndex}
@@ -85,14 +87,39 @@ const UsersTable = () => {
     const [data, setData] = useState(dataSource);
     const [editingKey, setEditingKey] = useState('');
     const [currentUser, setCurrentUser] = useState({});
+    const [isEditingUser, setIsEditingUser] = useState(false);
     const [user, setUser] = useState(null);
     const [statusState, setStatusState] = useState('');
     const [isSavingStatus, setIsSavingStatus] = useState({});
+    const [roles, setRoles] = useState([]);
     const {
         isOpen: userEditIsOpen,
         onOpen: onUserEditOpen,
         onClose: onUserEditClose,
     } = useDisclosure();
+    const [currentPage, setCurrentPage] = useState(1);
+    const pageSize = 10; // Update with your actual page size
+
+    const fetchData = async () => {
+        try {
+            setIsLoading(true);
+            const res = await fetch(hostUrl + 'users');
+            if (res.ok) {
+            const result = await res.json();
+            setDataSource(result.users);
+            setRoles(result.roles);
+            }
+        } catch (err) {
+            console.error('Error fetching data:', err?.message);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
 
     const isEditing = (record) => record.key === editingKey;
     const edit = (record) => {
@@ -106,8 +133,9 @@ const UsersTable = () => {
         setEditingKey(record.key);
     };
 
-    const cancel = () => {
+    const cancel = (page) => {
         setEditingKey('');
+        setCurrentPage(page);
     };
 
     const columns = [
@@ -115,32 +143,36 @@ const UsersTable = () => {
             title: '#',
             dataIndex: 'key',
             rowScope: 'row',
-            render: (text, record, index) => <a>{record.key + 1}</a>,
+            // render: (text, record, index) => <a key={index}>{index + 1}</a>,
+            render: (text, record, index) => (
+                <a key={index}>{(currentPage - 1) * pageSize + index + 1}</a>
+              ),
+        
 
         },
         {
             key: '1',
-            title: 'First Name',
-            dataIndex: 'fname',
-            editable: true,
-            render: (text) => <a>{text}</a>,
-        },
-        {
-            key: '2',
-            title: 'Last Name',
-            dataIndex: 'lname',
-            editable: true,
-        },
-        {
-            key: '3',
             title: 'Username',
             dataIndex: 'username',
             editable: true,
         },
         {
-            key: '4',
+            key: '2',
             title: 'Email',
             dataIndex: 'email',
+            editable: true,
+        },
+        {
+            key: '3',
+            title: 'First Name',
+            dataIndex: 'firstname',
+            editable: true,
+            render: (text) => <a>{text}</a>,
+        },
+        {
+            key: '4',
+            title: 'Last Name',
+            dataIndex: 'lastname',
             editable: true,
         },
         {
@@ -151,33 +183,33 @@ const UsersTable = () => {
             render: (text, record, index) => (
                 <Space size="middle">
                     <button
-                        className={`btn btn-sm flex items-center gap-2 ${record.status == 1 ? 'btn-success' : 'btn-danger'}`}
-                        disabled={isSavingStatus[record.key]}
-                        aria-disabled={isSavingStatus[record.key]}
+                        className={`btn btn-sm flex items-center gap-2 ${record.is_active ? 'btn-success' : 'btn-danger'}`}
+                        disabled={isSavingStatus[record.id]}
+                        aria-disabled={isSavingStatus[record.id]}
                         onClick={
                             // setIsSavingStatus(true);
                             // setCurrentUser(record);
-                            ()=>toggleCurrentPersonStatus(text, record, index, record.status)
+                            ()=>toggleCurrentPersonStatus(text, record, index, record.is_active)
                           }
                           >
-                                {isSavingStatus[record.key] ? (
-                                    <>
-                                        <LoaderIcon
-                                            extraClass="text-white"
-                                            className="animate-spin mr-1"
-                                        />
-                                    </>
-                                ) : (
-                                    ''
-                                )}
-                                {record.status === 1 ? 'Active' : 'Inactive'}
+                            {isSavingStatus[record.id] ? (
+                                <>
+                                    <LoaderIcon
+                                        extraClass="text-white h-5 w-5"
+                                        className="animate-spin mr-1"
+                                    />
+                                </>
+                            ) : (
+                                ''
+                            )}
+                            {record.is_active ? 'Active' : 'Inactive'}
                     </button>
                 </Space>
             ),
         },
         {
             title: 'Action',
-            key: '5',
+            key: '6',
             render: (_, record) => {
                 const editable = isEditing(record);
                 return editable ? (
@@ -199,6 +231,7 @@ const UsersTable = () => {
                             <button 
                                 className="flex btn btn-info items-center gap-1 text-xs" 
                                 onClick={() => {
+                                    setIsEditingUser(true);
                                     setCurrentUser(record);
                                     onUserEditOpen();
                                   }}
@@ -258,6 +291,8 @@ const UsersTable = () => {
     const start = () => {
         setLoading(true);
         // ajax request after empty completing
+        fetchData();
+
         setTimeout(() => {
         setSelectedRowKeys([]);
         setLoading(false);
@@ -276,12 +311,12 @@ const UsersTable = () => {
     
     const hasSelected = selectedRowKeys.length > 0;
 
-    useEffect(()=>{
-        setTimeout(()=>{
-            setDataSource(dataSourceData);
-            setIsLoading(false);
-        }, 100);
-    }, [])
+    // useEffect(()=>{
+    //     setTimeout(()=>{
+    //         setDataSource(dataSourceData);
+    //         setIsLoading(false);
+    //     }, 100);
+    // }, [])
 
 
     // const toggleCurrentPersonStatus = (data) => {
@@ -290,7 +325,7 @@ const UsersTable = () => {
     // }
 
     const toggleCurrentPersonStatus = async(text, record, index, status) => {
-        let key = record.key
+        let key = record.id
         // key = "undefined";
         var msg = '';
         if (key == "undefined") {
@@ -313,11 +348,13 @@ const UsersTable = () => {
             });
             try {
                     
-                const updatedRecord = { ...record, status: record.status === 1 ? 0 : 1 };
+                const updatedRecord = { ...record, is_active: record.is_active ? 0 : 1 };
                 const updatedDataSource = dataSource.map(item => 
                     item.id === record.id ? updatedRecord : item
                 );
         
+                await axios.post(`${hostUrl}users/update-active-status/`+record?.id);
+
                 setDataSource(updatedDataSource);
         
                 setTimeout(() => {
@@ -325,7 +362,7 @@ const UsersTable = () => {
                         [key]: false
                     });
 
-                    msg = 'Successfully '+ (updatedRecord.status === 1 ? 'Activated' : 'Deactivated')  + '!!'
+                    msg = 'Successfully '+ (updatedRecord.is_active ? 'Activated' : 'Deactivated')  + '!!'
                     toast.success(msg, {
                         successOptions,
                         position: "top-right"
@@ -360,7 +397,7 @@ const UsersTable = () => {
 
     const deleteUser = (data) => {
         Swal.fire({
-            title: 'Are you sure?',
+            title: 'You\'re currently deleting' + ' ' + data.email,
             text: 'You won\'t be able to revert this!',
             icon: 'warning',
             showCancelButton: true,
@@ -369,35 +406,38 @@ const UsersTable = () => {
             confirmButtonText: 'Yes, delete it!',
             allowOutsideClick: () => !Swal.isLoading(), // Prevent clicking outside modal during loading
             showLoaderOnConfirm: true,
-            preConfirm: async (login) => {
-                const newData = dataSource.filter((item) => item.id !== data.id);
-                setDataSource(newData);
-                // try {
-                //   const githubUrl = `
-                //     https://api.github.com/users/${login}
-                //   `;
-                //   const response = await fetch(githubUrl);
-                //   if (!response.ok) {
-                //     return Swal.showValidationMessage(`
-                //       ${JSON.stringify(await response.json())}
-                //     `);
-                //   }
-                //   return response.json();
-                // } catch (error) {
-                //   Swal.showValidationMessage(`
-                //     Request failed: ${error}
-                //   `);
-                // }
-                },
+            preConfirm: async () => {
+                try {
+                    console.log(data, 'data')
+                  const response = await axios.delete(hostUrl + 'users/delete/'+ parseInt(data.id));
+                  if(response.data.success) {
+                    const newData = dataSource.filter((item) => item.id !== data.id);
+                    setDataSource(newData);
+                    Swal.fire(
+                      'Deleted!',
+                      'The User has been deleted.',
+                     'success'
+                    );
+                  } else{
+                    Swal.fire(
+                        'Error',
+                        'Delete Failed!',
+                        'error'
+                    );
+                  }
+                } catch (error) {
+                  toast.error('An error occurred while deleting')
+                }
+            },
         }).then((result) => {
             
-            if (result.isConfirmed) {
-                Swal.fire(
-                'Deleted!',
-                'The Role has been deleted.',
-                'success'
-                );
-            }
+            // if (result.isConfirmed) {
+            //     Swal.fire(
+            //     'Deleted!',
+            //     'The Role has been deleted.',
+            //     'success'
+            //     );
+            // }
             // hrBaseService.deleteResource(
             //     data?.id,
             //     function (resp) {
@@ -426,8 +466,8 @@ const UsersTable = () => {
             {isLoading ? 
             (
                 <div className='h-full flex items-center justify-center'>
-                    <LoaderIcon2
-                        extraClass="text-[#034343]"
+                    <LoaderIcon
+                        extraClass="text-[#034343] h-6 w-8"
                         className="animate-spin"
                     />
                 </div>
@@ -442,6 +482,15 @@ const UsersTable = () => {
                                 </Button>
                                 {hasSelected ? `Selected ${selectedRowKeys.length} items` : null}
                             </Flex>
+                            <Button className='text-[#008000]' 
+                                onClick={() => {
+                                    setIsEditingUser(false);
+                                    setCurrentUser(null);
+                                    onUserEditOpen();
+                                }}
+                                >
+                                Add User
+                            </Button>
                             {/* <Link href={'/admin/users/roles'} className="btn-primary">
                                 Roles
                             </Link> */}
@@ -459,14 +508,15 @@ const UsersTable = () => {
                             rowClassName="editable-row"
                             pagination={{
                                 // pageSize: 50,
-                                onChange: cancel,
+                                onChange: (page)=>cancel(page),
+                                pageSize: pageSize,
                             }}
                             />
                     </Flex>
                 </Form>
             )}
 
-            {currentUser ? (
+            {/* {currentUser ? ( */}
                 <EditUserModal
                     user={user}
                     isOpen={userEditIsOpen}
@@ -475,10 +525,14 @@ const UsersTable = () => {
                     currentUser={currentUser}
                     setDataSource={setDataSource}
                     setCurrentUser={setCurrentUser}
+                    isEditing={isEditingUser}
+                    setIsEditingUser={setIsEditingUser}
+                    start={start}
+                    roles={roles}
                 />
-            ) : (
+            {/* ) : (
                 ' '
-            )}
+            )} */}
         </>
     );
 };

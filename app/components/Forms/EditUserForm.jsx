@@ -8,13 +8,14 @@ import {
   ModalBody,
   ModalCloseButton,
 } from '@chakra-ui/react';
+import { Progress, useToast } from "@chakra-ui/react";
 import { useRouter } from 'next/navigation';
 import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
-import { _getUser, fetchProjectsById } from '../../lib/utilFunctions';
+import { _getUser, fetchProjectsById, getGeneratedPassword, hostUrl } from '../../lib/utilFunctions';
 import { LoaderIcon } from '../IconComponent';
 import { permissionLevelList } from '../../lib/constants';
-import { Check } from 'iconsax-react';
+import { Check, Danger, Eye, EyeSlash, Refresh } from 'iconsax-react';
 
 const EditUserForm = ({
   onClose,
@@ -22,18 +23,76 @@ const EditUserForm = ({
   currentUser,
   setDataSource,
   setCurrentUser,
+  isEditingUser,
+  setIsEditingUser,
+  start,
+  allRoles,
 }) => {
   const [user, setUser] = useState(null);
   const [showRoles, setShowRoles] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showCPassword, setShowCPassword] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  // const [defaultRole, setDefaultRole] = useState(null);
   const router = useRouter();
   const [inputs, setInputs] = useState({
-    fname: currentUser?.fname??'',
-    lname: currentUser?.lname??'',
+    fname: currentUser?.firstname??'',
+    lname: currentUser?.lastname??'',
     username: currentUser?.username??'',
     email: currentUser?.email??'',
-    roles: currentUser?.roles ?? [],
+    password: '',
+    cpassword: '',
+    roles: currentUser?.rolesIds ?? [],
+    defaultRole: currentUser?.user_default_role_id ?? null
   });
+
+  console.log(inputs, currentUser?.rolesIds)
+  const chakraToast = useToast();
+
+  const [generatedPassword, setGeneratedPassword] = useState('');
+
+  const generateRandomPassword = () => {
+    setIsGenerating(true)
+    // Define the characters to include in the password
+    let password = getGeneratedPassword();
+
+    // setGeneratedPassword(password);
+    setInputs((prevInputs) => ({
+      ...prevInputs,
+      password: password,
+      cpassword: password,
+    }));
+
+    chakraToast({
+      title: 'Generated Password Successfully',
+      description: "Success",  
+      status: "success",
+      duration: 2000,
+      position: "top-right",
+    });
+
+    setTimeout(()=>{
+      setIsGenerating(false);
+    }, 200)
+    
+  
+  };
+
+  // useEffect(() => {
+  //   if (currentUser) {
+  //     setInputs({
+  //       fname: currentUser.firstname ?? '',
+  //       lname: currentUser.lastname ?? '',
+  //       username: currentUser.username ?? '',
+  //       email: currentUser.email ?? '',
+  //       password: '',
+  //       cpassword: '',
+  //       roles: currentUser.rolesIds ?? [],
+  //       defaultRole: currentUser.user_default_role_id ?? null
+  //     });
+  //   }
+  // }, [currentUser]);
 
   console.log(currentUser, 'currentUser')
   // const [isLoading, setIsLoading] = useState(false);
@@ -73,12 +132,32 @@ const EditUserForm = ({
     });
   };
 
+  const handleSetDefaultRole = (roleId) => {
+    setInputs((prev) => ({
+      ...prev,
+      defaultRole: roleId, // Set the default role ID
+    }));
+  };
+
+  // const handleRoleChange = (roleId) => {
+  //   setInputs((prev) => {
+  //     const roles = prev.roles.includes(roleId)
+  //       ? prev.roles.filter((role) => role !== roleId)
+  //       : [...prev.roles, roleId];
+  //     return { ...prev, roles };
+  //   });
+  // };
+
   const handleRoleChange = (roleId) => {
+    // Toggle role in the inputs.roles array
     setInputs((prev) => {
-      const roles = prev.roles.includes(roleId)
-        ? prev.roles.filter((role) => role !== roleId)
-        : [...prev.roles, roleId];
-      return { ...prev, roles };
+      const isRoleSelected = prev.roles.includes(roleId);
+      return {
+        ...prev,
+        roles: isRoleSelected
+          ? prev.roles.filter((id) => id !== roleId) // Remove role if it's already selected
+          : [...prev.roles, roleId], // Add role if it's not selected
+      };
     });
   };
 
@@ -118,45 +197,119 @@ const EditUserForm = ({
     if (handleValidation()) {
       try {
         // console.log(user, inputs, 'its seeing it here');
-        // return
-        const { fname, lname, email, username, roles } = inputs;
+        // returnpermissionLevelList
+        const { fname, lname, email, username, roles, password, cpassword, defaultRole } = inputs;
 
         var payload = {
           fname,
           lname,
           email,
           username,
-          roles
+          roles,
+          password,
+          cpassword,
         }
 
-        const res = await axios.post(`${process.env.NEXT_PUBLIC_AUTH_URL}/users/update-user/${currentUser?.id}`, 
-          payload
-        );
-        // console.log(res.data, 'res.datadwfwfwfffffwefefef');
 
-        if (res.data.error) {
-          // console.log("errroooooorrrrrrrrr")
-          toast.error(res.data.message);
-        } else if (res.data.success) {
-          const updatedColumns = dataSource.map((column) => {
-            if (column.id === currentUser.id) {
-              return {
-                ...column,
-                ...payload,
-              };
-            }
-            return column;
-          });
+        if(currentUser){
 
-          setDataSource(updatedColumns);
-          // console.log(columns, title, description, updatedColumns, 'momo')
-          toast.success(res.data.message);
-          onClose();
+          payload.defaultRole = defaultRole;
+
+          const res = await axios.post(`${hostUrl}users/update-user/${currentUser?.id}`, 
+            payload
+          );
+          // console.log(res.data, 'res.datadwfwfwfffffwefefef');
+
+          if (res.data.error) {
+            // console.log("errroooooorrrrrrrrr")
+            chakraToast({
+              title: res.data.message,
+              description: "Error Occured",  
+              status: "error",
+              duration: 2000,
+              position: "top-right",
+            });
+            // toast.error(res.data.message);
+          } else if (res.data.success) {
+            start();
+            // const updatedColumns = dataSource.map((column) => {
+            //   if (column.id === currentUser.id) {
+            //     return {
+            //       ...column,
+            //       ...payload,
+            //     };
+            //   }
+            //   return column;
+            // });
+
+            // setDataSource(updatedColumns);
+            setIsEditingUser(false);
+            // console.log(columns, title, description, updatedColumns, 'momo')
+            // toast.success(res.data.message);
+            chakraToast({
+              title: res.data.message,
+              description: "Successfully Updated",
+              status: "success",
+              duration: 2000,
+              position: "top-right",
+            });
+            onClose();
+          }
+        } else{
+
+          console.log(payload)
+          // return
+          const res = await axios.post(`${hostUrl}users/add-user`, 
+            payload
+          );
+          // console.log(res.data, 'res.datadwfwfwfffffwefefef');
+
+          if (res.data.error) {
+            // console.log("errroooooorrrrrrrrr")
+            chakraToast({
+              title: res.data.message,
+              description: "Error Occured",  
+              status: "error",
+              duration: 2000,
+              position: "top-right",
+            });
+            // toast.error(res.data.message);
+          } else if (res.data.success) {
+            start();
+            // const updatedColumns = dataSource.map((column) => {
+            //   if (column.id === currentUser.id) {
+            //     return {
+            //       ...column,
+            //       ...payload,
+            //     };
+            //   }
+            //   return column;
+            // });
+
+            // setDataSource(updatedColumns);
+            // console.log(columns, title, description, updatedColumns, 'momo')
+            // toast.success(res.data.message);
+            chakraToast({
+              title: res.data.message,
+              description: "Successfully Created",
+              status: "success",
+              duration: 2000,
+              position: "top-right",
+            });
+            onClose();
+          }
         }
         setIsSaving(false);
       } catch (err) {
         console.log(err, 'err')
-        toast.error('An error occurred');
+        // toast.error('An error occurred');
+        chakraToast({
+          title: err?.response?.data?.message??'An Error Occurred',
+          description: "Error Occured",  
+          status: "error",
+          duration: 2000,
+          position: "top-right",
+        });
         setIsSaving(false);
       }
     }
@@ -165,6 +318,14 @@ const EditUserForm = ({
   const onCloseModal = () =>{
     onClose();
     setCurrentUser(null);
+  }
+
+  const showConfirmPassword = () =>{
+    setShowCPassword(!showCPassword)
+  }
+  
+  const showAPassword = () =>{
+    setShowPassword(!showPassword)
   }
 
   // console.log(status, 'status')
@@ -219,6 +380,7 @@ const EditUserForm = ({
                 name="username"
                 value={inputs.username}
                 onChange={handleChange}
+                readOnly={currentUser}
                 placeholder="Username"
                 className="border border-gray-400 focus:border-gray-500 h-10 focus:outline-0 bg-transparent rounded mb-3 px-2 w-full"
               />
@@ -238,28 +400,121 @@ const EditUserForm = ({
                 className="border border-gray-400 focus:border-gray-500 h-10 focus:outline-0 bg-transparent rounded mb-3 px-2 w-full"
               />
             </div>
+            <div className='w-full gap-2 items-center'>
+              {currentUser && 
+                (<div className="pb-1 rounded-lg mb-2">
+                    <div className="flex items-center w-full gap-1 text-red-500">
+                        <span>
+                            <Danger size={22} />
+                        </span>
+                        <p className="text-sm text-red-500">
+                            Please leave empty if not updating password.
+                        </p>
+                    </div>
+                </div>)
+              }
 
-            <div>
-                <div className='mb-2'>
-                  <h3 className='font-semibold text-base '>Roles To Assign</h3>
+              <div className='flex w-full gap-2 items-center'>
+                <div className=" flex flex-col gap-1 w-1/2">
+                  <label className="text-sm" htmlFor="password">
+                    Password
+                  </label>
+                  <div className=" relative rounded-full  items-center w-full">
+                    <button onClick={showAPassword} type="button" className="absolute inset-y-0 right-0 flex items-center h-full cursor-pointer focus:outline-none">
+                      <span className="text-[#BEBDBD] px-3">
+                        {showPassword ? <EyeSlash size={22}/> : <Eye size={22}/>}
+                      </span>
+                    </button>
+                    <input 
+                      type={showPassword ? "text" : "password"}
+                      className=" block min-w-full border border-gray-400 focus:border-gray-500 h-10  w-full  focus:outline-0 bg-transparent rounded px-2 pr-10 text-sm"
+                      name="password"
+                      id="password"
+                      required
+                      placeholder="Password"
+                      value={inputs.password}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  
                 </div>
 
-              <div className='min-h-0'>
-                  
-                  {permissionLevelList.map((level) => (
-                    <div key={level.id} className="mb-2">
-                      <label className="flex items-center gap-2 border py-3 px-3 rounded cursor-pointer hover:bg-[#F3F4F6] text-sm">
-                        <input
-                          type="checkbox"
-                          checked={inputs.roles.includes(level.id)}
-                          onChange={() => handleRoleChange(level.id)}
-                        />
-                        {level.title}
-                      </label>
-                    </div>
-                  ))}
+                <div className="flex flex-col gap-1 w-1/2">
+                  <label className="text-sm" htmlFor="cpassword">
+                    Confirm Password
+                  </label>
+
+                  <div className=" relative rounded-full  items-center w-full">
+                    <button onClick={showConfirmPassword} type="button" className="absolute inset-y-0 right-0 flex items-center h-full cursor-pointer focus:outline-none">
+                      <span className="text-[#BEBDBD] px-3">
+                        {showCPassword ? <EyeSlash size={22}/> : <Eye size={22}/>}
+                      </span>
+                    </button>
+
+                    <input 
+                      type={showCPassword ? "text" : "password"}
+                      className="block min-w-full border border-gray-400 focus:border-gray-500 h-10 w-full focus:outline-0 bg-transparent rounded px-2 pr-10 text-sm"
+                      name="cpassword"
+                      id="cpassword"
+                      required
+                      placeholder="Confirm Password"
+                      value={inputs.cpassword}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+                <div className='flex flex-col gap-1 '>
+                  <label className="text-sm" htmlFor="cpassword">
+                    &nbsp;
+                  </label>
+                  <button type='button' onClick={generateRandomPassword} className='bg-gray-600 h-10 w-10 px-2 rounded text-white flex items-center justify-center gap-2'>
+                    {isGenerating ? <LoaderIcon
+                        extraClass="text-white h-5 w-5"
+                        className="animate-spin "
+                      />: <Refresh size={16}/>
+
+                    }
+                  </button> 
+                </div>
+
               </div>
             </div>
+
+            {currentUser &&
+              <div className='mt-4'>
+                  <div className='mb-2'>
+                    <h3 className='font-semibold text-base '>Roles To Assign</h3>
+                  </div>
+
+                <div className='min-h-0'>
+                    
+                    {allRoles.map((level) => (
+                      <div key={level.id} className="mb-2">
+                        <div className="flex items-center justify-between gap-2 border px-3 rounded cursor-pointer hover:bg-[#F3F4F6] text-sm">
+                          <label className='flex items-center gap-2 w-full cursor-pointer py-3 '>
+                            <input
+                              type="checkbox"
+                              checked={inputs.roles.includes(parseInt(level.id))}
+                              onChange={() => handleRoleChange(parseInt(level.id))}
+                            />
+                            {level.name}
+                          </label>
+
+
+                          <input
+                            type="checkbox"
+                            checked={inputs.defaultRole === parseInt(level.id)}
+                            // checked={level.id === defaultRole?.id}
+                            onChange={() => handleSetDefaultRole(parseInt(level.id))}
+                            disabled={!inputs.roles.includes(parseInt(level.id))} // Disable if the role is not selected
+      
+                          />
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            }
           </form>
         </div>
       </ModalBody>

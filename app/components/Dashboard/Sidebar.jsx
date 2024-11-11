@@ -96,7 +96,7 @@ const Sidebar = ({ isOpen, toggleSidebar, userRole  }) => {
       submenu: [
         {
           label: 'Users',
-          href: '/admin/users/users',
+          href: '/admin/users',
           icon: <Category size={16} />,
           isDropdownMenu: false,
         },
