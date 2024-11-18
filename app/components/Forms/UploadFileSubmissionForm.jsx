@@ -311,7 +311,7 @@ const UploadFileSubmissionForm = ({
                 Saving Task...
                 <LoaderIcon
                   extraClass="text-white"
-                  className="animate-spin ml-1"
+                  className="animate-spin ml-1 "
                 />
               </>
             ) : (
