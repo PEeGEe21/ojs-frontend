@@ -176,6 +176,9 @@ export const issuesData = [
   }
 ];
 
+export const uploadTypeList = [
+
+]
 
 export const modules = {
   clipboard: {

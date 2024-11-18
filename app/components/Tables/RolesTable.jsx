@@ -67,7 +67,7 @@ const RolesTable = () => {
     const fetchData = async () => {
         try {
             setIsLoading(true);
-            const res = await fetch(hostUrl + 'users/roles');
+            const res = await fetch(hostUrl + 'roles');
             if (res.ok) {
                 const result = await res.json();
                 setDataSource(result.roles);
@@ -360,7 +360,7 @@ const RolesTable = () => {
                     item.id === record.id ? updatedRecord : item
                 );
         
-                await axios.post(`${hostUrl}users/roles/update-active-status/`+record?.id);
+                await axios.post(hostUrl + `roles/update-active-status/`+record?.id);
 
                 setDataSource(updatedDataSource);
         
@@ -607,14 +607,14 @@ const RolesTable = () => {
             showLoaderOnConfirm: true,
             preConfirm: async () => {
                 try {
-                    const response = await axios.delete(hostUrl + 'users/delete/roles/'+ parseInt(data.id));
+                    const response = await axios.delete(hostUrl + 'roles/delete/'+ parseInt(data.id));
                     if(response.data.success) {
                         const newData = dataSource.filter((item) => item.id !== data.id);
                         setDataSource(newData);
                         Swal.fire(
-                        'Deleted!',
-                        'The Role has been deleted.',
-                        'success'
+                            'Deleted!',
+                            'The Role has been deleted.',
+                            'success'
                         );
                     } else{
                         Swal.fire(

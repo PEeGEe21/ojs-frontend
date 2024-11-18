@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { LoaderIcon, LoaderIcon2 } from '../IconComponent';
 import Swal from 'sweetalert2';
 import { useDisclosure } from '@chakra-ui/react';
@@ -25,9 +25,11 @@ import { Edit, Trash } from 'iconsax-react';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import { hostUrl, shortenTitle } from '../../lib/utilFunctions';
+import { JournalContext } from '../../utils/journalContext';
 
   
 const SectionsTable = ({user, users, data, fetchData, isLoading}) => {
+    const { selectedJournal } = useContext(JournalContext);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [loading, setLoading] = useState(false);
     const [dataSource, setDataSource] = useState([]);
@@ -144,7 +146,7 @@ const SectionsTable = ({user, users, data, fetchData, isLoading}) => {
             showLoaderOnConfirm: true,
             preConfirm: async () => {
                 try {
-                    const response = await axios.delete(hostUrl + 'sections/delete/'+ parseInt(data.id));
+                    const response = await axios.delete(hostUrl + 'journals/sections/delete/'+ parseInt(data.id));
                     if(response.data.success) {
                         const newData = dataSource.filter((item) => item.id !== data.id);
                         setDataSource(newData);

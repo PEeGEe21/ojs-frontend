@@ -98,17 +98,17 @@ const AddIssueForm = ({
           }
 
           if(fileName !== '')
-            payload.fileName = fileName;
+            payload.cover_image_name = fileName;
 
-          console.log(payload, 'payload')
-          return;
+          // console.log(payload, 'payload')
+          // return;
 
-          const res = await axios.post(`${hostUrl}users/add-user`, 
+          const res = await axios.post(hostUrl + `issues/add-issue`, 
             payload
           );
           if (res.data.error) {
             chakraToast({
-              title: res.data.message,
+              title: res?.data?.message,
               description: "Error Occured",  
               status: "error",
               duration: 2000,
@@ -117,7 +117,7 @@ const AddIssueForm = ({
           } else if (res.data.success) {
             start();
             chakraToast({
-              title: res.data.message,
+              title: res?.data?.message,
               description: "Successfully Created",
               status: "success",
               duration: 2000,

@@ -62,7 +62,7 @@ const AddRoleForm = ({ onClose, dataSource, start }) => {
           description,
         };
 
-        const res = await axios.post(hostUrl + 'users/roles/add-role',
+        const res = await axios.post(hostUrl + 'roles/add-role',
           payload
         );
         if (res.data.error) {

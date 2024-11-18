@@ -68,7 +68,7 @@ const EditRoleForm = ({
       try {
         const { name, description } = inputs;
 
-        const res = await axios.post(hostUrl + `users/roles/update-role/${currentRole?.id}`, {
+        const res = await axios.post(hostUrl + `roles/update-role/${currentRole?.id}`, {
           name,
           description,
         });

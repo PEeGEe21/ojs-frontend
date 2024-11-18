@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useContext } from 'react';
 import "react-quill-new/dist/quill.snow.css";
 import {
   Modal,
@@ -19,6 +19,7 @@ import dynamic from "next/dynamic";
 import { modules } from '../../../lib/constants';
 import { getFullName } from '../../../utils/common';
 import { hostUrl } from '../../../lib/utilFunctions';
+import { JournalContext } from '../../../utils/journalContext';
 
 
 const EditSectionForm = ({
@@ -31,6 +32,7 @@ const EditSectionForm = ({
   users,
   loggedInUser
 }) => {
+  const { selectedJournal } = useContext(JournalContext);
   const [user, setUser] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const router = useRouter();
@@ -64,7 +66,7 @@ const EditSectionForm = ({
       toast.error('Title is required');
       setIsSaving(false);
       return false;
-    } else if (abbreviation === '' || !editor) {
+    } else if (abbreviation === '') {
       toast.error('Editor is required');
       setIsSaving(false);
       return false;
@@ -89,17 +91,18 @@ const EditSectionForm = ({
           return false;
         }
 
-        const { title, abbreviation } = inputs;
+        const { title, abbreviation, word_count, identification_text } = inputs;
 
         var payload = {
           title,
           abbreviation,
           policy,
           word_count: parseInt(word_count),
-          identification_text
+          identification_text,
+          journalId: parseInt(selectedJournal?.id)
         };
 
-        const res = await axios.post(hostUrl + `journals/update-section/${currentSection?.id}`, payload);
+        const res = await axios.post(hostUrl + `journals/sections/update-section/${currentSection?.id}`, payload);
 
         if (res.data.error) {
           chakraToast({

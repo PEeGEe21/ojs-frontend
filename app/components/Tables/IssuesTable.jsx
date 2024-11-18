@@ -58,11 +58,11 @@ const IssuesTable = () => {
     const fetchData = async () => {
         try {
             setIsLoading(true);
-            const res = await fetch(hostUrl + 'users');
+            const res = await fetch(hostUrl + 'issues');
             if (res.ok) {
                 const result = await res.json();
-                setDataSource(issuesData);
-                // setDataSource(result.users);
+                // setDataSource(issuesData);
+                setDataSource(result.issues);
                 setRoles(result.roles);
             }
         } catch (err) {
@@ -163,7 +163,7 @@ const IssuesTable = () => {
 
     const deleteIssue = (data) => {
         Swal.fire({
-            title: 'You\'re currently deleting' + ' ' + data.email,
+            title: 'Are you sure?',
             text: 'You won\'t be able to revert this!',
             icon: 'warning',
             showCancelButton: true,
@@ -174,13 +174,13 @@ const IssuesTable = () => {
             showLoaderOnConfirm: true,
             preConfirm: async () => {
                 try {
-                  const response = await axios.delete(hostUrl + 'users/delete/'+ parseInt(data.id));
+                  const response = await axios.delete(hostUrl + 'issues/delete/'+ parseInt(data.id));
                   if(response.data.success) {
                     const newData = dataSource.filter((item) => item.id !== data.id);
                     setDataSource(newData);
                     Swal.fire(
                       'Deleted!',
-                      'The User has been deleted.',
+                      'The Issue has been deleted.',
                      'success'
                     );
                   } else{

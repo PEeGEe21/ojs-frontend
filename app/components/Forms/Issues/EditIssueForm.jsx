@@ -106,7 +106,7 @@ const EditIssueForm = ({
 
           if(currentIssue){
 
-            const res = await axios.post(`${hostUrl}users/update-user/${currentIssue?.id}`, 
+            const res = await axios.post(hostUrl + `issues/update/${currentIssue?.id}`, 
               payload
             );
 
@@ -119,18 +119,6 @@ const EditIssueForm = ({
                 position: "top-right",
               });
             } else if (res.data.success) {
-              // const updatedColumns = dataSource.map((column) => {
-              //   if (column.id === currentUser.id) {
-              //     return {
-              //       ...column,
-              //       ...payload,
-              //     };
-              //   }
-              //   return column;
-              // });
-
-              // setDataSource(updatedColumns);
-              setIsEditingUser(false);
               chakraToast({
                 title: res.data.message,
                 description: "Successfully Updated",
@@ -140,29 +128,6 @@ const EditIssueForm = ({
               });
               start();
 
-              onClose();
-            }
-          } else{
-            const res = await axios.post(`${hostUrl}users/add-user`, 
-              payload
-            );
-            if (res.data.error) {
-              chakraToast({
-                title: res.data.message,
-                description: "Error Occured",  
-                status: "error",
-                duration: 2000,
-                position: "top-right",
-              });
-            } else if (res.data.success) {
-              start();
-              chakraToast({
-                title: res.data.message,
-                description: "Successfully Created",
-                status: "success",
-                duration: 2000,
-                position: "top-right",
-              });
               onClose();
             }
           }

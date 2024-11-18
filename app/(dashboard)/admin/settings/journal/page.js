@@ -1,12 +1,13 @@
 "use client"
 import { Progress, Tab, TabIndicator, TabList, TabPanel, TabPanels, Tabs, useToast } from "@chakra-ui/react";
-import React, {useEffect, useState} from 'react'
+import React, {useContext, useEffect, useState} from 'react'
 import { SearchNormal1 } from "iconsax-react";
 import JournalsMainTable from '../../../../components/Tables/JournalsMainTable'
 import SectionsTable from '../../../../components/Tables/SectionsTable'
 import Link from "next/link";
 import { hostUrl } from "../../../../lib/utilFunctions";
 import { SectionsData } from "../../../../lib/constants";
+import { JournalContext } from "../../../../utils/journalContext";
 
 const Settings = () => {
   const [viewType, setViewType] = useState(0);
@@ -16,6 +17,9 @@ const Settings = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [dataSource, setDataSource] = useState([]);
   const [sectionsDataSource, setSectionsDataSource] = useState([]);
+
+  const { selectedJournal } = useContext(JournalContext);
+
 
   useEffect(() =>{
     const getUser = async ()=>{
@@ -67,12 +71,14 @@ const Settings = () => {
   const fetchSectionsData = async () => {
       try {
           setIsLoading(true);
-          const res = await fetch(hostUrl + 'journals/all');
-          if (res.ok) {
-              const result = await res.json();
-              setSectionsDataSource(SectionsData);
-              // setSectionsDataSource(result.data);
-              console.log(sectionsDataSource, 'found')
+          if(selectedJournal){
+            const res = await fetch(hostUrl + 'journals/sections/' + selectedJournal?.id);
+            if (res.ok) {
+                const result = await res.json();
+                // setSectionsDataSource(SectionsData);
+                setSectionsDataSource(result.sections);
+                console.log(sectionsDataSource, 'found')
+            }
           }
       } catch (err) {
           console.error('Error fetching data:', err?.message);
@@ -152,6 +158,7 @@ const Settings = () => {
                           data={sectionsDataSource} 
                           fetchData={fetchSectionsData} 
                           isLoading={isLoading}
+                          selectedJournal={selectedJournal}
                         />
                       </div>
                     </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useContext } from 'react';
 import "react-quill-new/dist/quill.snow.css";
 import {
   Modal,
@@ -18,8 +18,10 @@ import { _getUser, hostUrl } from '../../../lib/utilFunctions';
 import { LoaderIcon } from '../../IconComponent';
 import { modules, permissionLevelList, styles } from '../../../lib/constants';
 import { getFullName } from '../../../utils/common';
+import { JournalContext } from '../../../utils/journalContext';
 
 const AddSectionForm = ({ onClose, dataSource, start, users, loggedInUser }) => {
+  const { selectedJournal } = useContext(JournalContext);
   const [user, setUser] = useState(null);
   const router = useRouter();
   const [inputs, setInputs] = useState({
@@ -55,7 +57,7 @@ const AddSectionForm = ({ onClose, dataSource, start, users, loggedInUser }) => 
       toast.error('Title is required');
       setIsSaving(false);
       return false;
-    } else if (abbreviation === '' || !editor) {
+    } else if (abbreviation === '') {
       toast.error('Editor is required');
       setIsSaving(false);
       return false;
@@ -78,8 +80,9 @@ const AddSectionForm = ({ onClose, dataSource, start, users, loggedInUser }) => 
           setIsSaving(false);
           return false;
         }
+        // console.log('jwnm')
           
-        const { title, abbreviation } = inputs;
+        const { title, abbreviation, word_count, identification_text } = inputs;
 
         // return
         var payload = {
@@ -87,10 +90,12 @@ const AddSectionForm = ({ onClose, dataSource, start, users, loggedInUser }) => 
           abbreviation,
           policy,
           word_count: parseInt(word_count),
-          identification_text
+          identification_text,
+          journalId: parseInt(selectedJournal?.id)
         };
+      console.log(payload)
 
-        const res = await axios.post(hostUrl + 'sections',
+        const res = await axios.post(hostUrl + 'journals/sections',
           payload
         );
         if (res.data.error) {
@@ -114,6 +119,7 @@ const AddSectionForm = ({ onClose, dataSource, start, users, loggedInUser }) => 
         }
         setIsSaving(false);
       } catch (err) {
+        console.log(err)
         toast.error(err?.response?.data?.message ?? err?.response?.data?.error ?? 'An Error Occured');
         setIsSaving(false);
       }
