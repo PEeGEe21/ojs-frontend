@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react'
 import Navbar from '../components/HomePage/Navbar';
 import Footer from '../components/HomePage/Footer';
+import { handleRedirect } from '../lib/utilFunctions';
 
 const JournalLayout = ({children}) => {
     const [user, setUser] = useState(null)    

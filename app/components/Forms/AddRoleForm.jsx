@@ -7,53 +7,27 @@ import {
   ModalFooter,
   ModalBody,
   ModalCloseButton,
+  useToast,
 } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
 import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
-// import { host } from '../routes';
-import { _getUser } from '../../lib/utilFunctions';
+import { _getUser, hostUrl } from '../../lib/utilFunctions';
 import { LoaderIcon } from '../IconComponent';
 import { permissionLevelList } from '../../lib/constants';
 
-const AddRoleForm = ({ onClose, dataSource }) => {
+const AddRoleForm = ({ onClose, dataSource, start }) => {
   const [user, setUser] = useState(null);
   const router = useRouter();
   const [inputs, setInputs] = useState({
-    title: '',
+    name: '',
     description: '',
-    permissionLevel: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState(null);
+  const chakraToast = useToast();
 
-  // useEffect(() => {
-  //   const fetchUser = async () => {
-  //     const token = localStorage.getItem('accessProjectUserToken');
-  //     const isLoggedIn = token !== null;
-
-  //     if (!isLoggedIn) {
-  //       router.push('/auth/login');
-  //       return;
-  //     }
-
-  //     try {
-  //       const user = await _getUser();
-  //       if (!user) {
-  //         throw new Error('Failed to fetch user');
-  //       }
-  //       setUser(user);
-  //     } catch (error) {
-  //       console.error(error);
-  //       router.push('/auth/login');
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
-
-  //   fetchUser();
-  // }, [router, _getUser]);
 
   const handleChange = (e) => {
     setInputs((prev) => {
@@ -62,21 +36,13 @@ const AddRoleForm = ({ onClose, dataSource }) => {
   };
 
   const handleValidation = () => {
-    const { title, description, permissionLevel } = inputs;
-    if (title === '' && description === '' && permissionLevel === '') {
+    const { name, description, permissionLevel } = inputs;
+    if (name === '' && description === '') {
       toast.error('Fill in all required fields');
       setIsSaving(false);
       return false;
-    } else if (title === '') {
+    } else if (name === '') {
       toast.error('Title is required');
-      setIsSaving(false);
-      return false;
-    } else if (description === '') {
-      toast.error('Description is required');
-      setIsSaving(false);
-      return false;
-    } else if (permissionLevel === '') {
-      toast.error('Permission Level is required');
       setIsSaving(false);
       return false;
     }
@@ -86,46 +52,41 @@ const AddRoleForm = ({ onClose, dataSource }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSaving(true);
-    // console.log(host, inputs, 'hereee');
-    // return
 
     if (handleValidation()) {
       try {
-        console.log(user, inputs, 'its seeing it here');
-        // return
-        const { title, description, permissionLevel } = inputs;
+        const { name, description } = inputs;
 
-        const payload = {
-          title,
+        var payload = {
+          name,
           description,
         };
 
-        if (currentstatus) {
-          payload.permissionLevel = permissionLevel?.id;
-        }
-
-        const res = await axios.post(`${process.env.NEXT_PUBLIC_AUTH_URL}/role/new-role`, {
+        const res = await axios.post(hostUrl + 'users/roles/add-role',
           payload
-        });
-        console.log(res.data, 'res.datadwfwfwfffffwefefef');
-
+        );
         if (res.data.error) {
-          // console.log("errroooooorrrrrrrrr")
-          toast.error(res.data.message);
+          chakraToast({
+            title: res.data.message,
+            description: "Error Occured",  
+            status: "error",
+            duration: 2000,
+            position: "top-right",
+          });
         } else if (res.data.success) {
-          dataSource.push({
-              id: res.data.data.id,
-              title: res.data.data.title,
-              description: res.data.data.description,
-              tasks: [],
-          })
-          toast.success(res.data.message);
+          chakraToast({
+            title: res.data.message,
+            description: "Successfully Updated",
+            status: "success",
+            duration: 2000,
+            position: "top-right",
+          });
+          start()
           onClose();
         }
         setIsSaving(false);
       } catch (err) {
-        console.log(err, 'err')
-        toast.error(err?.response.data?.message);
+        toast.error(err?.response?.data?.message ?? 'An Error Occured');
         setIsSaving(false);
       }
     }
@@ -138,7 +99,7 @@ const AddRoleForm = ({ onClose, dataSource }) => {
       <ModalBody>
         <div>
           <form>
-            <div className="mb-4 flex flex-col gap-1">
+            {/* <div className="mb-4 flex flex-col gap-1">
               <label className="text-sm" htmlFor="permissionLevel">
                 Permission Level
               </label>
@@ -156,7 +117,7 @@ const AddRoleForm = ({ onClose, dataSource }) => {
                   </option>
                 ))}
               </select>
-            </div>
+            </div> */}
             
             <div className="mb-4 flex flex-col gap-1">
               <label className="text-sm" htmlFor="title">
@@ -164,7 +125,7 @@ const AddRoleForm = ({ onClose, dataSource }) => {
               </label>
               <input
                 type="text"
-                name="title"
+                name="name"
                 onChange={handleChange}
                 placeholder="Title"
                 className="border border-gray-400 focus:border-gray-500 h-10 focus:outline-0 bg-transparent rounded mb-3 px-2 w-full"

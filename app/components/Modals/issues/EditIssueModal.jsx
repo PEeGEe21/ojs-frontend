@@ -7,32 +7,35 @@ import {
   ModalBody,
   ModalCloseButton,
 } from '@chakra-ui/react';
-import EditRoleForm from '../../Forms/EditRoleForm';
+import EditIssueForm from '../../Forms/Issues/EditIssueForm';
+// import EditRoleForm from '../../Forms/EditRoleForm';
 
-const EditRoleModal = ({
+const EditIssueModal = ({
   user,
   isOpen,
   onClose,
   dataSource,
-  currentRole,
+  currentIssue,
   setDataSource,
-  setCurrentRole,
-  start
+  setCurrentIssue,
+  start,
+  roles
 }) => {
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose} isCentered size="lg">
+      <Modal isOpen={isOpen} onClose={onClose} isCentered size="2xl">
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Edit {currentRole?.title} Role</ModalHeader>
+          <ModalHeader>Edit {currentIssue?.title}</ModalHeader>
           <ModalCloseButton />
-          <EditRoleForm
+          <EditIssueForm
             onClose={onClose}
             dataSource={dataSource}
-            currentRole={currentRole}
+            currentIssue={currentIssue}
             setDataSource={setDataSource}
-            setCurrentRole={setCurrentRole}
+            setCurrentIssue={setCurrentIssue}
             start={start}
+            roles={roles}
           />
         </ModalContent>
       </Modal>
@@ -40,4 +43,4 @@ const EditRoleModal = ({
   );
 };
 
-export default EditRoleModal;
+export default EditIssueModal;

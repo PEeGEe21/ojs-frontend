@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react';
-import { LoaderIcon2 } from '../IconComponent';
+import { LoaderIcon, LoaderIcon2 } from '../IconComponent';
 import Swal from 'sweetalert2';
 import { useDisclosure } from '@chakra-ui/react';
 import {successOptions} from '../../lib/constants';
@@ -24,6 +24,8 @@ import EditRoleModal from '../../components/Modals/roles/EditRoleModal';
 import { permissionLevelList } from '../../lib/constants';
 import { Edit, Trash } from 'iconsax-react';
 import toast from 'react-hot-toast';
+import { hostUrl } from '../../lib/utilFunctions';
+import axios from 'axios';
 
 
 const dataSourceData = Array.from({
@@ -45,7 +47,10 @@ const RolesTable = () => {
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [loading, setLoading] = useState(false);
     const [dataSource, setDataSource] = useState([]);
+    const [statusState, setStatusState] = useState('');
     const [currentRole, setCurrentRole] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [isSavingStatus, setIsSavingStatus] = useState({});
 
     const {
         isOpen: roleIsOpen,
@@ -57,6 +62,28 @@ const RolesTable = () => {
         onOpen: onRoleEditOpen,
         onClose: onRoleEditClose,
     } = useDisclosure();
+    const pageSize = 10; 
+
+    const fetchData = async () => {
+        try {
+            setIsLoading(true);
+            const res = await fetch(hostUrl + 'users/roles');
+            if (res.ok) {
+                const result = await res.json();
+                setDataSource(result.roles);
+                // setRoles(result.roles);
+            }
+        } catch (err) {
+            console.error('Error fetching data:', err?.message);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
 
 
     const user = null;
@@ -65,87 +92,59 @@ const RolesTable = () => {
         {
             title: '#',
             dataIndex: 'key',
-            rowScope: 'row',
-            render: (text, record, index) => <a>{record.key + 1}</a>,
-    
+            // rowScope: 'row',
+            key:'index',
+            render: (text, record, index) => (
+                <a>{(currentPage - 1) * pageSize + index + 1}</a>
+            ),
         },
         {
             key: '1',
             title: 'Role Name',
-            dataIndex: 'title',
+            dataIndex: 'name',
             render: (text) => <a>{text}</a>,
         },
         {
             key: '2',
-            title: 'Permission Level',
-            dataIndex: 'permission_level',
-            render: (text) => <a>{text.title}</a>,
+            title: 'Description',
+            dataIndex: 'description',
+            render: (text) => <a>{text}</a>,
         },
         {
             key: '3',
-            title: 'Submission',
-            dataIndex: 'submission',
-            render: (_, record) => (
-                <div className='w-full text-center flex items-center justify-center'>
-                    <input 
-                        type='checkbox' 
-                        checked={record.submission === 1}
-                        onChange={() => handleSubmissionChange(record, record.submission)}
-                        className='h-4 w-4 cursor-pointer'
-                    />
-                </div>
-            ),
-        },
-        {
-            key: '4',
-            title: 'Review',
-            dataIndex: 'review',
-            render: (_, record) => (
-                <div className='w-full text-center flex items-center justify-center'>
-                    <input 
-                        type='checkbox' 
-                        checked={record.review === 1}
-                        onChange={() => handleReviewChange(record, record.review)}
-                        className='h-4 w-4 cursor-pointer'
-                    />
-                </div>
-            ),
-        },
-        {
-            key: '5',
-            title: 'CopyEditing',
-            dataIndex: 'copyediting',
-            render: (_, record) => (
-                <div className='w-full text-center flex items-center justify-center'>
-                    <input 
-                        type='checkbox' 
-                        checked={record.copyediting === 1}
-                        onChange={() => handleCopyEditingChange(record, record.copyediting)}
-                        className='h-4 w-4 cursor-pointer'
-                    />
-                </div>
-
-            ),
-        },
-        {
-            key: '6',
-            title: 'Production',
-            dataIndex: 'production',
-            render: (_, record) => (
-                <div className='w-full text-center flex items-center justify-center'>
-                    <input 
-                        type='checkbox' 
-                        checked={record.production === 1}
-                        onChange={() => handleProductionChange(record, record.production)}
-                        className='h-4 w-4 cursor-pointer'
-                    />
-                </div>
-                
+            title: 'Status',
+            dataIndex: 'status',
+            editable: false,
+            render: (text, record, index) => (
+                <Space size="middle">
+                    <button
+                        className={`btn btn-sm flex items-center gap-2 ${record.is_active ? 'btn-success' : 'btn-danger'}`}
+                        disabled={isSavingStatus[record.id]}
+                        aria-disabled={isSavingStatus[record.id]}
+                        onClick={
+                            // setIsSavingStatus(true);
+                            // setCurrentUser(record);
+                            ()=>toggleCurrentRoleStatus(text, record, index, record.is_active)
+                          }
+                          >
+                            {isSavingStatus[record.id] ? (
+                                <>
+                                    <LoaderIcon
+                                        extraClass="text-white h-5 w-5"
+                                        className="animate-spin mr-1"
+                                    />
+                                </>
+                            ) : (
+                                record.is_active ? 'Active' : 'Inactive'
+                            )}
+                            
+                    </button>
+                </Space>
             ),
         },
         {
             title: 'Action',
-            key: '7',
+            key: '4',
             render: (_, record) => (
             <Space size="middle">
                 <button 
@@ -163,38 +162,232 @@ const RolesTable = () => {
                 </button>
             </Space>
             ),
-            // render: (_, record) => {
-            //     const editable = isEditing(record);
-            //     return editable ? (
-            //         <span>
-            //             <Typography.Link
-            //             onClick={() => save(record.key)}
-            //             style={{
-            //                 marginInlineEnd: 8,
-            //             }}
-            //             >
-            //             Save
-            //             </Typography.Link>
-            //             <Popconfirm title="Sure to cancel?" onConfirm={cancel}>
-            //             <a>Cancel</a>
-            //             </Popconfirm>
-            //         </span>
-            //         ) : (
-            //             <Space size="middle">
-            //                 <a disabled={editingKey !== ''} onClick={() => edit(record)}>
-            //                     Edit
-            //                 </a>
-            //                 <a>Disable {record.name}</a>
-            //                 <a>Delete</a>
-            //             </Space>
-            //         )
-            
-            //   },
         },
     ];
+    // const columns = [
+    //     {
+    //         title: '#',
+    //         dataIndex: 'key',
+    //         rowScope: 'row',
+    //         key:'index',
+    //         render: (text, record, index) => (
+    //             <a key={index}>{(currentPage - 1) * pageSize + index + 1}</a>
+    //         ),
+    
+    //     },
+    //     {
+    //         key: '1',
+    //         title: 'Role Name',
+    //         dataIndex: 'name',
+    //         render: (text) => <a>{text}</a>,
+    //     },
+    //     {
+    //         key: '2',
+    //         title: 'Description',
+    //         dataIndex: 'description',
+    //         render: (text) => <a>{text}</a>,
+    //     },
+    //     // {
+    //     //     key: '3',
+    //     //     title: 'Submission',
+    //     //     dataIndex: 'submission',
+    //     //     render: (_, record) => (
+    //     //         <div className='w-full text-center flex items-center justify-center'>
+    //     //             <input 
+    //     //                 type='checkbox' 
+    //     //                 checked={record.submission === 1}
+    //     //                 onChange={() => handleSubmissionChange(record, record.submission)}
+    //     //                 className='h-4 w-4 cursor-pointer'
+    //     //             />
+    //     //         </div>
+    //     //     ),
+    //     // },
+    //     // {
+    //     //     key: '4',
+    //     //     title: 'Review',
+    //     //     dataIndex: 'review',
+    //     //     render: (_, record) => (
+    //     //         <div className='w-full text-center flex items-center justify-center'>
+    //     //             <input 
+    //     //                 type='checkbox' 
+    //     //                 checked={record.review === 1}
+    //     //                 onChange={() => handleReviewChange(record, record.review)}
+    //     //                 className='h-4 w-4 cursor-pointer'
+    //     //             />
+    //     //         </div>
+    //     //     ),
+    //     // },
+    //     // {
+    //     //     key: '5',
+    //     //     title: 'CopyEditing',
+    //     //     dataIndex: 'copyediting',
+    //     //     render: (_, record) => (
+    //     //         <div className='w-full text-center flex items-center justify-center'>
+    //     //             <input 
+    //     //                 type='checkbox' 
+    //     //                 checked={record.copyediting === 1}
+    //     //                 onChange={() => handleCopyEditingChange(record, record.copyediting)}
+    //     //                 className='h-4 w-4 cursor-pointer'
+    //     //             />
+    //     //         </div>
+
+    //     //     ),
+    //     // },
+    //     // {
+    //     //     key: '6',
+    //     //     title: 'Production',
+    //     //     dataIndex: 'production',
+    //     //     render: (_, record) => (
+    //     //         <div className='w-full text-center flex items-center justify-center'>
+    //     //             <input 
+    //     //                 type='checkbox' 
+    //     //                 checked={record.production === 1}
+    //     //                 onChange={() => handleProductionChange(record, record.production)}
+    //     //                 className='h-4 w-4 cursor-pointer'
+    //     //             />
+    //     //         </div>
+                
+    //     //     ),
+    //     // },
+    //     {
+    //         key: '3',
+    //         title: 'Status',
+    //         dataIndex: 'status',
+    //         editable: false,
+    //         render: (text, record, index) => (
+    //             <Space size="middle">
+    //                 <button
+    //                     className={`btn btn-sm flex items-center gap-2 ${record.is_active ? 'btn-success' : 'btn-danger'}`}
+    //                     disabled={isSavingStatus[record.id]}
+    //                     aria-disabled={isSavingStatus[record.id]}
+    //                     onClick={
+    //                         // setIsSavingStatus(true);
+    //                         // setCurrentUser(record);
+    //                         ()=>toggleCurrentPersonStatus(text, record, index, record.is_active)
+    //                       }
+    //                       >
+    //                         {isSavingStatus[record.id] ? (
+    //                             <>
+    //                                 <LoaderIcon
+    //                                     extraClass="text-white h-5 w-5"
+    //                                     className="animate-spin mr-1"
+    //                                 />
+    //                             </>
+    //                         ) : (
+    //                             ''
+    //                         )}
+    //                         {record.is_active ? 'Active' : 'Inactive'}
+    //                 </button>
+    //             </Space>
+    //         ),
+    //     },
+    //     {
+    //         title: 'Action',
+    //         key: '4',
+    //         render: (_, record) => (
+    //         <Space size="middle">
+    //             <button 
+    //                 className="flex btn btn-info items-center gap-1 text-xs" 
+    //                 onClick={() => {
+    //                     setCurrentRole(record);
+    //                     onRoleEditOpen();
+    //                   }}>
+    //                 <Edit size={14}/> Edit
+    //             </button>
+    //             <button 
+    //                 className="flex btn btn-red items-center gap-1 text-xs" 
+    //                 onClick={(e)=>deleteRole(record)}>
+    //                     <Trash size={12}/> Delete
+    //             </button>
+    //         </Space>
+    //         ),
+    //         // render: (_, record) => {
+    //         //     const editable = isEditing(record);
+    //         //     return editable ? (
+    //         //         <span>
+    //         //             <Typography.Link
+    //         //             onClick={() => save(record.key)}
+    //         //             style={{
+    //         //                 marginInlineEnd: 8,
+    //         //             }}
+    //         //             >
+    //         //             Save
+    //         //             </Typography.Link>
+    //         //             <Popconfirm title="Sure to cancel?" onConfirm={cancel}>
+    //         //             <a>Cancel</a>
+    //         //             </Popconfirm>
+    //         //         </span>
+    //         //         ) : (
+    //         //             <Space size="middle">
+    //         //                 <a disabled={editingKey !== ''} onClick={() => edit(record)}>
+    //         //                     Edit
+    //         //                 </a>
+    //         //                 <a>Disable {record.name}</a>
+    //         //                 <a>Delete</a>
+    //         //             </Space>
+    //         //         )
+            
+    //         //   },
+    //     },
+    // ];
+
+    const toggleCurrentRoleStatus = async(text, record, index, status) => {
+        let key = record.id
+        // key = "undefined";
+        var msg = '';
+        if (key == "undefined") {
+            msg = "Record key is not defined:";
+            console.error(msg);
+            toast.error(msg, {
+                position: "top-right"
+            });
+            return;
+        }
+
+        setCurrentRole(record);
+        setStatusState(key);
+        
+        
+        if(currentRole){
+            
+            setIsSavingStatus({
+                [key]: true
+            });
+            try {
+                    
+                const updatedRecord = { ...record, is_active: record.is_active ? 0 : 1 };
+                const updatedDataSource = dataSource.map(item => 
+                    item.id === record.id ? updatedRecord : item
+                );
+        
+                await axios.post(`${hostUrl}users/roles/update-active-status/`+record?.id);
+
+                setDataSource(updatedDataSource);
+        
+                setTimeout(() => {
+                    setIsSavingStatus({
+                        [key]: false
+                    });
+
+                    msg = 'Successfully '+ (updatedRecord.is_active ? 'Activated' : 'Deactivated')  + '!!'
+                    toast.success(msg, {
+                        successOptions,
+                        position: "top-right"
+                    });
+                }, 500);
+        
+            } catch (err) {
+                setIsSavingStatus({
+                    [key]: false
+                });
+                toast.error(err.message);
+            }
+        }
+    };
 
     const start = () => {
         setLoading(true);
+        fetchData();
         // ajax request after empty completing
         setTimeout(() => {
             setSelectedRowKeys([]);
@@ -202,19 +395,24 @@ const RolesTable = () => {
         }, 1000);
     };
 
+    const cancel = (page) => {
+        setEditingKey('');
+        setCurrentPage(page);
+    };
+
     const onSelectChange = (newSelectedRowKeys) => {
         console.log('selectedRowKeys changed: ', newSelectedRowKeys);
         setSelectedRowKeys(newSelectedRowKeys);
     };
 
-    useEffect(()=>{
-        setTimeout(()=>{
-            setDataSource(dataSourceData);
-            setIsLoading(false);
-        }, 100);
-        console.log(dataSource, 'dataSource')
+    // useEffect(()=>{
+    //     setTimeout(()=>{
+    //         setDataSource(dataSourceData);
+    //         setIsLoading(false);
+    //     }, 100);
+    //     console.log(dataSource, 'dataSource')
 
-      }, [dataSource])
+    //   }, [dataSource])
     
 
     const handleSubmissionChange = async(record, status) => {
@@ -407,55 +605,37 @@ const RolesTable = () => {
             confirmButtonText: 'Yes, delete it!',
             allowOutsideClick: () => !Swal.isLoading(), // Prevent clicking outside modal during loading
             showLoaderOnConfirm: true,
-            preConfirm: async (login) => {
-                const newData = dataSource.filter((item) => item.id !== data.id);
-                setDataSource(newData);
-                // try {
-                //   const githubUrl = `
-                //     https://api.github.com/users/${login}
-                //   `;
-                //   const response = await fetch(githubUrl);
-                //   if (!response.ok) {
-                //     return Swal.showValidationMessage(`
-                //       ${JSON.stringify(await response.json())}
-                //     `);
-                //   }
-                //   return response.json();
-                // } catch (error) {
-                //   Swal.showValidationMessage(`
-                //     Request failed: ${error}
-                //   `);
-                // }
-                },
+            preConfirm: async () => {
+                try {
+                    const response = await axios.delete(hostUrl + 'users/delete/roles/'+ parseInt(data.id));
+                    if(response.data.success) {
+                        const newData = dataSource.filter((item) => item.id !== data.id);
+                        setDataSource(newData);
+                        Swal.fire(
+                        'Deleted!',
+                        'The Role has been deleted.',
+                        'success'
+                        );
+                    } else{
+                        Swal.fire(
+                            'Error',
+                            'Delete Failed!',
+                            'error'
+                        );
+                    }
+                } catch (error) {
+                    toast.error('An error occurred while deleting')
+                }
+            },
         }).then((result) => {
             
-            if (result.isConfirmed) {
-                Swal.fire(
-                'Deleted!',
-                'The Role has been deleted.',
-                'success'
-                );
-            }
-            // hrBaseService.deleteResource(
-            //     data?.id,
-            //     function (resp) {
-            //       var id = data?.id;
-            //     //   var index = lodash.findLastIndex($scope.model.resources, [
-            //     //     'id',
-            //     //     id,
-            //     //   ]);
-            //     //   if (index != -1) $scope.model.resources.splice(index, 1);
-
-            //       if (resp.data.success) Swal(resp.data.success);
-            //       else Swal('Delete successfully');
-            //     },
-            //     function (resp) {
-            //         Swal({
-            //         type: 'error',
-            //         title: 'Delete Failed!',
-            //       });
-            //     }
-            //   );
+            // if (result.isConfirmed) {
+            //     Swal.fire(
+            //     'Deleted!',
+            //     'The Role has been deleted.',
+            //     'success'
+            //     );
+            // }
         });
     };
       
@@ -465,7 +645,7 @@ const RolesTable = () => {
             (
                 <div className='h-full flex items-center justify-center'>
                     <LoaderIcon2
-                        extraClass="text-[#034343]"
+                        extraClass="text-[#034343] h-6 w-8"
                         className="animate-spin"
                     />
                 </div>
@@ -479,7 +659,7 @@ const RolesTable = () => {
                         <Button type="primary" onClick={start} loading={loading}>
                             Reload
                         </Button>
-                        <Button type="default" onClick={onRoleOpen} loading={loading}>
+                        <Button type="default" onClick={onRoleOpen}>
                             Add Role
                         </Button>
                     </Flex>
@@ -490,10 +670,12 @@ const RolesTable = () => {
                         bordered
                         rowClassName="editable-row"
                         pagination={{
-                            pageSize: 25,
-                            // onChange: cancel,
+                            // pageSize: 50,
+                            onChange: (page)=>cancel(page),
+                            pageSize: pageSize,
                         }}
-                        />
+                        rowKey="id"
+                    />
                 </Flex>
             )}
 
@@ -502,6 +684,7 @@ const RolesTable = () => {
                     isOpen={roleIsOpen}
                     onClose={onRoleClose}
                     dataSource={dataSource}
+                    start={start}
                 />
             {/* ) : (
                 ''
@@ -517,6 +700,7 @@ const RolesTable = () => {
                 currentRole={currentRole}
                 setDataSource={setDataSource}
                 setCurrentRole={setCurrentRole}
+                start={start}
             />
         ) : (
             ' '

@@ -88,9 +88,94 @@ export const demoSubmissions = [
   }
 ]
 
-export const uploadTypeList = [
+export const SectionsData = [
+  {
+    title: 'Journal of Advanced Research',
+    abbreviation: 'JAR',
+    identification_text: 'JAR-2024',
+    word_count: '1500',
+    policy: 'Open Access',
+    editors: 'Udeh Praise, PG'
+  },
+  {
+    title: 'Scientific Review Monthly',
+    abbreviation: 'SRM',
+    identification_text: 'SRM-2024',
+    word_count: '2000',
+    policy: 'Subscription-Based',
+    editors: 'Udeh Praise, PG'
+  },
+  {
+    title: 'Tech Innovations Journal',
+    abbreviation: 'TIJ',
+    identification_text: 'TIJ-2024',
+    word_count: '1200',
+    policy: 'Peer-Reviewed',
+    editors: 'Udeh Praise, PG'
 
-]
+  },
+  {
+    title: 'Global Health Bulletin',
+    abbreviation: 'GHB',
+    identification_text: 'GHB-2024',
+    word_count: '1800',
+    policy: 'Public Access',
+    editors: 'Udeh Praise, PG'
+  },
+  {
+    title: 'Economic Insights Weekly',
+    abbreviation: 'EIW',
+    identification_text: 'EIW-2024',
+    word_count: '2500',
+    policy: 'Subscription-Based',
+    editors: 'Udeh Praise, PG'
+  }
+];
+
+
+export const issuesData = [
+  {
+    volume: '10',
+    number: '1',
+    year: '2024',
+    title: 'Advances in Artificial Intelligence',
+    url_path: '/journals/ai-advances-2024',
+    description: 'A comprehensive review of the latest trends in AI research and applications.'
+  },
+  {
+    volume: '5',
+    number: '3',
+    year: '2023',
+    title: 'Renewable Energy Perspectives',
+    url_path: '/journals/renewable-energy-2023',
+    description: 'Insights and case studies on the global push towards renewable energy solutions.'
+  },
+  {
+    volume: '15',
+    number: '2',
+    year: '2022',
+    title: 'Medical Innovations',
+    url_path: '/journals/medical-innovations-2022',
+    description: 'Exploring breakthrough treatments and technologies in the medical field.'
+  },
+  {
+    volume: '8',
+    number: '4',
+    year: '2024',
+    title: 'Economic Growth Analysis',
+    url_path: '/journals/economic-growth-2024',
+    description: 'Analyzing global economic trends and their implications for the future.'
+  },
+  {
+    volume: '3',
+    number: '6',
+    year: '2021',
+    title: 'Space Exploration Milestones',
+    url_path: '/journals/space-exploration-2021',
+    description: 'A detailed account of recent achievements in space exploration and technology.'
+  }
+];
+
 
 export const modules = {
   clipboard: {

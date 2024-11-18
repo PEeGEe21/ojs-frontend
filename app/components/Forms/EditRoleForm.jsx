@@ -7,13 +7,13 @@ import {
   ModalFooter,
   ModalBody,
   ModalCloseButton,
+  useToast,
 } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
 import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
-import { _getUser, fetchProjectsById } from '../../lib/utilFunctions';
+import { _getUser, fetchProjectsById, hostUrl } from '../../lib/utilFunctions';
 import { LoaderIcon } from '../IconComponent';
-import { permissionLevelList } from '../../lib/constants';
 import { Check } from 'iconsax-react';
 
 const EditRoleForm = ({
@@ -22,48 +22,22 @@ const EditRoleForm = ({
   currentRole,
   setDataSource,
   setCurrentRole,
+  start,
 }) => {
   const [user, setUser] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const router = useRouter();
   const [inputs, setInputs] = useState({
-    title: currentRole?.title,
-    description: currentRole?.description,
-    permissionLevel: currentRole?.permission_level?.id,
+    name: currentRole?.name ?? '',
+    description: currentRole?.description ?? '',
   });
+  const chakraToast = useToast();
 
-  console.log(currentRole, 'currentRole')
   // const [isLoading, setIsLoading] = useState(false);
   // const [isSaving, setIsSaving] = useState(false);
   // const [error, setError] = useState(null);
 
-  // useEffect(() => {
-  //   const fetchUser = async () => {
-  //     const token = localStorage.getItem('accessProjectUserToken');
-  //     const isLoggedIn = token !== null;
-
-  //     if (!isLoggedIn) {
-  //       router.push('/auth/login');
-  //       return;
-  //     }
-
-  //     try {
-  //       const user = await _getUser();
-  //       if (!user) {
-  //         throw new Error('Failed to fetch user');
-  //       }
-  //       setUser(user);
-  //     } catch (error) {
-  //       console.error(error);
-  //       router.push('/auth/login');
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
-
-  //   fetchUser();
-  // }, [router, _getUser]);
-
+  
   const handleChange = (e) => {
     setInputs((prev) => {
       return { ...prev, [e.target.name]: e.target.value };
@@ -71,22 +45,13 @@ const EditRoleForm = ({
   };
 
   const handleValidation = () => {
-    const { title, description, permissionLevel } = inputs;
-    console.log(inputs, 'jjj')
-    if (title === '' && description === '' && permissionLevel === '') {
+    const { name, description } = inputs;
+    if (name === '' && description === '') {
       toast.error('Fill in all required fields');
       setIsSaving(false);
       return false;
-    } else if (title === '') {
+    } else if (name === '') {
       toast.error('Title is required');
-      setIsSaving(false);
-      return false;
-    } else if (description === '') {
-      toast.error('Description is required');
-      setIsSaving(false);
-      return false;
-    } else if (!permissionLevel || permissionLevel === '') {
-      toast.error('Permission Level is required');
       setIsSaving(false);
       return false;
     }
@@ -101,41 +66,36 @@ const EditRoleForm = ({
 
     if (handleValidation()) {
       try {
-        // console.log(user, inputs, 'its seeing it here');
-        // return
-        const { title, description, permissionLevel } = inputs;
+        const { name, description } = inputs;
 
-        const res = await axios.post(`${process.env.NEXT_PUBLIC_AUTH_URL}/roles/update-role/${currentRole?.id}`, {
-          title,
+        const res = await axios.post(hostUrl + `users/roles/update-role/${currentRole?.id}`, {
+          name,
           description,
-          permissionLevel,
         });
-        // console.log(res.data, 'res.datadwfwfwfffffwefefef');
 
         if (res.data.error) {
-          // console.log("errroooooorrrrrrrrr")
-          toast.error(res.data.message);
-        } else if (res.data.success) {
-          const updatedColumns = dataSource.map((column) => {
-            if (column.id === currentRole.id) {
-              return {
-                ...column,
-                title,
-                description,
-              };
-            }
-            return column;
+          chakraToast({
+            title: res.data.message,
+            description: "Error Occured",  
+            status: "error",
+            duration: 2000,
+            position: "top-right",
           });
-
-          setDataSource(updatedColumns);
-          // console.log(columns, title, description, updatedColumns, 'momo')
-          toast.success(res.data.message);
+        } else if (res.data.success) {
+          chakraToast({
+            title: res.data.message,
+            description: "Successfully Updated",
+            status: "success",
+            duration: 2000,
+            position: "top-right",
+          });
+          start();
           onClose();
         }
         setIsSaving(false);
       } catch (err) {
         console.log(err, 'err')
-        toast.error(err?.response.data?.message);
+        toast.error(err?.response?.data?.message ?? 'An Error Occured');
         setIsSaving(false);
       }
     }
@@ -145,13 +105,13 @@ const EditRoleForm = ({
     onClose();
     setCurrentRole(null);
   }
-  // console.log(status, 'status')
+
   return (
     <>
       <ModalBody>
         <div>
           <form>
-            <div className="mb-4 flex flex-col gap-1">
+            {/* <div className="mb-4 flex flex-col gap-1">
               <label className="text-sm" htmlFor="status">
                 Permission Level
               </label>
@@ -170,16 +130,16 @@ const EditRoleForm = ({
                   </option>
                 ))}
               </select>
-            </div>
+            </div> */}
 
             <div className="mb-4 flex flex-col gap-1">
-              <label className="text-sm" htmlFor="title">
+              <label className="text-sm" htmlFor="name">
                 Title
               </label>
               <input
                 type="text"
-                name="title"
-                value={inputs.title}
+                name="name"
+                value={inputs.name}
                 onChange={handleChange}
                 placeholder="Title"
                 className="border border-gray-400 focus:border-gray-500 h-10 focus:outline-0 bg-transparent rounded mb-3 px-2 w-full"

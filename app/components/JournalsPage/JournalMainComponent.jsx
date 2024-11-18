@@ -9,6 +9,7 @@ import Image from 'next/image';
 import { LoaderIcon } from '../IconComponent';
 import { blurDataUrl } from '../../lib/constants';
 import Footer from '../HomePage/Footer';
+import { getFullName } from '../../utils/common';
 
 
 const JournalMainComponent = () => {
@@ -107,7 +108,8 @@ const JournalMainComponent = () => {
 
                                                 <div className="py-4 mb-4 flex flex-col gap-2 px-5 text-center">
                                                     <span className=" text-gray-900 text-lg mb-2 font-semibold">{journal.name}</span>
-                                                    <span className="text-gray-700 leading-none text-sm mb-2 ">Editor: Udeh Praise</span>
+                                                    {/* <span className="text-gray-700 leading-none text-sm mb-2 ">Editor: Udeh Praise</span> */}
+                                                    <span className="text-gray-700 leading-none text-sm mb-2">Editor: <b className='capitalize'>{getFullName(journal?.editor)}</b></span>
                                                     <span className="text-gray-700 leading-none text-sm mb-2 ">
                                                             Affiliation: University of Nigeria, Nsukka, Nigeria.
                                                     </span>

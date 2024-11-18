@@ -47,17 +47,15 @@ const EditUserForm = ({
     defaultRole: currentUser?.user_default_role_id ?? null
   });
 
-  console.log(inputs, currentUser?.rolesIds)
+  // console.log(inputs, currentUser?.rolesIds)
   const chakraToast = useToast();
 
   const [generatedPassword, setGeneratedPassword] = useState('');
 
   const generateRandomPassword = () => {
     setIsGenerating(true)
-    // Define the characters to include in the password
     let password = getGeneratedPassword();
 
-    // setGeneratedPassword(password);
     setInputs((prevInputs) => ({
       ...prevInputs,
       password: password,
@@ -75,26 +73,8 @@ const EditUserForm = ({
     setTimeout(()=>{
       setIsGenerating(false);
     }, 200)
-    
-  
   };
 
-  // useEffect(() => {
-  //   if (currentUser) {
-  //     setInputs({
-  //       fname: currentUser.firstname ?? '',
-  //       lname: currentUser.lastname ?? '',
-  //       username: currentUser.username ?? '',
-  //       email: currentUser.email ?? '',
-  //       password: '',
-  //       cpassword: '',
-  //       roles: currentUser.rolesIds ?? [],
-  //       defaultRole: currentUser.user_default_role_id ?? null
-  //     });
-  //   }
-  // }, [currentUser]);
-
-  console.log(currentUser, 'currentUser')
   // const [isLoading, setIsLoading] = useState(false);
   // const [isSaving, setIsSaving] = useState(false);
   // const [error, setError] = useState(null);
@@ -155,15 +135,14 @@ const EditUserForm = ({
       return {
         ...prev,
         roles: isRoleSelected
-          ? prev.roles.filter((id) => id !== roleId) // Remove role if it's already selected
-          : [...prev.roles, roleId], // Add role if it's not selected
+          ? prev.roles.filter((id) => id !== roleId)
+          : [...prev.roles, roleId],
       };
     });
   };
 
   const handleValidation = () => {
     const { fname, lname, username, email, roles } = inputs;
-    console.log(inputs, 'jjj')
     if (fname === '' && lname === '' && username === '' && email === '') {
       toast.error('Fill in all required fields');
       setIsSaving(false);
@@ -196,8 +175,6 @@ const EditUserForm = ({
 
     if (handleValidation()) {
       try {
-        // console.log(user, inputs, 'its seeing it here');
-        // returnpermissionLevelList
         const { fname, lname, email, username, roles, password, cpassword, defaultRole } = inputs;
 
         var payload = {
@@ -210,7 +187,6 @@ const EditUserForm = ({
           cpassword,
         }
 
-
         if(currentUser){
 
           payload.defaultRole = defaultRole;
@@ -218,10 +194,8 @@ const EditUserForm = ({
           const res = await axios.post(`${hostUrl}users/update-user/${currentUser?.id}`, 
             payload
           );
-          // console.log(res.data, 'res.datadwfwfwfffffwefefef');
 
           if (res.data.error) {
-            // console.log("errroooooorrrrrrrrr")
             chakraToast({
               title: res.data.message,
               description: "Error Occured",  
@@ -229,9 +203,7 @@ const EditUserForm = ({
               duration: 2000,
               position: "top-right",
             });
-            // toast.error(res.data.message);
           } else if (res.data.success) {
-            start();
             // const updatedColumns = dataSource.map((column) => {
             //   if (column.id === currentUser.id) {
             //     return {
@@ -244,8 +216,6 @@ const EditUserForm = ({
 
             // setDataSource(updatedColumns);
             setIsEditingUser(false);
-            // console.log(columns, title, description, updatedColumns, 'momo')
-            // toast.success(res.data.message);
             chakraToast({
               title: res.data.message,
               description: "Successfully Updated",
@@ -253,19 +223,15 @@ const EditUserForm = ({
               duration: 2000,
               position: "top-right",
             });
+            start();
+
             onClose();
           }
         } else{
-
-          console.log(payload)
-          // return
           const res = await axios.post(`${hostUrl}users/add-user`, 
             payload
           );
-          // console.log(res.data, 'res.datadwfwfwfffffwefefef');
-
           if (res.data.error) {
-            // console.log("errroooooorrrrrrrrr")
             chakraToast({
               title: res.data.message,
               description: "Error Occured",  
@@ -273,22 +239,8 @@ const EditUserForm = ({
               duration: 2000,
               position: "top-right",
             });
-            // toast.error(res.data.message);
           } else if (res.data.success) {
             start();
-            // const updatedColumns = dataSource.map((column) => {
-            //   if (column.id === currentUser.id) {
-            //     return {
-            //       ...column,
-            //       ...payload,
-            //     };
-            //   }
-            //   return column;
-            // });
-
-            // setDataSource(updatedColumns);
-            // console.log(columns, title, description, updatedColumns, 'momo')
-            // toast.success(res.data.message);
             chakraToast({
               title: res.data.message,
               description: "Successfully Created",
@@ -301,8 +253,6 @@ const EditUserForm = ({
         }
         setIsSaving(false);
       } catch (err) {
-        console.log(err, 'err')
-        // toast.error('An error occurred');
         chakraToast({
           title: err?.response?.data?.message??'An Error Occurred',
           description: "Error Occured",  

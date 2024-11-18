@@ -47,11 +47,14 @@ const Sidebar = ({ isOpen, toggleSidebar, userRole  }) => {
 
 
   const showDropdown = (index) => {
-    if (activeDropdowns.includes(index)) {
-      setActiveDropdowns(activeDropdowns.filter((i) => i !== index));
-    } else {
-      setActiveDropdowns([...activeDropdowns, index]);
-    }
+    setActiveDropdowns((prevDropdowns) => {
+      if (prevDropdowns.includes(index)) {
+        return prevDropdowns.filter((i) => i !== index);
+      } else {
+        return [...prevDropdowns, index];
+      }
+    });  
+    
   };
 
   const handleClickOpen = () => {
@@ -62,6 +65,12 @@ const Sidebar = ({ isOpen, toggleSidebar, userRole  }) => {
     {
       label: 'Submissions',
       href: '/admin/submissions',
+      icon: <Category size={16} />,
+      isDropdownMenu: false,
+    },
+    {
+      label: 'Issues',
+      href: '/admin/issues',
       icon: <Category size={16} />,
       isDropdownMenu: false,
     },
@@ -119,8 +128,8 @@ const Sidebar = ({ isOpen, toggleSidebar, userRole  }) => {
       isDropdownMenu: true,
       submenu: [
         {
-          label: 'Website',
-          href: '/admin/settings/website',
+          label: 'Journals',
+          href: '/admin/settings/journal',
           icon: <Category size={16} />,
           isDropdownMenu: false,
         }
@@ -278,9 +287,7 @@ const Sidebar = ({ isOpen, toggleSidebar, userRole  }) => {
                             <Link href={submenuItem.href}
                               key={submenuItem.label}
                               className={`menu-item w-full font-thin ${
-                                pathname === submenuItem.href ||
-                                pathname.startsWith(`${submenuItem.href}/`)
-                                  ? 'bg-[#034343] text-[#fff]'
+                                pathname === submenuItem.href ? 'bg-[#034343] text-[#fff]'
                                   : 'text-white '
                               } flex items-center px-5 transition-colors duration-200 ease-in hover:bg-[#034343]  hover:text-[#fff] justify-between text-sm hover:border-[#008080] text-left h-12`}
                             >
@@ -304,7 +311,8 @@ const Sidebar = ({ isOpen, toggleSidebar, userRole  }) => {
                       <div
                         className={`menu-item w-full font-thin ${
                           pathname == menuItem.href ||
-                          pathname.startsWith(`${menuItem.href}/`)
+                          pathname.startsWith(`${menuItem.href}/
+                            `)
                             ? 'bg-[#034343] text-[#fff]'
                             : 'text-white '
                         }  flex items-center  px-5 transition-colors duration-200 ease-in hover:text-[#fff] justify-between text-sm hover:border-[#008080] hover:bg-[#034343]  text-left h-12 ${

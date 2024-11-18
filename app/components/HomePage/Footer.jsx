@@ -80,7 +80,7 @@ const Footer = () => {
                     </div>
                 </div>
             </div>
-            <div className="bottom-footer py-[12px] bg-[#008080] text-white">
+            <div className="bottom-footer py-[12px] bg-[#062F2F] text-white">
                 <p className="text-center text-white ">&copy;{currentYear} - O.J.S</p>
             </div>
         </footer>

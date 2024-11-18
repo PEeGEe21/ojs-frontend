@@ -187,9 +187,10 @@ export function getGeneratedPassword(){
   return password;
 }
 
-export function shortenTitle(title) {
+export function shortenTitle(title, number = 20) {
   // console.log(title?.length)
-  if (title?.length < 20) {
+  console.log(title)
+  if (title?.length < number) {
     // If the address is too short to be shortened, return it as is
     return title;
   }

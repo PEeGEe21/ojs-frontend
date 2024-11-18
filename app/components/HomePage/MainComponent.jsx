@@ -10,6 +10,7 @@ import { handleRedirect, hostUrl } from '../../lib/utilFunctions'
 import { ArrowRight, ArrowRight2, ArrowRight3 } from 'iconsax-react'
 import { LoaderIcon } from '../IconComponent'
 import { blurDataUrl } from '../../lib/constants'
+import { getFullName } from '../../utils/common'
 
 
 const MainComponent = () => {
@@ -94,7 +95,7 @@ const MainComponent = () => {
                             ):( 
                                 <Link 
                                     href={'/articles'} 
-                                    className="bg-[#008080] border border-[#008080] text-[#fff] px-6 py-2 text-base rounded-lg flex items-center gap-2 min-h-[48px]">
+                                    className="bg-[#008080] hover:bg-[#062F2F] border border-[#062F2F] text-[#fff] px-6 py-2 text-base rounded-lg flex items-center gap-2 min-h-[48px]">
                                         View Articles  <span><ArrowRight size={15}/></span>
                                 </Link>
                             )
@@ -141,7 +142,7 @@ const MainComponent = () => {
                                         
                                                 <div className="py-4 mb-4 flex flex-col gap-2 px-5 text-center">
                                                     <span className="text-gray-900 text-lg mb-2 font-semibold">{journal.name}</span>
-                                                    <span className="text-gray-700 leading-none text-sm mb-2">Editor: Udeh Praise</span>
+                                                    <span className="text-gray-700 leading-none text-sm mb-2">Editor: <b className='capitalize'>{getFullName(journal?.editor)}</b></span>
                                                     <span className="text-gray-700 leading-none text-sm mb-2">
                                                         Affiliation: University of Nigeria, Nsukka, Nigeria.
                                                     </span>

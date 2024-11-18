@@ -142,11 +142,12 @@ const UsersTable = () => {
         {
             title: '#',
             dataIndex: 'key',
-            rowScope: 'row',
             // render: (text, record, index) => <a key={index}>{index + 1}</a>,
+            // rowScope: 'row',
+            key:'index',
             render: (text, record, index) => (
-                <a key={index}>{(currentPage - 1) * pageSize + index + 1}</a>
-              ),
+                <a>{(currentPage - 1) * pageSize + index + 1}</a>
+            ),
         
 
         },
@@ -200,9 +201,8 @@ const UsersTable = () => {
                                     />
                                 </>
                             ) : (
-                                ''
+                                record.is_active ? 'Active' : 'Inactive'
                             )}
-                            {record.is_active ? 'Active' : 'Inactive'}
                     </button>
                 </Space>
             ),
@@ -268,7 +268,6 @@ const UsersTable = () => {
             setEditingKey('');
         }
         } catch (errInfo) {
-        console.log('Validate Failed:', errInfo);
         }
     };
 
@@ -300,7 +299,6 @@ const UsersTable = () => {
     };
 
     const onSelectChange = (newSelectedRowKeys) => {
-        console.log('selectedRowKeys changed: ', newSelectedRowKeys);
         setSelectedRowKeys(newSelectedRowKeys);
     };
 
@@ -383,7 +381,6 @@ const UsersTable = () => {
             //   }
         
             } catch (err) {
-                console.log(err, 'err');
                 setIsSavingStatus({
                     [key]: false
                 });
@@ -408,7 +405,6 @@ const UsersTable = () => {
             showLoaderOnConfirm: true,
             preConfirm: async () => {
                 try {
-                    console.log(data, 'data')
                   const response = await axios.delete(hostUrl + 'users/delete/'+ parseInt(data.id));
                   if(response.data.success) {
                     const newData = dataSource.filter((item) => item.id !== data.id);
@@ -438,26 +434,6 @@ const UsersTable = () => {
             //     'success'
             //     );
             // }
-            // hrBaseService.deleteResource(
-            //     data?.id,
-            //     function (resp) {
-            //       var id = data?.id;
-            //     //   var index = lodash.findLastIndex($scope.model.resources, [
-            //     //     'id',
-            //     //     id,
-            //     //   ]);
-            //     //   if (index != -1) $scope.model.resources.splice(index, 1);
-
-            //       if (resp.data.success) Swal(resp.data.success);
-            //       else Swal('Delete successfully');
-            //     },
-            //     function (resp) {
-            //         Swal({
-            //         type: 'error',
-            //         title: 'Delete Failed!',
-            //       });
-            //     }
-            //   );
         });
     };
 
@@ -511,7 +487,8 @@ const UsersTable = () => {
                                 onChange: (page)=>cancel(page),
                                 pageSize: pageSize,
                             }}
-                            />
+                            rowKey="id"
+                        />
                     </Flex>
                 </Form>
             )}
