@@ -29,7 +29,6 @@ import { JournalContext } from '../../utils/journalContext';
 
   
 const JournalsMainTable = ({user, users, data, fetchData, isLoading}) => {
-    console.log(user, users, data, isLoading)
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [loading, setLoading] = useState(false);
     const [dataSource, setDataSource] = useState([]);
@@ -236,6 +235,7 @@ const JournalsMainTable = ({user, users, data, fetchData, isLoading}) => {
                             'The Journal has been deleted.',
                             'success'
                         );
+                        fetchJournals();
                     } else{
                         Swal.fire(
                             'Error',

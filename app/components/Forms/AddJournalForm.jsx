@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useContext } from 'react';
 import "react-quill-new/dist/quill.snow.css";
 import {
   Modal,
@@ -18,6 +18,7 @@ import { _getUser, hostUrl } from '../../lib/utilFunctions';
 import { LoaderIcon } from '../IconComponent';
 import { modules, permissionLevelList, styles } from '../../lib/constants';
 import { getFullName } from '../../utils/common';
+import { JournalContext } from '../../utils/journalContext';
 
 const AddJournalForm = ({ onClose, dataSource, start, users, loggedInUser }) => {
   const [user, setUser] = useState(null);
@@ -30,6 +31,7 @@ const AddJournalForm = ({ onClose, dataSource, start, users, loggedInUser }) => 
     slug: '',
     file_url: '',
   });
+  const { fetchJournals } = useContext(JournalContext);
   const [fileName, setFileName] = useState("");
   const [note, setNote] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -117,7 +119,8 @@ const AddJournalForm = ({ onClose, dataSource, start, users, loggedInUser }) => 
             duration: 2000,
             position: "top-right",
           });
-          start()
+          start();
+          fetchJournals();
           onClose();
         }
         setIsSaving(false);
