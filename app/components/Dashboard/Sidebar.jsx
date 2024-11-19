@@ -24,17 +24,12 @@ import { Category } from 'react-iconly';
 // import { LogoutIcon } from './IconComponent';
 import './nav.css';
 
-const Sidebar = ({ isOpen, toggleSidebar, userRole  }) => {
+const Sidebar = ({ isOpen, toggleSidebar, userRole, user_roles=[]}) => {
   const pathname = usePathname();
-
-  // const [activeDropdown, setActiveDropdown] = useState(null);
   const [activeDropdowns, setActiveDropdowns] = useState([]);
   const [currentMenu, setCurrentMenu] = useState([]);
   const [isDropdown, setIsDropdown] = useState(true);
 
-  const wrapperClasses = classNames(
-    'h-full sidebar pb-4 bg-[#0F1B2D] lg:flex justify-between shadow-sm scrollbar-change flex-col overflow-y-auto overflow-x-hidden border-r-[0.5px] border-[#F3F4F6] hidden w-48 z-50'
-  );
 
 
   // const showDropdown = (index) => {
@@ -57,22 +52,27 @@ const Sidebar = ({ isOpen, toggleSidebar, userRole  }) => {
     
   };
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
   const menuLinks = [
     {
       label: 'Submissions',
       href: '/admin/submissions',
       icon: <Category size={16} />,
       isDropdownMenu: false,
+      rolesPermitted: [1]
+    },
+    {
+      label: 'Submissions',
+      href: '/author/submissions',
+      icon: <Category size={16} />,
+      isDropdownMenu: false,
+      rolesPermitted: [3]
     },
     {
       label: 'Issues',
       href: '/admin/issues',
       icon: <Category size={16} />,
       isDropdownMenu: false,
+      rolesPermitted: [1]
     },
     {
       label: 'Analytics',
@@ -84,6 +84,7 @@ const Sidebar = ({ isOpen, toggleSidebar, userRole  }) => {
       icon: <Briefcase size={16} />,
       projects: true,
       isDropdownMenu: false,
+      rolesPermitted: [1],
       submenu: [
         {
           label: 'Project 1',
@@ -102,6 +103,7 @@ const Sidebar = ({ isOpen, toggleSidebar, userRole  }) => {
         e.preventDefault();
         showDropdown(index);
       },
+      rolesPermitted: [1],
       submenu: [
         {
           label: 'Users',
@@ -126,6 +128,7 @@ const Sidebar = ({ isOpen, toggleSidebar, userRole  }) => {
       },
       icon: <Setting3 size={16} />,
       isDropdownMenu: true,
+      rolesPermitted: [1],
       submenu: [
         {
           label: 'Journals',
@@ -135,16 +138,6 @@ const Sidebar = ({ isOpen, toggleSidebar, userRole  }) => {
         }
       ]
     },
-    // {
-    //   label: 'Sign Out',
-    //   href: '#',
-    //   action: (e) => {
-    //     e.preventDefault();
-    //     signOut();
-    //   },
-    //   icon: <LogoutCurve size={16} />,
-    //   isDropdownMenu: false,
-    // },
   ];
 
   const authorMenuLinks = [
@@ -153,34 +146,29 @@ const Sidebar = ({ isOpen, toggleSidebar, userRole  }) => {
       href: '/author/submissions',
       icon: <Category size={16} />,
       isDropdownMenu: false,
-    },
-    // {
-    //   label: 'Sign Out',
-    //   href: '#',
-    //   action: (e) => {
-    //     e.preventDefault();
-    //     signOut();
-    //   },
-    //   icon: <LogoutCurve size={16} />,
-    //   isDropdownMenu: false,
-    // },
+    }
   ];
 
-  useEffect(() => {
-    // const menuToShow = () =>{
-      switch (userRole){
-        case 'admin':
-          setCurrentMenu(menuLinks);
-          break;
-        case 'author':
-          setCurrentMenu(authorMenuLinks);
-          break;
-        default:
-          setCurrentMenu(menuLinks);
-          break;
-      }
-    // }
-  }, [userRole]);
+
+  const filteredMenuLinks = menuLinks.filter(menuItem => 
+    menuItem.rolesPermitted.some(role => user_roles.includes(role))
+  );
+
+  // useEffect(() => {
+  //   // const menuToShow = () =>{
+  //     switch (userRole){
+  //       case 'admin':
+  //         setCurrentMenu(menuLinks);
+  //         break;
+  //       case 'author':
+  //         setCurrentMenu(authorMenuLinks);
+  //         break;
+  //       default:
+  //         setCurrentMenu(menuLinks);
+  //         break;
+  //     }
+  //   // }
+  // }, [userRole]);
 
 
   // useEffect(() => {
@@ -190,14 +178,11 @@ const Sidebar = ({ isOpen, toggleSidebar, userRole  }) => {
   //   setActiveDropdowns(dropdownIndices);
   // }, []);
   
-  // const handleCloseModal = () => {
-  //   onClose();
-  // };
 
   return (
     <>
       <div
-        className={wrapperClasses}
+        className={'h-full sidebar pb-4 bg-[#0F1B2D] lg:flex justify-between shadow-sm scrollbar-change flex-col overflow-y-auto overflow-x-hidden border-r-[0.5px] border-[#F3F4F6] hidden w-48 z-50'}
         style={{
           transition: 'width 0s ease-in-out 0s ',
         }}
@@ -232,7 +217,7 @@ const Sidebar = ({ isOpen, toggleSidebar, userRole  }) => {
           <nav className="mt-6 md:mt-3 grow">
             <div className=" flex-wrap flex gap-4 flex-col">
               {/* (isDropdown && menuItem.projects) || */}
-              {currentMenu.map((menuItem, index) => (
+              {filteredMenuLinks.map((menuItem, index) => (
                 (menuItem.isDropdownMenu ? 
                     <div onClick={(e) => menuItem?.action(e, index)} key={menuItem.label}>
                     <div

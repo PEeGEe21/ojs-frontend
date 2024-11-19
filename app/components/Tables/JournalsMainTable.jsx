@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { LoaderIcon, LoaderIcon2 } from '../IconComponent';
 import Swal from 'sweetalert2';
 import { useDisclosure } from '@chakra-ui/react';
@@ -25,6 +25,7 @@ import { Edit, Trash } from 'iconsax-react';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import { hostUrl, shortenTitle } from '../../lib/utilFunctions';
+import { JournalContext } from '../../utils/journalContext';
 
   
 const JournalsMainTable = ({user, users, data, fetchData, isLoading}) => {
@@ -36,6 +37,7 @@ const JournalsMainTable = ({user, users, data, fetchData, isLoading}) => {
     const [currentJournal, setCurrentJournal] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [isSavingStatus, setIsSavingStatus] = useState({});
+    const { journals, fetchJournals } = useContext(JournalContext);
     const {
         isOpen: journalIsOpen,
         onOpen: onJournalOpen,
@@ -174,6 +176,7 @@ const JournalsMainTable = ({user, users, data, fetchData, isLoading}) => {
                         [key]: false
                     });
 
+                    fetchJournals();
                     msg = 'Successfully '+ (updatedRecord.status ? 'Activated' : 'Deactivated')  + '!!'
                     toast.success(msg, {
                         successOptions,

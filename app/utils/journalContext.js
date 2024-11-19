@@ -30,7 +30,6 @@ const JournalProvider = ({ children }) => {
     //   fetchJournals();
     // }, []);
 
-    useEffect(() => {
       const fetchJournals = async () => {
         setIsLoading(true);
         setError(null);
@@ -54,6 +53,7 @@ const JournalProvider = ({ children }) => {
         }
       };
   
+    useEffect(() => {
       fetchJournals();
     }, []);
 
@@ -67,7 +67,7 @@ const JournalProvider = ({ children }) => {
     };
   
     return (
-      <JournalContext.Provider value={{ journals, selectedJournal, handleJournalChange, isLoading }}>
+      <JournalContext.Provider value={{ journals, selectedJournal, handleJournalChange, isLoading, fetchJournals }}>
         {children}
       </JournalContext.Provider>
     );
