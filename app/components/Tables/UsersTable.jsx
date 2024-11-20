@@ -472,6 +472,7 @@ const UsersTable = () => {
                             </Link> */}
                         </Flex>
                         <Table 
+                            scroll={{ x: 'max-content' }}
                             // rowSelection={rowSelection} 
                             columns={mergedColumns} 
                             dataSource={dataSource} 

@@ -664,6 +664,7 @@ const RolesTable = () => {
                         </Button>
                     </Flex>
                     <Table 
+                        scroll={{ x: 'max-content' }}
                         // rowSelection={rowSelection} 
                         columns={columns} 
                         dataSource={dataSource}

@@ -32,12 +32,16 @@ import {
 import { Magicpen, More, NoteAdd, Trash, UserAdd } from 'iconsax-react';
 import { JournalContext } from '../../utils/journalContext';
 import toast from 'react-hot-toast';
+import { DashboardMenuContext } from '../../utils/dashboardContext';
 // import { menuLinks } from "../lib/constants";
 // import "../navbar.css";
 
 const Navbar = ({ user, isLoadingState , userRole}) => {
   const pathname = usePathname();
   const router = useRouter();
+
+  const contextValue = useContext(DashboardMenuContext) || {};
+  const { toggleDashMenu, showDashMenu } = contextValue;
   const { journals, selectedJournal, handleJournalChange, isLoading } = useContext(JournalContext);
 
   const handleSelectChange = (event) => {
@@ -61,22 +65,24 @@ const Navbar = ({ user, isLoadingState , userRole}) => {
 
   return (
     <>
-      <header className="bg-[#fff] border-b-[0.5px] border-[#F3F4F6] z-[999] h-14 ">
+      <header className="bg-[#fff] border-b-[0.5px] border-[#F3F4F6] z-[999] h-14">
         <div className="max-w-7xl mx-auto px-4 lg:px-4 h-full">
-          <nav className="flex items-center justify-between flex-wrap py-4 h-full ">
-            {/* <div className="flex items-start justify-start flex-shrink-0 text-white mr-6">
-              <Link
-                href="/dashboard"
-                className="text-xl  font-semibold font-heading"
+          <nav className="flex items-center justify-between py-4 h-full w-full gap-2">
+            <div className="md:block sm:hidden h-full">
+              <button
+                className={`navbar-burger flex items-center py-3 px-3 text-white  rounded relative transition-all duration-150 ease-linear ${
+                  showDashMenu ? 'open' : ''
+                }`}
+                id="nav-icon3"
+                onClick={toggleDashMenu}
               >
-                <Image
-                  src="/images/logo.svg"
-                  alt="logo"
-                  width={150}
-                  height={100}
-                />
-              </Link>
-            </div> */}
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+              </button>
+            </div>
+
             {userRole !== 'admin' &&
               <div className="h-full">
                 <select onChange={handleSelectChange} value={selectedJournal?.id || ''} className='focus:outline-none'>
@@ -88,9 +94,9 @@ const Navbar = ({ user, isLoadingState , userRole}) => {
                 </select>
               </div>
             }
-            <div className="w-full hidden  flex-grow lg:flex lg:items-center lg:w-auto justify-end h-full">
+            <div className="w-full   flex-grow flex lg:items-center lg:w-auto justify-end h-full">
               
-              <div className="lg:flex lg:items-center lg:w-auto gap-4">
+              <div className="flex items-center w-auto gap-4">
 
                 {/* {isLoadingState ? (
                   <>
@@ -103,13 +109,13 @@ const Navbar = ({ user, isLoadingState , userRole}) => {
                   </>
                 ) : ( */}
                 <Link href={'/articles'} className='flex items-center gap-1 bg-[#008080] px-2 py-1 rounded-md text-[#F3F4F6]'>
-                  <Eye size={16} /> view site
+                  <Eye size={16} /> <span className='hidden md:block'>view site</span>
                 </Link>
                 <button>
                   <NotificationBing size={22} color="#008080" />
                 </button>
                   <div className="relative flex items-center justify-center z-[999] ">
-                    <Menu className=" bg-card-background">
+                    <Menu className=" bg-card-background" >
                       <MenuButton>
                         <div className="flex items-center justify-start gap-2 bg-card-background rounded-l-full h-auto">
                           <Image
@@ -120,7 +126,7 @@ const Navbar = ({ user, isLoadingState , userRole}) => {
                             className="rounded-full"
                           />
 
-                          <div className="flex flex-col items-start text-sm text-[#008080] pr-2 py-2">
+                          <div className="hidden md:flex flex-col items-start text-sm text-[#008080] pr-2 py-2">
                             <span>
                               {`${
                                 user?.username ? user?.username.substring(0, 15) : 'praise'
@@ -137,9 +143,18 @@ const Navbar = ({ user, isLoadingState , userRole}) => {
                         </div>
                       </MenuButton>
                       <MenuList
-                        className="bg-[#008080] py-3 text-white text-sm border border-[#737272] rounded-md z-[99]"
-                        minWidth="150px"
-                        maxWidth="150px"
+                          className="bg-[#008080] py-2 text-white text-sm border border-[#737272] rounded-md z-[99]"
+                          minWidth="120px"
+                          maxWidth="150px"
+                          sx={{
+                            '@media screen and (max-width: 768px)': {
+                              left: '0 !important',
+                              right: 'auto !important',
+                              minWidth: '100px !important',
+                              maxWidth: '100px !important'
+                            }
+                          }}
+                        
                       >
                         {/* <MenuItem
                           icon={<Profile2User size={14} />}
@@ -155,11 +170,11 @@ const Navbar = ({ user, isLoadingState , userRole}) => {
                           Settings
                         </MenuItem> */}
                         <MenuItem
-                          icon={<LogoutCurve size={14} color="red" />}
+                          // icon={<LogoutCurve size={14} color="red" />}
                           onClick={logout}
-                          className="hover:bg-[#034343] transition duration-200 ease-in-out p-2 bg-[#008080]"
+                          className="hover:bg-[#034343] transition duration-200 ease-in-out px-2 bg-[#008080] text-sm whitespace-nowrap flex items-center justify-center gap-2 text-center"
                         >
-                          Sign Out
+                          <LogoutCurve size={14} color="red" className='hidden md:block'/> <span>Sign Out</span>
                         </MenuItem>
                       </MenuList>
                     </Menu>

@@ -196,6 +196,7 @@ const SectionsTable = ({user, users, data, fetchData, isLoading}) => {
                         </Button>
                     </Flex>
                     <Table 
+                        scroll={{ x: 'max-content' }}
                         // rowSelection={rowSelection} 
                         columns={columns} 
                         dataSource={dataSource}
