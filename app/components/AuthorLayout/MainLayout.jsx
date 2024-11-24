@@ -5,7 +5,6 @@ import { JournalContext } from '../../utils/journalContext';
 
 const MainLayout = ({children}) => {
     const { journals } = useContext(JournalContext);
-    console.log(journals, 'socdcmomdc')
     const [user, setUser] = useState(null);
 
     useEffect(()=>{

@@ -107,7 +107,7 @@ const MainComponent = () => {
             </section>
             
             <section className="py-24 bg-[#f7f7f7]">
-                <div className="container max-w-[1440px] mx-auto px-4"> 
+                <div className="container max-w-[750px] md:max-w-[970px] lg:max-w-[1170px] mx-auto px-4"> 
                     <div className="flex items-center justify-center flex-row pb-6">
                         <div className="flex flex-col justify-center text-center">
                             <h1 className="text-2xl font-semibold">Our Journals</h1>

@@ -2,10 +2,15 @@
 
 import { redirect, useRouter } from 'next/navigation';
 import axios from 'axios';
+import * as dayjs from 'dayjs';
+import moment from 'moment';
 // import { localStorage } from "es-storage";
 import { useAuth } from '../hooks/useAuth';
 import toast, { Toaster } from 'react-hot-toast';
 import { successtoastOptions } from './constants';
+import duration from 'dayjs/plugin/duration';
+
+dayjs.extend(duration);
 
 const isWindowDefined = typeof window !== 'undefined';
 // const hostUrl = process.env.NEXT_PUBLIC_AUTH_URL;
@@ -161,6 +166,27 @@ export const handleRedirect = (role, push) => {
     };
     push(routes[role] || '/auth/login');
 };
+
+
+export function getTotalMinutes(durationHours, durationMinutes) {
+  return durationHours * 60 + durationMinutes;
+}
+
+export const formatMomentDate = (date, time = true) =>{
+  let addTIme;
+  if(time)
+    addTIme = 'ddd MMM Do, YYYY hh:mma';
+  else
+    addTIme = 'ddd MMM Do, YYYY';
+  const formattedDate = moment(date).format(addTIme);
+  return formattedDate;
+}
+export const formattedDateString = (date) =>{
+  const formattedDate = dayjs(date).set('month', 11).set('date', 1).set('hour', 23).set('minute', 59).set('second', 59).format('YYYY-MM-DD HH:mm:ss');;
+  return formattedDate;
+}
+
+
 
 export const slugify = (string) =>{
   return string

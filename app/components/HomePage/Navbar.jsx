@@ -22,7 +22,7 @@ const Navbar = ({user, start}) => {
         className="z-50 shadow-md"
         style={{ position: 'relative' }}
       >
-        <div className="container mx-auto max-w-[1440px] px-4">
+        <div className="container mx-auto max-w-[750px] md:max-w-[970px] lg:max-w-[1170px] px-4">
           <nav className="flex  flex-wrap items-center justify-between py-4">
             <div className="lg:order-1 w-auto lg:w-1/4 lg:text-center">
               <Link

@@ -6,7 +6,6 @@ import { useRouter, usePathname } from 'next/navigation';
 
 const MainLayout = ({children}) => {
     const { journals } = useContext(JournalContext);
-    console.log(journals, 'socdcmomdc')
     const [user, setUser] = useState(null);
     const [loading, setIsLoading] = useState(false)
     const pathname = usePathname();

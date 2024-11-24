@@ -9,7 +9,7 @@ const Footer = () => {
     <>
         <footer className="">
             <div className="bg-[#f7f7f7] py-5 ">
-                <div className="top-footer lg:flex container max-w-[1440px] px-4 mx-auto py-12">
+                <div className="top-footer lg:flex container max-w-[750px] md:max-w-[970px] lg:max-w-[1170px] px-4 mx-auto py-12">
                     <div className=" w-full lg:w-2/5 ">
                         <div className="pr-5">
                             <div>

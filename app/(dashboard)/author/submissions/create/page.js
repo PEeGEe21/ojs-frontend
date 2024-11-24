@@ -883,7 +883,7 @@ export default function CreateSubmission() {
                                                                         <div className="text-[#313131] text-xs flex items-center justify-center gap-2 flex-row">
                                                                             {/* && status === 'In Progress'  */}
                                                                             <button className='btn px-2 py-1 bg-[#e1e5ec] border border-[#e1e5ec] rounded text-[#666] flex items-center'>
-                                                                                Take Test
+                                                                                Delete
                                                                             </button>
                                                                         </div>
                                                                     </Td>
@@ -923,7 +923,7 @@ export default function CreateSubmission() {
                                                             setPrefix(e.target.value);
                                                             console.log(prefix);
                                                         }}
-                                                        className={`block px-2 w-full text-sm text-[#212121] border bg-transparent  h-12 rounded-md focus:outline-0`}
+                                                        className={`block px-2 w-full text-sm text-[#212121] border border-[#524F4D]  bg-transparent  h-12 rounded-md focus:outline-0`}
                                                         name="prefix"
                                                         placeholder="e.g A, The"
                                                         autoComplete="off"

@@ -85,7 +85,7 @@ const SingleJournal = () => {
 
 
             <section className="sectionspace pb-28">
-                    <div className="container max-w-6xl mx-auto px-4 pb-12 border-x border-gray-100 mt-8 shadow">
+                    <div className="container max-w-[750px] md:max-w-[970px] lg:max-w-[1170px] mx-auto px-4 pb-12 border-x border-gray-100 mt-8 shadow">
                         <div className='px-4 '>
 
                             <div className="flex gap-4 flex-wrap">

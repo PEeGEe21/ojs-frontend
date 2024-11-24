@@ -62,6 +62,7 @@ const JournalsMainTable = ({user, users, data, fetchData, isLoading}) => {
             title: '#',
             dataIndex: 'key',
             key:'index',
+            width: 10,
             render: (text, record, index) => (
                 <a>{(currentPage - 1) * pageSize + index + 1}</a>
             ),
@@ -70,23 +71,24 @@ const JournalsMainTable = ({user, users, data, fetchData, isLoading}) => {
             key: '1',
             title: 'Journal Name',
             dataIndex: 'name',
-            width: 50,
+            width: 60,
             render: (text) => <a className='whitespace-nowrap'>{text}</a>,
         },
+        // {
+        //     key: '2',
+        //     title: 'Note',
+        //     dataIndex: 'note',
+        //     render: (text) => <div dangerouslySetInnerHTML={{
+        //         __html: text,
+        //     }}
+        //     ></div>,
+        // },
         {
             key: '2',
-            title: 'Note',
-            dataIndex: 'note',
-            render: (text) => <div dangerouslySetInnerHTML={{
-                __html: text,
-            }}
-            ></div>,
-        },
-        {
-            key: '3',
             title: 'Status',
             dataIndex: 'status',
             editable: false,
+            width: 10,
             render: (text, record, index) => (
                 <Space size="middle">
                     <button
@@ -116,8 +118,8 @@ const JournalsMainTable = ({user, users, data, fetchData, isLoading}) => {
         },
         {
             title: 'Action',
-            key: '4',
-            width: 50,
+            key: '3',
+            width: 20,
             render: (_, record) => (
             <Space size="middle">
                 <button 
