@@ -1,4 +1,4 @@
-import { formatDuration, formatMomentDate } from "../../lib/utilFunctions";
+import { formatDuration, formatMomentDate, shortenTitle } from "../../lib/utilFunctions";
 import { Progress } from "@chakra-ui/react";
 import { Global } from "iconsax-react";
 import Image from "next/image";
@@ -105,7 +105,7 @@ const CollectionItem = ({ index, data, setSubmissions }) => {
                                 
                                 <div className="flex flex-col font-medium">
                                     <Link href={'/admin/submissions/' + data?.id} className="text-2xl text-white capitalize hover:underline">
-                                        {data?.title} 
+                                        {data?.title??shortenTitle(data?.title, 100)} 
                                     </Link>
                                     <p className="text-[#C3C1C1] text-sm">
                                         <span className="text-[#ADB4B9] text-xs">

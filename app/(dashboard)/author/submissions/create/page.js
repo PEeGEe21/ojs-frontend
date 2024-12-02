@@ -34,7 +34,8 @@ import { Progress, useToast } from "@chakra-ui/react";
 import { hostUrl } from "../../../../lib/utilFunctions";
 import axios from "axios";
 import { JournalContext } from "../../../../utils/journalContext";
-import {modules, styles} from "../../../../lib/constants";
+import {modules, styles, openai} from "../../../../lib/constants";
+import Swal from 'sweetalert2';
 
 const steps = [
     { title: "Section Policy", description: "select the type of airdrop to use" },
@@ -73,6 +74,7 @@ export default function CreateSubmission() {
     const [title, setTitle] = useState('');
     const [subTitle, setSubTitle] = useState('');
     const [abstract, setAbstract] = useState('');
+    const [isGenerating, setIsGenerating] = useState(false)
     const stepperRef = useRef(null);
     const MAX_TAGS = 10;
 
@@ -91,13 +93,6 @@ export default function CreateSubmission() {
         loading: () => <div className="border border-[#464849] h-72 animate-pulse bg-gray-100" />
     }), []);
 
-
-
-    const {
-        isOpen: makePaymentAirdropOpen,
-        onOpen: onMakePaymentAirdropOpen,
-        onClose: onMakePaymentAirdropClose,
-    } = useDisclosure();
 
     useEffect(() => {
         if (stepperRef.current) {
@@ -129,12 +124,12 @@ export default function CreateSubmission() {
                 console.log(data, 'datumm')
                 if(data.journalId === Number(selectedJournal.id)){
                     setCurrentSubmission(data)
-                    setPrefix(data.prefix)
-                    setTitle(data.title)
-                    setSubTitle(data.subTitle)
-                    setAbstract(data.abstract)
+                    setPrefix(data.prefix??'')
+                    setTitle(data.title??'')
+                    setSubTitle(data.subTitle??'')
+                    setAbstract(data.abstract??'')
                     // tags = JSON.parse(data.keywords);
-                    setEditorsNote(data.editorsNote)
+                    setEditorsNote(data.editorsNote??'')
                     setIsPreviouslyPublished(data.is_previously_published == 1 ? true : false)
                     setIsUrlReference(data.url_reference == 1 ? true : false)
                     setIsFormattedCorrectly(data.formatted_correctly == 1 ? true : false)
@@ -355,7 +350,7 @@ export default function CreateSubmission() {
     const handleSaveSubmissionFields = async () => {
 
         console.log(prefix, title, subTitle, abstract)
-        if(!prefix || !title || !subTitle || !abstract){
+        if(!prefix || !title || !abstract){
             toast({
                 title: "Error all required fields.",
                 description: "Failed",
@@ -489,6 +484,30 @@ export default function CreateSubmission() {
         }
     };
 
+    const getSubmissionfiles = async() => {
+        try{
+            const response = await axios.get(hostUrl + "submissions/" + currentSubmission?.id + "/files");
+            console.log(response.data, response.data.success)
+            if(response.data.success){
+                setUploads(response.data.submissionFiles)
+            }
+        } catch(err){
+            console.error("error", err);
+            toast({
+                title: "An error occurred.",
+                description: "Failed",
+                status: "error",
+                duration: 2000,
+                position: "top-right",
+            });
+        }
+    }
+
+    useEffect(()=>{
+        if(currentSubmission)
+            getSubmissionfiles();
+    }, [currentSubmission, activeStep])
+
     const handleFinish = async () => {
         const data = JSON.stringify({
             owner_address: address,
@@ -570,6 +589,97 @@ export default function CreateSubmission() {
 
     const isActive = (index) => activeStep === index;
     const isCompleted = (index) => activeStep > index;
+
+    const generateAbstract = async () => {
+        const fullTitle = `${prefix ? prefix + ': ' : ''}${title}${subTitle ? ' - ' + subTitle : ''}`;
+
+        // console.log(fullTitle, 'generated')
+        // return;
+        
+        if (!fullTitle.trim()) {
+            toast({
+                title: "Please enter a title.",
+                description: "Failed",
+                status: "error",
+                duration: 2000,
+                position: "top-right",
+            });
+            return;
+        }
+    
+        setIsGenerating(true)
+        try {
+          const response = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [
+              {
+                role: "system", 
+                content: "You are an academic writing assistant. Generate a professional, concise abstract based on the given title."
+              },
+              {
+                role: "user", 
+                content: `Generate a scholarly abstract for a research paper with the following title: "${fullTitle}". The abstract should be approximately 250-300 words, highlighting the research problem, methodology, key findings, and significance.`
+              }
+            ],
+            max_tokens: 350,
+            temperature: 0.7
+          })
+    
+          const generatedAbstract = response.choices[0].message.content || ''
+          setAbstract(generatedAbstract)
+        } catch (error) {
+            toast({
+                title: "Failed to generate abstract. Please try again.",
+                description: "Failed",
+                status: "error",
+                duration: 2000,
+                position: "top-right",
+            });
+          console.error('Error generating abstract:', error)
+        } finally {
+          setIsGenerating(false)
+        }
+      }
+
+      const deleteUpload = (uploadId) => {
+        Swal.fire({
+            title: 'Are you sure you want to remove this file?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Delete',
+            allowOutsideClick: () => !Swal.isLoading(), // Prevent clicking outside modal during loading
+            showLoaderOnConfirm: true,
+            preConfirm: async () => {
+                try {
+                    const response = await axios.delete(hostUrl + `submissions/${parseInt(currentSubmission?.id)}/delete/${parseInt(uploadId)}/file`);
+
+                    if (response.data.success){
+                        Swal.fire(
+                            'Deleted!',
+                            response?.data?.message,
+                            'success'
+                        );
+                        getSubmissionfiles()
+
+                    } else {
+                        Swal.fire('Error!', 'There was an issue removing Submission File.', 'error');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    Swal.fire('Error!', 'There was an issue deleting your Submission File.', 'error');
+                    throw err; 
+                }
+            },
+        }).then((result) => {
+            if (result.isConfirmed) {
+
+                getSubmissionfiles()
+
+            }
+        });
+    };
 
     return (
         <>
@@ -846,8 +956,8 @@ export default function CreateSubmission() {
                                                     <Thead className='bg-[#F7FAFC] border-b border-[#e7ecf1]'>
                                                     <Tr>
                                                         <Th width={10}>#</Th>
-                                                        <Th width={'30%'}>Title</Th>
-                                                        <Th>Action</Th>
+                                                        <Th width={80}>Title</Th>
+                                                        <Th width={10}>Action</Th>
                                                     </Tr>
                                                     </Thead>
                                                     <Tbody className=' w-full px-4 divide-y divide-[#e7ecf1]'>
@@ -880,9 +990,9 @@ export default function CreateSubmission() {
                                                                     </Td>
                                                                     
                                                                     <Td className="px-2 py-4 text-sm whitespace-nowrap">
-                                                                        <div className="text-[#313131] text-xs flex items-center justify-center gap-2 flex-row">
+                                                                        <div className="text-[#313131] text-xs  gap-2 flex-row">
                                                                             {/* && status === 'In Progress'  */}
-                                                                            <button className='btn px-2 py-1 bg-[#e1e5ec] border border-[#e1e5ec] rounded text-[#666] flex items-center'>
+                                                                            <button type="button" onClick={()=>deleteUpload(upload.id)} className='btn btn-red px-2 py-1 bg-[#e1e5ec] border border-[#e1e5ec] rounded text-[#666] flex items-center'>
                                                                                 Delete
                                                                             </button>
                                                                         </div>
@@ -921,7 +1031,6 @@ export default function CreateSubmission() {
                                                         required
                                                         onChange={(e) => {
                                                             setPrefix(e.target.value);
-                                                            console.log(prefix);
                                                         }}
                                                         className={`block px-2 w-full text-sm text-[#212121] border border-[#524F4D]  bg-transparent  h-12 rounded-md focus:outline-0`}
                                                         name="prefix"
@@ -1005,18 +1114,34 @@ export default function CreateSubmission() {
                                                             }
                                                         `}</style>
                                                     </div> */}
-                                                    <ReactQuill
-                                                        theme="snow"
-                                                        required
-                                                        value={abstract}
-                                                        modules={modules}
-                                                        style={styles}
-                                                        onChange={(value) => {
-                                                            setAbstract(value);
-                                                            console.log(abstract)
-                                                        }}
-                                                        className="border border-[#524F4D] h-auto min-h-72"
-                                                    />
+                                                    <div>
+                                                        <ReactQuill
+                                                            theme="snow"
+                                                            required
+                                                            value={abstract}
+                                                            modules={modules}
+                                                            style={styles}
+                                                            onChange={(value) => {
+                                                                setAbstract(value);
+                                                            }}
+                                                            className="border border-[#524F4D] h-auto min-h-72"
+                                                        />
+
+                                                        <div className="mt-4 w-full flex items-center justify-end">
+
+
+                                                            <button
+                                                                disabled={isGenerating}
+                                                                onClick={generateAbstract}
+                                                                className="bg-[#008080] hover:bg-[#008080]  whitespace-nowrap w-full md:w-auto
+                                                                disabled:opacity-50 disabled:cursor-not-allowed rounded-lg 
+                                                                transition-all duration-75 border-none px-5 
+                                                                font-medium p-3 text-base text-white block"
+                                                            >
+                                                                {isGenerating ? 'Generating...' : 'Generate Abstract'}
+                                                            </button>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
 
@@ -1159,8 +1284,10 @@ export default function CreateSubmission() {
                     isOpen={uploadFileIsOpen}
                     onClose={onUploadFileClose}
                     currentUpload={currentUpload}
+                    currentSubmission={currentSubmission}
                     uploadList={setUploads}
                     setCurrentUpload={setCurrentUpload}
+                    fetchUploads={getSubmissionfiles}
                 />
             {/* ) : (
                 ''

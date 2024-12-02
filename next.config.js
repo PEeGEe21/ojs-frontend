@@ -11,7 +11,27 @@ const withPWA = require('next-pwa')({
 });
 
 module.exports = withPWA({
-  // other congigs
+  // other configs
   reactStrictMode: false,
-});
+  
+  webpack: (config, { isServer }) => {
+    // Handle .node files
+    config.module.rules.push({
+      test: /\.node$/,
+      use: 'node-loader'
+    });
 
+    // Resolve fallback for client-side
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        canvas: false
+      };
+    }
+
+    return config;
+  }
+});

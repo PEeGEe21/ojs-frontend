@@ -23,7 +23,6 @@ const UpdateSubmissionTitleForm = ({
   submission,
   fetchData,
 }) => {
-  console.log(submission?.issue?.id)
   const [isSaving, setIsSaving] = useState(false);
   const [prefix, setPrefix] = useState(submission.prefix??"");
   const [title, setTitle] = useState(submission.title??"");

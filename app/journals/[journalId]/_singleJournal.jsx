@@ -8,17 +8,29 @@ import {
     BreadcrumbItem,
     BreadcrumbLink,
     BreadcrumbSeparator,
+    Drawer,
+    DrawerBody,
+    DrawerFooter,
+    DrawerHeader,
+    DrawerOverlay,
+    DrawerContent,
+    DrawerCloseButton,
+    useDisclosure
   } from '@chakra-ui/react'
 import { ChevronRight, DocumentExport, Recycle } from '@carbon/icons-react'
 import Link from 'next/link'
 import { hostUrl } from '../../lib/utilFunctions';
 import { LoaderIcon } from '../../components/IconComponent';
+import ArticleSummaryDrawer  from '../../components/Drawer/ArticleSummaryDrawer';
 
 const SingleJournal = () => {
     const [journal, setJournal] = useState(null);
     const [submissions, setSubmissions] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [currentArticle, setCurrentArticle] = useState(null);
     const [pageTitle, setPageTitle] = useState(null);
+    const { isOpen, onOpen, onClose } = useDisclosure()
+
     const router = useRouter();
 
     const params = useParams();
@@ -57,6 +69,12 @@ const SingleJournal = () => {
 
         fetchData();
     }, [id]);
+
+    const openSummary = (item) =>{
+        setCurrentArticle(item)
+        // if(currentArticle)
+        onOpen();
+    }
 
     return (
         <>
@@ -140,7 +158,7 @@ const SingleJournal = () => {
                                                                 <button className='flex items-center justify-center gap-1 rounded-md border border-[#008080] p-2 px-3 text-xs min-w-[90px] text-[#008080]'>
                                                                     <DocumentExport/> PDF
                                                                 </button>
-                                                                <button className='flex items-center justify-center gap-1 rounded-md border border-[#008000] bg-[#008000] p-2 px-3 text-xs min-w-[90px] text-white'>
+                                                                <button onClick={()=>openSummary(item)} className='flex items-center justify-center gap-1 rounded-md border border-[#008000] bg-[#008000] p-2 px-3 text-xs min-w-[90px] text-white'>
                                                                     <Recycle/> Summary
                                                                 </button>
                                                             </div>
@@ -159,6 +177,8 @@ const SingleJournal = () => {
                         </div>
                     </div>
             </section>
+
+            <ArticleSummaryDrawer isOpen={isOpen} onClose={onClose} currentArticle={currentArticle}/>
         </>
     )
 }

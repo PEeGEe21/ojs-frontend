@@ -52,6 +52,8 @@ const Navbar = ({ user, isLoadingState , userRole}) => {
 
   const logout = () => {
     localStorage.removeItem('ojs-user');
+    localStorage.removeItem('ojs-current-submission');
+    localStorage.removeItem('accessOJSUserToken');
     router.push('/auth/login');
     toast.success('Successfully logged out')
   };

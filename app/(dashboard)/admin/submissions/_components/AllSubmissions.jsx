@@ -42,7 +42,7 @@ const AllSubmissions = ({ searchQuery }) => {
       if (user && selectedJournal) {
         try {
           setIsLoading(true);
-          const res = await fetch(hostUrl + 'submissions');
+          const res = await fetch(hostUrl + 'submissions/admin/all');
           if (res.ok) {
             const result = await res.json();
             setSubmissions(result.data);

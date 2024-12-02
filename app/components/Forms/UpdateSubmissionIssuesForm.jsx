@@ -24,7 +24,6 @@ const UpdateSubmissionIssuesForm = ({
   fetchData,
   sections
 }) => {
-  console.log(submission?.issue?.id)
   const [isSaving, setIsSaving] = useState(false);
   const [urlPath, setUrlPath] = useState(submission.url_path??"");
   const [pages, setPages] = useState(submission.pages??"");

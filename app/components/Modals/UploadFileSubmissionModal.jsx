@@ -15,9 +15,11 @@ const UploadFileSubmissionModal = ({
   isOpen,
   onClose,
   currentUpload,
+  currentSubmission,
   uploadList,
   setCurrentUpload,
   setUploads,
+  fetchUploads,
 }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered size="4xl">
@@ -33,9 +35,11 @@ const UploadFileSubmissionModal = ({
           onClose={onClose}
           user={user}
           currentUpload={currentUpload}
+          currentSubmission={currentSubmission}
           uploadList={uploadList}
           setCurrentUpload={setCurrentUpload}
           setUploads={setUploads}
+          fetchUploads={fetchUploads}
         />
       </ModalContent>
     </Modal>

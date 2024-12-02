@@ -16,7 +16,7 @@ import { Eye, Trash } from "iconsax-react";
 import { demoSubmissions } from "../../lib/constants";
 import Link from "next/link";
 import Swal from 'sweetalert2';
-import { hostUrl } from "../../lib/utilFunctions";
+import { formatMomentDate, hostUrl } from "../../lib/utilFunctions";
 import axios from "axios";
 
 const MySubmissions = ({submissions, setSubmissions}) => {
@@ -122,7 +122,7 @@ const MySubmissions = ({submissions, setSubmissions}) => {
                                 <Td className="px-2 py-4 whitespace-nowrap">
                                     <div className='flex items-start justify-between text-sm'>
                                         <p>
-                                            {item.createdAt}
+                                            {formatMomentDate(item?.createdAt, false)}
                                         </p>
                                     </div>
                                 </Td>
@@ -133,7 +133,7 @@ const MySubmissions = ({submissions, setSubmissions}) => {
                                         <Link href={'submissions/'+item.id} className='btn p-2 bg-[#e1e5ec] border border-[#e1e5ec] rounded text-[#666] flex items-center'>
                                             <Eye size={12}/>
                                         </Link>
-                                        <button onClick={()=>deleteSubmission(item.id)} className='btn p-2 bg-[#e1e5ec] border border-[#e1e5ec] rounded text-[#666] flex items-center'>
+                                        <button onClick={()=>deleteSubmission(item.id)} className='btn p-2 btn-red btn border border-[#e1e5ec] rounded !text-[#fff] flex items-center'>
                                             <Trash size={12}/>
                                         </button>
                                     </div>

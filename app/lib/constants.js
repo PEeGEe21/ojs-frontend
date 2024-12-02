@@ -1,4 +1,10 @@
 'use client';
+import OpenAI from 'openai';
+
+export const openai = new OpenAI({
+  apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
+  dangerouslyAllowBrowser: true // Only use this for client-side calls
+});
 
 export const successtoastOptions = {
   duration: 8000,
@@ -177,7 +183,33 @@ export const issuesData = [
 ];
 
 export const uploadTypeList = [
-
+  { id: 1,
+    title: 'Article Text',
+  },
+  { id: 2,
+    title: 'Research Instrument',
+  },
+  { id: 3,
+    title: 'Research Materials',
+  },
+  { id: 4,
+    title: 'Research Results',
+  },
+  { id: 5,
+    title: 'Transcripts',
+  },
+  { id: 6,
+    title: 'Data Analysis',
+  },
+  { id: 7,
+    title: 'Data Set',
+  },
+  { id: 8,
+    title: 'Source Texts',
+  },
+  { id: 9,
+    title: 'Other',
+  },
 ]
 
 export const modules = {

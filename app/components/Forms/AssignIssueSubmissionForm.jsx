@@ -24,8 +24,6 @@ const AssignIssueSubmissionForm = ({
   issuesList,
   fetchData,
 }) => {
-
-  console.log(submission?.issue?.id)
   const [isSaving, setIsSaving] = useState(false);
   const router = useRouter();
   const [inputs, setInputs] = useState({

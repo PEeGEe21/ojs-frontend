@@ -187,6 +187,11 @@ export const formattedDateString = (date) =>{
 }
 
 
+export const convertToKB = (size) =>{
+  const newSize = (size / 1024).toFixed(2)
+  return newSize;
+}
+
 
 export const slugify = (string) =>{
   return string
