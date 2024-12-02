@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '../../lib/firebase';
+// import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+// import { storage } from '../../lib/firebase';
 import { supabase } from '../../lib/supabase';
 import {
   Modal,
