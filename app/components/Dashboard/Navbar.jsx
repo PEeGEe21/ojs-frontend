@@ -13,6 +13,7 @@ import {
   Setting2,
   Setting3,
   Eye,
+  
 } from 'iconsax-react';
 import Image from 'next/image';
 import { Category } from 'react-iconly';
@@ -27,6 +28,7 @@ import {
   MenuOptionGroup,
   MenuDivider,
   IconButton,
+  Portal
 } from '@chakra-ui/react';
 
 import { Magicpen, More, NoteAdd, Trash, UserAdd } from 'iconsax-react';
@@ -144,19 +146,37 @@ const Navbar = ({ user, isLoadingState , userRole}) => {
                           </div>
                         </div>
                       </MenuButton>
-                      <MenuList
-                          className="bg-[#008080] py-2 text-white text-sm border border-[#737272] rounded-md z-[99]"
-                          minWidth="120px"
-                          maxWidth="150px"
+                      <Portal className='test-popup'>
+
+                      <MenuList 
+                          // transformOrigin="top left"
+                          // placement="top-start" // or "bottom-end", "top-start", "top-end", etc.
+                          // style={{
+                          //   '--popper-transform-origin': 'top left',
+                          //   transformOrigin: 'top left'
+                          // }}
+                          // className="bg-[#008080] py-2 text-white text-sm border border-[#737272] rounded-md z-[99] "
+                          // minWidth="120px"
+                          // maxWidth="150px"
+                          // sx={{
+                          //     '&[data-popper-placed]': {
+                          //         transformOrigin: 'top left !important',
+                          //         transform: 'translate(0, 10px) !important'
+                          //       },                            
+                          //     '@media screen and (max-width: 768px)': {
+                          //     left: '0 !important',
+                          //     right: 'auto !important',
+                          //     minWidth: '100px !important',
+                          //     maxWidth: '100px !important',
+                          //     transformOrigin: 'top left !important',
+                          //   },
+                          // }}     
+                          pos="absolute"
+                          right="0"
                           sx={{
-                            '@media screen and (max-width: 768px)': {
-                              left: '0 !important',
-                              right: 'auto !important',
-                              minWidth: '100px !important',
-                              maxWidth: '100px !important'
-                            }
-                          }}
-                        
+                            '--popper-transform-origin': 'top left !important',
+                            transformOrigin: 'top left !important'
+                          }}                   
                       >
                         {/* <MenuItem
                           icon={<Profile2User size={14} />}
@@ -174,11 +194,13 @@ const Navbar = ({ user, isLoadingState , userRole}) => {
                         <MenuItem
                           // icon={<LogoutCurve size={14} color="red" />}
                           onClick={logout}
-                          className="hover:bg-[#034343] transition duration-200 ease-in-out px-2 bg-[#008080] text-sm whitespace-nowrap flex items-center justify-center gap-2 text-center"
+                          className="hover:bg-[#034343] transition duration-200 ease-in-out px-2 bg-[#008080] text-sm whitespace-nowrap flex items-center justify-center gap-2 text-center text-white"
                         >
                           <LogoutCurve size={14} color="red" className='hidden md:block'/> <span>Sign Out</span>
                         </MenuItem>
                       </MenuList>
+                      </Portal>
+
                     </Menu>
                   </div>
                 {/* )} */}

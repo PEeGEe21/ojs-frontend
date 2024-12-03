@@ -1,13 +1,13 @@
 "use client"
-import { Box, Progress, Tab, TabIndicator, Table, TabList, TabPanel, TabPanels, Tabs, Tbody, Td, Th, Thead, Tr, useDisclosure, useToast } from "@chakra-ui/react";
+import { Box, Progress, Tab, TabIndicator, Table, TabList, TabPanel, TabPanels, Tabs, Tbody, Td, Th, Thead, Tr, useDisclosure, useToast, Tooltip } from "@chakra-ui/react";
 import UploadFileSubmissionModal from "../../../../components/Modals/UploadFileSubmissionModal"
 import AssignEditorSubmissionModal from "../../../../components/Modals/AssignEditorSubmissionModal"
 import AssignIssueSubmissionModal from "../../../../components/Modals/AssignIssueSubmissionModal"
 import "react-quill-new/dist/quill.snow.css";
-import { ArrowLeft, Trash } from 'iconsax-react'
+import { ArrowLeft, DocumentDownload, Trash, Eye } from 'iconsax-react'
 import { useParams, useRouter } from 'next/navigation'
 import React, { useContext, useEffect, useMemo, useState } from 'react'
-import { hostUrl } from "../../../../lib/utilFunctions";
+import { formatMomentDate, hostUrl } from "../../../../lib/utilFunctions";
 import { getFullName } from "../../../../utils/common";
 import Swal from 'sweetalert2';
 import axios from "axios";
@@ -18,10 +18,12 @@ import useTags from "../../../../hooks/useTags";
 import { JournalContext } from "../../../../utils/journalContext";
 import UpdateSubmissionIssuesForm from "../../../../components/Forms/UpdateSubmissionIssuesForm"
 import UpdateSubmissionTitleForm from "../../../../components/Forms/UpdateSubmissionTitleForm"
+import Link from "next/link";
 
 const SingleSubmission = () => {
     const { selectedJournal } = useContext(JournalContext);
     const router = useRouter();
+    const [user, setUser ] = useState(null);
     const [submission, setSubmission ] = useState(null);
     const [submissionFiles, setSubmissionFiles ] = useState([]);
     const [sections, setSections ] = useState([]);
@@ -37,7 +39,9 @@ const SingleSubmission = () => {
     const [section, setSection] = useState("");
     const [abstract, setAbstract] = useState("");
     const [currentUpload, setCurrentUpload] = useState(null);
+    const [currentViewUpload, setViewCurrentUpload] = useState(null);
     const [editors, setEditors] = useState([])
+    const [userEditors, setUserEditors] = useState([])
     const [showReviews, setShowReviews] = useState(false)
     const params = useParams();
     const { submissionId } = params;    
@@ -66,10 +70,28 @@ const SingleSubmission = () => {
           loading: () => <div className="border border-[#464849] h-72 animate-pulse bg-gray-100" />
       }), []);
 
-      const MAX_TAGS = 10;
+    const MAX_TAGS = 10;
 
-      const { tags, handleAddTag, handleRemoveTag } = useTags(MAX_TAGS); // pass the maximum tags
+    const { tags, handleAddTag, handleRemoveTag } = useTags(MAX_TAGS); // pass the maximum tags
   
+    useEffect(() => {
+        const getUser = async ()=>{
+            try{
+                if (localStorage.getItem('ojs-user')){
+                    const data = await JSON.parse(
+                        localStorage.getItem("ojs-user")
+                    );
+                    setUser(data)
+                    
+                }else{
+                    router.push("/auth/login")
+                }
+            }catch(err){}
+        };
+        getUser();
+    }, []);
+
+
     const fetchUsers = async () => {
         if (id) {
             try {
@@ -78,6 +100,27 @@ const SingleSubmission = () => {
                     const data = await res.json();
                     const result = data.users
                     setUsers(result)
+                    // fetchSubmissionFiles();
+                    // console.log(result)
+
+                } else {
+                    throw new Error('Failed to fetch the submission');
+                }
+            } catch (err) {
+                console.error('Error fetching data:', err?.message);
+            }
+        } else {
+        }
+    };
+
+    const fetchEditors = async () => {
+        if (id) {
+            try {
+                const res = await fetch(hostUrl + `users/editors`);
+                if (res.ok) {
+                    const data = await res.json();
+                    const result = data.editors
+                    setUserEditors(result)
                     // fetchSubmissionFiles();
                     // console.log(result)
 
@@ -228,10 +271,130 @@ const SingleSubmission = () => {
         });
     };
 
+    const deleteUpload = (uploadId) => {
+        Swal.fire({
+            title: 'Are you sure you want to remove this file?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Delete',
+            allowOutsideClick: () => !Swal.isLoading(), // Prevent clicking outside modal during loading
+            showLoaderOnConfirm: true,
+            preConfirm: async () => {
+                try {
+                    const response = await axios.delete(hostUrl + `submissions/${parseInt(submission?.id)}/delete/${parseInt(uploadId)}/file`);
+
+                    if (response.data.success){
+                        Swal.fire(
+                            'Deleted!',
+                            response?.data?.message,
+                            'success'
+                        );
+                        fetchSubmissionFiles()
+
+                    } else {
+                        Swal.fire('Error!', 'There was an issue removing Submission File.', 'error');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    Swal.fire('Error!', 'There was an issue deleting your Submission File.', 'error');
+                    throw err; 
+                }
+            },
+        }).then((result) => {
+            if (result.isConfirmed) {
+
+                fetchSubmissionFiles()
+            }
+        });
+    };
+
+    const handleOpenCurrentUpload = (upload) =>{
+        setViewCurrentUpload(upload)
+    }
+
+    const acceptSubmission = () =>{
+        Swal.fire({
+            title: 'You\'re about to Accept this Submission.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Confirm',
+            allowOutsideClick: () => !Swal.isLoading(), // Prevent clicking outside modal during loading
+            showLoaderOnConfirm: true,
+            preConfirm: async () => {
+                try {
+                    const response = await axios.post(hostUrl + `submissions/${parseInt(submission?.id)}/accept`);
+
+                    if (response.data.success){
+                        Swal.fire(
+                            'Success!',
+                            response?.data?.message,
+                            'success'
+                        );
+                        fetchData()
+
+                    } else {
+                        Swal.fire('Error!', 'There was an issue accepting Submission.', 'error');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    Swal.fire('Error!', 'There was an issue accepting Submission.', 'error');
+                    throw err; 
+                }
+            },
+        }).then((result) => {
+            if (result.isConfirmed) {
+
+                fetchData()
+            }
+        });
+    }
+
+    const declineSubmission = () =>{
+        Swal.fire({
+            title: 'You\'re about to Decline this Submission.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Confirm',
+            allowOutsideClick: () => !Swal.isLoading(), // Prevent clicking outside modal during loading
+            showLoaderOnConfirm: true,
+            preConfirm: async () => {
+                try {
+                    const response = await axios.post(hostUrl + `submissions/${parseInt(submission?.id)}/decline`);
+
+                    if (response.data.success){
+                        Swal.fire(
+                            'Success!',
+                            response?.data?.message,
+                            'success'
+                        );
+                        fetchData()
+
+                    } else {
+                        Swal.fire('Error!', 'There was an issue declining Submission.', 'error');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    Swal.fire('Error!', 'There was an issue declining Submission.', 'error');
+                    throw err; 
+                }
+            },
+        }).then((result) => {
+            if (result.isConfirmed) {
+
+                fetchData()
+            }
+        });
+    }
 
     return (
         <>
-            <div className="flex flex-row items-center justify-start gap-4 mb-8">
+            <div className="flex flex-row items-center justify-start gap-4 mb-8 flex-wrap lg:flex-nowrap">
                 <button
                     type="button"
                     onClick={() => router.back()}
@@ -241,7 +404,7 @@ const SingleSubmission = () => {
                 </button>
 
                 <div className="w-full">
-                    <h1 className=" whitespace-nowrap font-bold text-2xl capitalize">{submission?.title}</h1>
+                    <h1 className="font-bold text-2xl capitalize" dangerouslySetInnerHTML={{ __html: submission?.title}}></h1>
                 </div>
             </div>
 
@@ -305,9 +468,9 @@ const SingleSubmission = () => {
                                 <TabPanel className="px-0 py-0">
                                     <div>
                                         <div className="bg-white min-h-[500px] p-4">
-                                            <div className="flex w-full gap-3">
+                                            <div className="flex w-full gap-3 flex-wrap lg:flex-nowrap">
                                             {/*  */}
-                                                <div className=" px-3 md:p-4 py-3 rounded-lg w-8/12">
+                                                <div className=" px-3 md:p-4 py-3 rounded-lg w-full lg:w-8/12">
                                                     <div>
                                                         <div className="flex items-center justify-between gap-2">
 
@@ -363,17 +526,33 @@ const SingleSubmission = () => {
                                                                                     <Td className="px-2 py-4 whitespace-nowrap">
                                                                                         <div className='flex items-start justify-between text-sm'>
                                                                                             <p>
-                                                                                                {upload.title}
+                                                                                                {formatMomentDate(upload.createdAt, false)}
                                                                                             </p>
                                                                                         </div>
                                                                                     </Td>
                                                                                     
                                                                                     <Td className="px-2 py-4 text-sm whitespace-nowrap">
                                                                                         <div className="text-[#313131] text-xs flex items-center justify-center gap-2 flex-row">
-                                                                                            {/* && status === 'In Progress'  */}
-                                                                                            <button className='btn px-2 py-1 bg-[#e1e5ec] border border-[#e1e5ec] rounded text-[#666] flex items-center'>
-                                                                                                Delete
-                                                                                            </button>
+                                                                                            {upload.file_type == 'pdf' ? 
+                                                                                                <Tooltip hasArrow label='view' placement='top'>
+                                                                                                    <button onClick={()=>handleOpenCurrentUpload(upload)} className='btn px-2 py-1 btn-primary btn border border-[#e1e5ec] rounded !text-[#fff] flex items-center'>
+                                                                                                        <Eye size={16}/>
+                                                                                                    </button>
+                                                                                                </Tooltip>
+                                                                                            : <>
+                                                                                                <Tooltip hasArrow label='download' placement='top'>
+                                                                                                    <Link href={upload?.file_url} target="_blank" download className='btn px-2 py-1 btn-info btn border border-[#e1e5ec] rounded !text-[#fff] flex items-center'>
+                                                                                                        <DocumentDownload size={16}/>
+                                                                                                    </Link>
+                                                                                                </Tooltip>
+
+                                                                                            </>}
+
+                                                                                            <Tooltip hasArrow label='delete' placement='top'>
+                                                                                                <button type="button" onClick={()=>deleteUpload(upload?.id)} className='btn px-2 py-1 btn-red btn border border-[#e1e5ec] rounded !text-[#fff] flex items-center'>
+                                                                                                    <Trash size={16}/>
+                                                                                                </button>
+                                                                                            </Tooltip>
                                                                                         </div>
                                                                                     </Td>
 
@@ -387,7 +566,7 @@ const SingleSubmission = () => {
                                                     </div>
                                                 </div>
                                                 
-                                                <div className="px-3 md:p-4 rounded-lg sidebar w-4/12 space-y-4">
+                                                <div className="px-3 md:p-4 rounded-lg sidebar w-full lg:w-4/12 space-y-4">
                                                     <div className="space-y-3">
                                                         {showReviews ? 
                                                             <>
@@ -405,13 +584,13 @@ const SingleSubmission = () => {
                                                             : <></>
                                                         }
                                                         
-                                                        <button 
+                                                        <button onClick={()=>acceptSubmission()}
                                                             className="w-full whitespace-nowrap py-2 md:py-3 px-3 md:px-3 bg-[#008000] border border-transparent text-white transition ease-in duration-200 text-center font-semibold shadow-md rounded flex items-center justify-center gap-2 text-xs"
                                                         >
                                                             <p className="">Accept Submission</p>
                                                         </button>
 
-                                                        <button 
+                                                        <button onClick={()=>declineSubmission()}
                                                             className="w-full whitespace-nowrap py-2 md:py-3 px-3 md:px-3 bg-[#c51b26] border border-transparent text-white transition ease-in duration-200 text-center font-semibold shadow-md rounded flex items-center justify-center gap-2 text-xs"
                                                         >
                                                             <p className="">Decline Submission</p>
@@ -668,19 +847,21 @@ const SingleSubmission = () => {
           </div>
 
             <UploadFileSubmissionModal
-                user={null}
+                user={user}
                 isOpen={uploadFileIsOpen}
                 onClose={onUploadFileClose}
                 currentUpload={currentUpload}
-                uploadList={submissionFiles}
-                setCurrentUpload={setSubmissionFiles}
+                currentSubmission={submission}
+                uploadList={uploads}
+                setCurrentUpload={setCurrentUpload}
+                fetchUploads={fetchSubmissionFiles}
             />
 
             <AssignEditorSubmissionModal
                 isOpen={attachEditorIsOpen}
                 onClose={onAttachEditorClose}
                 submission={submission}
-                usersList={users}
+                usersList={userEditors}
                 fetchData={fetchData}
             />
 

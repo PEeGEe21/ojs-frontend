@@ -123,7 +123,7 @@ export default function CreateSubmission() {
                 );
                 console.log(data, 'datumm')
                 if(data.journalId === Number(selectedJournal.id)){
-                    setCurrentSubmission(data)
+                    setCurrentSubmission(data) 
                     setPrefix(data.prefix??'')
                     setTitle(data.title??'')
                     setSubTitle(data.subTitle??'')

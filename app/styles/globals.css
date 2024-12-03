@@ -208,3 +208,7 @@
   gap: 1rem !important;  /* Adds gap between slides */
 }
 
+
+.test-popup > div:first-of-type {
+  transform-origin: top left !important;
+}
