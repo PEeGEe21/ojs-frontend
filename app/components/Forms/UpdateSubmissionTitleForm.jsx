@@ -179,9 +179,9 @@ const UpdateSubmissionTitleForm = ({
               <Box mt={4}>
                   <div className="flex items-center justify-end w-full gap-3 flex-wrap">
                       <button
-                        className="h-10  w-auto whitespace-nowrap py-2 px-3 bg-[#008080] text-white transition ease-in duration-200 text-center text-sm font-semibold shadow-md rounded flex items-center justify-center gap-2 "
+                        className={`h-10  w-auto whitespace-nowrap py-2 px-3 bg-[#008080] text-white transition ease-in duration-200 text-center text-sm font-semibold shadow-md rounded flex items-center justify-center gap-2 ${isSaving || submission?.issue?.published_status == 1 ? 'disabled:opacity-50 disabled:cursor-not-allowed': ''}`}
                         onClick={handleSubmit}
-                        disabled={isSaving}
+                        disabled={isSaving || submission?.issue?.published_status == 1}
                         aria-disabled={isSaving}
                       >
                         {isSaving ? (

@@ -19,7 +19,7 @@ import {
 import Link from 'next/link';
 import { LoaderIcon, LoaderIcon2 } from '../IconComponent';
 import { issuesData, successOptions } from '../../lib/constants';
-import { Edit, PenTool, PenTool2, Trash } from 'iconsax-react';
+import { Edit, Global, GlobalEdit, GridLock, PenTool, PenTool2, Trash } from 'iconsax-react';
 import toast from 'react-hot-toast';
 import AddIssueModal from '../Modals/issues/AddIssueModal';
 import EditIssueModal from '../Modals/issues/EditIssueModal';
@@ -125,6 +125,31 @@ const IssuesTable = () => {
             render: (_, record) => {
                 return (
                         <Space size="middle">
+                            
+                            {record?.published_status == 0 ? (
+                                <button 
+                                    className="flex btn btn-success items-center gap-1 text-xs" 
+                                    onClick={() => {
+                                        // setIsEditingUser(true);
+                                        // setCurrentIssue(record);
+                                        publishIssue(record);
+                                    }}
+                                >
+                                    <Global size={14}/>Publish
+                                </button>
+                            ):(
+                                <button 
+                                    className="flex btn btn-warning items-center gap-1 text-xs" 
+                                    onClick={() => {
+                                        // setIsEditingUser(true);
+                                        // setCurrentIssue(record);
+                                        unPublishIssue(record);
+                                    }}
+                                >
+                                    <GridLock size={14}/>UnPublish
+                                </button>
+                                )
+                            }
                             <button 
                                 className="flex btn btn-info items-center gap-1 text-xs" 
                                 onClick={() => {
@@ -205,6 +230,85 @@ const IssuesTable = () => {
             // }
         });
     };
+
+    const publishIssue = (data) =>{
+        Swal.fire({
+            title: 'You\'re about to Publish this Issue.',
+            html: 'You\'re about to publish <strong>' + data?.title + '</strong>.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Confirm',
+            allowOutsideClick: () => !Swal.isLoading(), // Prevent clicking outside modal during loading
+            showLoaderOnConfirm: true,
+            preConfirm: async () => {
+                try {
+                    const response = await axios.post(hostUrl + `issues/${parseInt(data?.id)}/publish`);
+
+                    if (response.data.success){
+                        Swal.fire(
+                            'Success!',
+                            response?.data?.message??'Successfully Published',
+                            'success'
+                        );
+                        fetchData()
+
+                    } else {
+                        Swal.fire('Error!', 'There was an problem publishing Issue.', 'error');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    Swal.fire('Error!', 'There was an problem publishing Issue.', 'error');
+                    throw err; 
+                }
+            },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetchData()
+            }
+        });
+    }
+
+    const unPublishIssue = (data) =>{
+        Swal.fire({
+            title: 'You\'re about to UnPublish this Issue.',
+            html: 'You\'re about to unpublish <strong>' + data?.title + '</strong>.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Confirm',
+            allowOutsideClick: () => !Swal.isLoading(), // Prevent clicking outside modal during loading
+            showLoaderOnConfirm: true,
+            preConfirm: async () => {
+                try {
+                    const response = await axios.post(hostUrl + `issues/${parseInt(data?.id)}/unpublish`);
+
+                    if (response.data.success){
+                        Swal.fire(
+                            'Success!',
+                            response?.data?.message??'Successfully Unpublished',
+                            'success'
+                        );
+                        fetchData()
+
+                    } else {
+                        Swal.fire('Error!', 'There was an problem unpublishing Issue.', 'error');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    Swal.fire('Error!', 'There was an problem unpublishing Issue.', 'error');
+                    throw err; 
+                }
+            },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetchData()
+            }
+        });
+    }
+
 
     return (
         <>

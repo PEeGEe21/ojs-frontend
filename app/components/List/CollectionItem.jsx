@@ -1,4 +1,4 @@
-import { formatDuration, formatMomentDate, shortenTitle } from "../../lib/utilFunctions";
+import { formatDuration, formatMomentDate, hostUrl, shortenTitle } from "../../lib/utilFunctions";
 import { Progress } from "@chakra-ui/react";
 import { Global } from "iconsax-react";
 import Image from "next/image";
@@ -34,19 +34,19 @@ const CollectionItem = ({ index, data, setSubmissions }) => {
     // }, [data]);
 
     console.log(data);
-    const status = useMemo(() => {
-        const now = Date.now();
-        const start_date = new Date(data?.start_date);
-        const end_date = new Date(data?.end_date);
-        if (start_date.getTime() <= now) {
-            return "In Progress";
-        }
+    // const status = useMemo(() => {
+    //     const now = Date.now();
+    //     const start_date = new Date(data?.start_date);
+    //     const end_date = new Date(data?.end_date);
+    //     if (start_date.getTime() <= now) {
+    //         return "In Progress";
+    //     }
 
-        if (now > end_date.getTime()) {
-            return "Ended";
-        }
-        return "Upcoming";
-    }, [data]);
+    //     if (now > end_date.getTime()) {
+    //         return "Ended";
+    //     }
+    //     return "Upcoming";
+    // }, [data]);
 
     const deleteSubmission = (id) => {
         Swal.fire({
@@ -93,7 +93,7 @@ const CollectionItem = ({ index, data, setSubmissions }) => {
         <>
         {/* [#0F1B2D] */}
             <div
-                className="bg-[#0F1B2D] min-h-[150px] p-5 rounded-lg font-medium relative hover:translate-y-[-10px] transition-all duration-300 ease-linear"
+                className="bg-[#0F1B2D] min-h-[150px] p-5 rounded-lg font-medium relative hover:translate-y-[-10px] transition-all duration-300 ease-linear w-[100%]"
             >
                 <div className="flex w-full gap-3">
                     <span className="text-2xl text-white">
@@ -104,8 +104,8 @@ const CollectionItem = ({ index, data, setSubmissions }) => {
                             <div className="flex flex-row items-start gap-2">
                                 
                                 <div className="flex flex-col font-medium">
-                                    <Link href={'/admin/submissions/' + data?.id} className="text-2xl text-white capitalize hover:underline">
-                                        {data?.title??shortenTitle(data?.title, 100)} 
+                                    <Link href={'/admin/submissions/' + data?.id} className="text-2xl text-white capitalize hover:underline w-[40%] break-words">
+                                        {shortenTitle(data?.title, 100)} 
                                     </Link>
                                     <p className="text-[#C3C1C1] text-sm">
                                         <span className="text-[#ADB4B9] text-xs">
@@ -117,36 +117,52 @@ const CollectionItem = ({ index, data, setSubmissions }) => {
 
 
                             <div className="flex flex-col gap-2">
-                                {status === "In Progress" || status === "Ended" ? (
+                                {data?.status === 0 ? (
                                     <div className="bg-[#353432] text-[#00FFA3] max-w-fit px-3 py-1 rounded-3xl text-xs inline-flex items-center gap-2 absolute right-2 top-2">
                                         <span className="h-1 w-1 rounded-full bg-[#00FFA3] block"></span>
-                                        {status}
+                                        {'Pending'}
                                     </div>
-                                ) : (
+                                ) : ''}
+
+                                {data?.status === 1 ? (
                                     <div className="bg-[#353432] text-[#F9C33F] max-w-fit px-3 py-1 rounded-3xl text-xs inline-flex items-center gap-2 absolute right-5 top-5">
                                         <span className="h-1 w-1 rounded-full bg-[#F9C33F] bstake"></span>
-                                        Incomplete
+                                        Accepted
                                     </div>
-                                )}
+                                ) : ''}
+
+                                {data?.status === 2 ? (
+                                    <div className="bg-[#353432] text-[#c51b26] max-w-fit px-3 py-1 rounded-3xl text-xs inline-flex items-center gap-2 absolute right-5 top-5">
+                                        <span className="h-1 w-1 rounded-full bg-[#a1161f] bstake"></span>
+                                        Rejected
+                                    </div>
+                                ) : ''}
                             </div>
                         </div>
 
-                        <div className="flex items-center justify-between flex-col-reverse md:flex-row w-full pt-4 border-t border-[#3C3E3E] gap-2">
+                        <div className="flex items-center justify-between flex-col flex-wrap lg:flex-nowrap md:flex-row w-full pt-4 border-t border-[#3C3E3E] gap-2">
                             
                             <div className="w-full space-y-1 font-medium md:w-10/12">
                                 <div className="flex flex-wrap items-start justify-start gap-4 font-medium">
                                     <div>
-                                        <p className="text-xAssigns text-[#ADB4B9]">Date Created</p>
+                                        <p className="text-xs text-[#ADB4B9]">Date Created</p>
                                         <span className="text-sm text-[#FFA178]">
                                             {formatMomentDate(data?.createdAt, false)}
                                         </span>
                                     </div>
                                     <div>
+                                        <p className="text-xs text-[#ADB4B9]">Published</p>
+                                        <span className="text-sm text-[#FFA178]">
+                                            <span>{data?.publication_status === 1 ? <span className="text-green-400">Scheduled</span> : <span className="text-red-400">Unscheduled</span>}</span>
+
+                                        </span>
+                                    </div>
+                                    {/* <div>
                                         <p className="text-xs text-[#ADB4B9]">Number of Reviews</p>
                                         <span className="text-sm text-[#FFA178]">
                                             {data?.no_of_reviews}
                                         </span>
-                                    </div>
+                                    </div> */}
                                 </div>
                             </div>
                                 
@@ -154,16 +170,16 @@ const CollectionItem = ({ index, data, setSubmissions }) => {
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-3">
 
-                                    
+                                        <button onClick={()=>deleteSubmission(data?.id)} className="text-[#F0EDED] text-sm btn btn-red p-2 relative block">
+                                            Delete
+                                        </button>
                                         <Link href={'/admin/submissions/'+data?.id} className="text-[#F0EDED] text-sm border border-[#3C3E3E] p-2 relative block">
                                             View Submission
                                         </Link>
                                         {/* <button onClick={()=>deleteSubmission(item.id)} className='btn p-2 bg-[#e1e5ec] border border-[#e1e5ec] rounded text-[#666] flex items-center'>
                                                 <Trash size={12}/>
                                             </button> */}
-                                        <button onClick={()=>deleteSubmission(data?.id)} className="text-[#F0EDED] text-sm btn btn-red p-2 relative block">
-                                            Delete
-                                        </button>
+                                        
                                     </div>
                                 </div>
                             </div>

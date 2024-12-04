@@ -23,6 +23,8 @@ const AssignIssueSubmissionForm = ({
   submission,
   issuesList,
   fetchData,
+  isPublishingSubmission,
+  onPublishSubmissionOpen = false,
 }) => {
   const [isSaving, setIsSaving] = useState(false);
   const router = useRouter();
@@ -85,6 +87,8 @@ const AssignIssueSubmissionForm = ({
         if (resp.data.success) {
           fetchData();
           onClose();
+          if(isPublishingSubmission)
+            onPublishSubmissionOpen();
         } else {
           toast.error(resp.data.message);
         }

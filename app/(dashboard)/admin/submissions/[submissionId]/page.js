@@ -3,6 +3,8 @@ import { Box, Progress, Tab, TabIndicator, Table, TabList, TabPanel, TabPanels, 
 import UploadFileSubmissionModal from "../../../../components/Modals/UploadFileSubmissionModal"
 import AssignEditorSubmissionModal from "../../../../components/Modals/AssignEditorSubmissionModal"
 import AssignIssueSubmissionModal from "../../../../components/Modals/AssignIssueSubmissionModal"
+import PublishSubmissionModal from "../../../../components/Modals/PublishSubmissionModal"
+import UnPublishSubmissionModal from "../../../../components/Modals/UnPublishSubmissionModal"
 import "react-quill-new/dist/quill.snow.css";
 import { ArrowLeft, DocumentDownload, Trash, Eye } from 'iconsax-react'
 import { useParams, useRouter } from 'next/navigation'
@@ -43,10 +45,11 @@ const SingleSubmission = () => {
     const [editors, setEditors] = useState([])
     const [userEditors, setUserEditors] = useState([])
     const [showReviews, setShowReviews] = useState(false)
+    const [changeAcceptanceStatus, setChangeAcceptanceStatus] = useState(false)
     const params = useParams();
     const { submissionId } = params;    
     const id = submissionId;
-
+    let isPublishingSubmission = false;
     const {
         isOpen: uploadFileIsOpen,
         onOpen: onUploadFileOpen,
@@ -60,9 +63,21 @@ const SingleSubmission = () => {
     } = useDisclosure();
 
     const {
-        isOpen: assignnIssueIsOpen,
+        isOpen: assignIssueIsOpen,
         onOpen: onAssignIssueOpen,
         onClose: onAssignIssueClose,
+    } = useDisclosure();
+
+    const {
+        isOpen: publishSubmissionIsOpen,
+        onOpen: onPublishSubmissionOpen,
+        onClose: onPublishSubmissionClose
+    } = useDisclosure();
+
+    const {
+        isOpen: unPublishSubmissionIsOpen,
+        onOpen: onUnPublishSubmissionOpen,
+        onClose: onUnPublishSubmissionClose
     } = useDisclosure();
 
     const ReactQuill = useMemo(() => dynamic(() => import('react-quill-new'), { 
@@ -314,6 +329,18 @@ const SingleSubmission = () => {
         setViewCurrentUpload(upload)
     }
 
+    function openScheduleForPublication(){
+        // let isPublished
+        if(!submission.issue){
+            isPublishingSubmission = true;
+            onAssignIssueOpen();
+        }
+
+        if(!submission.issue)
+            return;
+        onPublishSubmissionOpen();
+    }
+
     const acceptSubmission = () =>{
         Swal.fire({
             title: 'You\'re about to Accept this Submission.',
@@ -355,7 +382,7 @@ const SingleSubmission = () => {
 
     const declineSubmission = () =>{
         Swal.fire({
-            title: 'You\'re about to Decline this Submission.',
+            title: 'You\'re about to Reject this Submission.',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
@@ -365,7 +392,7 @@ const SingleSubmission = () => {
             showLoaderOnConfirm: true,
             preConfirm: async () => {
                 try {
-                    const response = await axios.post(hostUrl + `submissions/${parseInt(submission?.id)}/decline`);
+                    const response = await axios.post(hostUrl + `submissions/${parseInt(submission?.id)}/reject`);
 
                     if (response.data.success){
                         Swal.fire(
@@ -452,7 +479,7 @@ const SingleSubmission = () => {
                                         Submission
                                     </span>
                                 </Tab>
-                                <Tab 
+                                {/* <Tab 
                                     // onSelect={}
                                     className=" border-[#3B3939] text-[#313131]"
                                     _hover={{ color: "#FFFFFF", backgroundColor:"#313131",  borderTop:"1px", borderTopColor: "#FFF" }}
@@ -462,7 +489,7 @@ const SingleSubmission = () => {
                                     <span className="py-2  min-w-[150px]">
                                         Reviews
                                     </span>
-                                </Tab>
+                                </Tab> */}
                             </TabList>
                             <TabPanels>
                                 <TabPanel className="px-0 py-0">
@@ -583,18 +610,41 @@ const SingleSubmission = () => {
                                                             </>
                                                             : <></>
                                                         }
-                                                        
-                                                        <button onClick={()=>acceptSubmission()}
-                                                            className="w-full whitespace-nowrap py-2 md:py-3 px-3 md:px-3 bg-[#008000] border border-transparent text-white transition ease-in duration-200 text-center font-semibold shadow-md rounded flex items-center justify-center gap-2 text-xs"
-                                                        >
-                                                            <p className="">Accept Submission</p>
-                                                        </button>
 
-                                                        <button onClick={()=>declineSubmission()}
-                                                            className="w-full whitespace-nowrap py-2 md:py-3 px-3 md:px-3 bg-[#c51b26] border border-transparent text-white transition ease-in duration-200 text-center font-semibold shadow-md rounded flex items-center justify-center gap-2 text-xs"
-                                                        >
-                                                            <p className="">Decline Submission</p>
-                                                        </button>
+                                                        {submission?.issue?.published_status || submission?.issue?.published_status ? 
+                                                            <div className="text-sm">
+                                                                <p><strong>Submission Published.</strong></p>
+                                                            </div>
+                                                        : ''}
+
+                                                        {submission?.status !== 0 && submission?.issue?.published_status == 0 ? 
+                                                            <div className="text-sm">
+                                                                <p><strong>Submission {submission?.status == 1 ? 'Accepted' : ''}{submission?.status == 2 ? 'Rejected' : ''}.</strong></p>
+                                                            </div>
+                                                        : ''}
+
+                                                        {submission?.status !== 0 ? 
+                                                            <div className="text-sm">
+                                                                <span className="underline cursor-pointer" onClick={()=>{setChangeAcceptanceStatus(!changeAcceptanceStatus)}}>Change Decision</span>
+                                                            </div>
+                                                        : ''}
+
+
+                                                        {submission?.status == 0 || changeAcceptanceStatus ? 
+                                                            <>
+                                                                <button onClick={()=>acceptSubmission()}
+                                                                    className="w-full whitespace-nowrap py-2 md:py-3 px-3 md:px-3 bg-[#008000] border border-transparent text-white transition ease-in duration-200 text-center font-semibold shadow-md rounded flex items-center justify-center gap-2 text-xs"
+                                                                >
+                                                                    <p className="">Accept Submission</p>
+                                                                </button>
+
+                                                                <button onClick={()=>declineSubmission()}
+                                                                    className="w-full whitespace-nowrap py-2 md:py-3 px-3 md:px-3 bg-[#c51b26] border border-transparent text-white transition ease-in duration-200 text-center font-semibold shadow-md rounded flex items-center justify-center gap-2 text-xs"
+                                                                >
+                                                                    <p className="">Decline Submission</p>
+                                                                </button>
+                                                            </>
+                                                        : ''}
                                                     </div>
                                                     <div>
                                                         <div className="flex items-center justify-between gap-2 bg-[#eee] p-2">
@@ -656,13 +706,13 @@ const SingleSubmission = () => {
                                         </div>
                                     </div>
                                 </TabPanel>
-                                <TabPanel className="px-0 py-0">
+                                {/* <TabPanel className="px-0 py-0">
                                     <div>
                                         <div className="bg-white min-h-[500px] p-4">
-2
+                                            2
                                         </div>
                                     </div>
-                                </TabPanel>
+                                </TabPanel> */}
                             </TabPanels>
 
                         </Tabs>
@@ -674,17 +724,44 @@ const SingleSubmission = () => {
                   <TabPanel className="px-0 py-0">
                     <div>
                       <div className="bg-white min-h-[500px]">
-                        <div className="flex items-center justify-between gap-2 border-b border-b-[#eee] px-3 py-3">
-                            <h3 className="text-[#212121] text-base font-semibold">
-                                Status: <span>Unscheduled</span>
-                            </h3>
-                            <button  
-                                onClick={onAttachEditorOpen}
-                                className="w-auto whitespace-nowrap py-2 md:py-2 px-3 md:px-3 bg-[#313131] text-white transition ease-in duration-200 text-center font-semibold shadow-md rounded flex items-center justify-center gap-2 text-xs"
-                            >
-                                <p className="">Schedule For Publication</p>
-                            </button>
-                        </div>
+                            <>
+                                <div className="flex items-center justify-between gap-2 border-b border-b-[#eee] px-3 py-3">                                
+                                    <h3 className="text-[#212121] text-base font-semibold">
+                                        Status: <span>{submission?.publication_status === 1 ? <span className="text-green-400">Scheduled</span> : <span className="text-red-400">Unscheduled</span>}</span>
+                                    </h3>
+
+                                    { (submission?.status === 0 || submission?.status === 1) && (submission?.publication_status == 0) ?
+                                        <button  
+                                            onClick={openScheduleForPublication}
+                                            className="w-auto whitespace-nowrap py-2 md:py-2 px-3 md:px-3 bg-[#313131] text-white transition ease-in duration-200 text-center font-semibold shadow-md rounded flex items-center justify-center gap-2 text-xs"
+                                        >
+                                            <p className="">Schedule For Publication</p>
+                                        </button>
+
+                                        : 
+                                        <button  
+                                            onClick={onUnPublishSubmissionOpen}
+                                            className="w-auto whitespace-nowrap py-2 md:py-2 px-3 md:px-3 btn-red text-white transition ease-in duration-200 text-center font-semibold shadow-md rounded flex items-center justify-center gap-2 text-xs"
+                                        >
+                                            <p className="">Unpublish</p>
+                                        </button>
+
+                                    }
+                                
+                                            
+                                </div>
+                            </> 
+
+                            { submission?.issue && submission?.issue?.published_status ? 
+                                <>
+                                    <div className="flex items-center justify-between gap-2  bg-red-600 text-white px-3 py-3 text-center w-full">
+                                        <h3 className="text-base font-semibold w-full">
+                                            This version has been published and can not be edited.
+                                        </h3>
+                                    </div>
+                                </>
+                                : ''
+                            }
 
                         <Tabs position="relative" variant="unstyled" isLazy className="flex">
 
@@ -818,14 +895,18 @@ const SingleSubmission = () => {
                                             <div className=" px-3 md:px-6 py-3 md:py-6">
                                                 <div className="flex items-center justify-start gap-2 mb-6">
                                                     <h3 className="text-[#212121] text-base">
-                                                        This has not been scheduled for publication in an issue. {!submission?.issue ? "Assign to Issue." : ""}
+                                                        {!submission?.issue ? "This has not been scheduled for publication in an issue. " : <span>Assign to Issue. Published in <span className="underline text-blue-400">Vol. {submission?.issue?.volume} No. {submission?.issue?.number} ({submission?.issue?.year}): {submission?.issue?.title}</span></span>}
                                                     </h3>
-                                                    <button  
-                                                        onClick={onAssignIssueOpen}
-                                                        className="w-auto whitespace-nowrap py-2 md:py-2 px-3 md:px-3 bg-[#313131] text-white transition ease-in duration-200 text-center font-semibold shadow-md rounded flex items-center justify-center gap-2 text-xs"
-                                                    >
-                                                        <p className="">Assign Issue</p>
-                                                    </button>
+
+                                                    {!submission?.issue || submission?.issue?.published_status == 0  ? 
+                                                        <button  
+                                                            onClick={onAssignIssueOpen}
+                                                            className="w-auto whitespace-nowrap py-2 md:py-2 px-3 md:px-3 bg-[#313131] text-white transition ease-in duration-200 text-center font-semibold shadow-md rounded flex items-center justify-center gap-2 text-xs"
+                                                        >
+                                                            <p className="">Assign Issue</p>
+                                                        </button>
+                                                    : <></>}
+
                                                 </div>
 
                                                 <UpdateSubmissionIssuesForm submission={submission} fetchData={fetchData} sections={sections}/>
@@ -866,10 +947,26 @@ const SingleSubmission = () => {
             />
 
             <AssignIssueSubmissionModal
-                isOpen={assignnIssueIsOpen}
+                isOpen={assignIssueIsOpen}
                 onClose={onAssignIssueClose}
                 submission={submission}
                 issuesList={issues}
+                fetchData={fetchData}
+                isPublishingSubmission={isPublishingSubmission}
+                onPublishSubmissionOpen={onPublishSubmissionOpen}
+            />
+
+            <PublishSubmissionModal
+                isOpen={publishSubmissionIsOpen}
+                onClose={onPublishSubmissionClose}
+                submission={submission}
+                fetchData={fetchData}
+            />
+
+            <UnPublishSubmissionModal
+                isOpen={unPublishSubmissionIsOpen}
+                onClose={onUnPublishSubmissionClose}
+                submission={submission}
                 fetchData={fetchData}
             />
         </>
