@@ -208,7 +208,7 @@ const SignUpForm = () => {
             name="password"
             required
             ref={password}
-            pattern="[a-zA-Z0-9]+"
+            // pattern="[a-zA-Z0-9]+"
             className="block px-2 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent border-1 border-gray-300 appearance-none  focus:outline-none focus:ring-0 peer border focus:border-[#013434] h-10 rounded focus:outline-0"
             placeholder=" "
           />
@@ -228,7 +228,7 @@ const SignUpForm = () => {
             name="cpassword"
             required
             ref={cpassword}
-            pattern="[a-zA-Z0-9]+"
+            // pattern="[a-zA-Z0-9]+"
             className="block px-2 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent border-1 border-gray-300 appearance-none  focus:outline-none focus:ring-0 peer border focus:border-[#013434] h-10 rounded focus:outline-0"
             placeholder=" "
           />
