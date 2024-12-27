@@ -13,6 +13,7 @@ import {
   Setting2,
   Setting3,
   Eye,
+  SearchNormal1,
   
 } from 'iconsax-react';
 import Image from 'next/image';

@@ -21,6 +21,7 @@ import { JournalContext } from "../../../../utils/journalContext";
 import UpdateSubmissionIssuesForm from "../../../../components/Forms/UpdateSubmissionIssuesForm"
 import UpdateSubmissionTitleForm from "../../../../components/Forms/UpdateSubmissionTitleForm"
 import Link from "next/link";
+import { LoaderIcon } from "../../../../components/IconComponent";
 
 const SingleSubmission = () => {
     const { selectedJournal } = useContext(JournalContext);
@@ -46,6 +47,7 @@ const SingleSubmission = () => {
     const [userEditors, setUserEditors] = useState([])
     const [showReviews, setShowReviews] = useState(false)
     const [changeAcceptanceStatus, setChangeAcceptanceStatus] = useState(false)
+    const [isSavingFileStatus, setIsSavingFileStatus] = useState({});
     const params = useParams();
     const { submissionId } = params;    
     const id = submissionId;
@@ -239,7 +241,7 @@ const SingleSubmission = () => {
     }
 
     useEffect(()=>{
-        // fetchUsers();
+        fetchUsers();
         fetchSectionsData();
         fetchSubmissionFiles();
         fetchIssuesData();
@@ -419,6 +421,55 @@ const SingleSubmission = () => {
         });
     }
 
+    const toggleCurrentFileStatus = async(record, index, status) => {
+        if(record.is_main)
+            return;
+        let key = record.id
+        var msg = '';
+        if (key == "undefined") {
+            msg = "Record key is not defined:";
+            console.error(msg);
+            Swal.fire('Error!', msg, 'error');
+            return;
+        }
+            
+        setIsSavingFileStatus({
+            [key]: true
+        });
+        try {
+                
+            const updatedRecord = { ...record, is_main: record.is_main ? 0 : 1 };
+            const updatedDataSource = submissionFiles.map(item => 
+                item.id === record.id ? updatedRecord : item
+            );
+    
+            await axios.post(hostUrl + `submissions/${submission?.id}/submission-files/toggle-main/`+record?.id);
+
+            // setSubmissionFiles(updatedDataSource);
+    
+            setTimeout(() => {
+                fetchSubmissionFiles();
+                setIsSavingFileStatus({
+                    [key]: false
+                });
+
+                msg = 'Successfully '+ (updatedRecord.is_main ? 'Activated' : 'Deactivated')  + '!!'
+                Swal.fire(
+                    'Success!',
+                    msg,
+                    'success'
+                );
+            }, 500);
+    
+        } catch (err) {
+            setIsSavingFileStatus({
+                [key]: false
+            });
+            Swal.fire('Error!', err?.message??'There was an an Error.', 'error');
+        }
+    
+    };
+
     return (
         <>
             <div className="flex flex-row items-center justify-start gap-4 mb-8 flex-wrap lg:flex-nowrap">
@@ -519,6 +570,7 @@ const SingleSubmission = () => {
                                                                         <Th width={10}>#</Th>
                                                                         <Th width={'30%'}>Title</Th>
                                                                         <Th width={'30%'}>Date</Th>
+                                                                        <Th width={'30%'}>Is Main</Th>
                                                                         <Th>Action</Th>
                                                                     </Tr>
                                                                     </Thead>
@@ -555,6 +607,31 @@ const SingleSubmission = () => {
                                                                                             <p>
                                                                                                 {formatMomentDate(upload.createdAt, false)}
                                                                                             </p>
+                                                                                        </div>
+                                                                                    </Td>
+
+                                                                                    <Td className="px-2 py-4 whitespace-nowrap">
+                                                                                        <div className='flex items-start justify-between text-sm'>
+                                                                                            <button
+                                                                                                className={`btn btn-sm flex items-center gap-2 ${upload.is_main ? 'btn-success' : 'btn-danger'}`}
+                                                                                                disabled={isSavingFileStatus[upload.id] || upload.is_main}
+                                                                                                aria-disabled={isSavingFileStatus[upload.id] || upload.is_main}
+                                                                                                onClick={
+                                                                                                    ()=>toggleCurrentFileStatus(upload, index, upload.is_main)
+                                                                                                }
+                                                                                                >
+                                                                                                    {isSavingFileStatus[upload.id] ? (
+                                                                                                        <>
+                                                                                                            <LoaderIcon
+                                                                                                                extraClass="text-white h-5 w-5"
+                                                                                                                className="animate-spin mr-1"
+                                                                                                            />
+                                                                                                        </>
+                                                                                                    ) : (
+                                                                                                        upload.is_main ? 'Main' : 'Not Inactive'
+                                                                                                    )}
+                                                                                                    
+                                                                                            </button>
                                                                                         </div>
                                                                                     </Td>
                                                                                     
@@ -942,7 +1019,7 @@ const SingleSubmission = () => {
                 isOpen={attachEditorIsOpen}
                 onClose={onAttachEditorClose}
                 submission={submission}
-                usersList={userEditors}
+                usersList={users}
                 fetchData={fetchData}
             />
 

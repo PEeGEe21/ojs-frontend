@@ -8,24 +8,46 @@ import {
     BreadcrumbItem,
     BreadcrumbLink,
     BreadcrumbSeparator,
-  } from '@chakra-ui/react'
+    List,
+    MenuItem,
+    useDisclosure,
+    useToast
+} from '@chakra-ui/react'
 import { ChevronRight, DocumentExport, Recycle } from '@carbon/icons-react'
 import Link from 'next/link'
-import { hostUrl, shortenTitle } from '../../../../lib/utilFunctions';
+import { formatMomentDate, hostUrl, shortenTitle } from '../../../../lib/utilFunctions';
 import { LoaderIcon } from '../../../../components/IconComponent';
+import ArticleRecoSearchForm from '../../../../components/Forms/ArticleRecoSearchForm';
+import ArticleSearchDrawer from '../../../../components/Drawer/ArticleSearchDrawer';
+import { Menu } from 'iconsax-react';
+import { getFullName } from '../../../../utils/common';
+import ArticleSummaryDrawer from '../../../../components/Drawer/ArticleSummaryDrawer';
+import axios from 'axios';
 
 const SingleArticle = () => {
     const [journal, setJournal] = useState(null);
     const [article, setArticle] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [pageTitle, setPageTitle] = useState(null);
+    const [getReco, setGetRecoSuccess] = useState(false);
+    const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+    const [summary, setSummary] = useState(null);
+    const [recommendation, setRecommendation] = useState([]);
     const router = useRouter();
+    const toast = useToast();
 
     // const params = useParams();
     // const { slug } = params;    
     // const id = slug;
 
     const { journalId, articleId } = useParams();
+    const { isOpen, onOpen, onClose } = useDisclosure();
+    const { 
+        isOpen: isOpenSummaryDrawer, 
+        onOpen: onOpenSummaryDrawer, 
+        onClose: onCloseSummaryDrawer 
+    } = useDisclosure();
+
 
     const journalIdNum = parseInt(journalId);
     const articleIdNum = parseInt(articleId);
@@ -85,6 +107,52 @@ const SingleArticle = () => {
     }, [articleIdNum]);
 
 
+    const getArticleSummary = async () => {
+        setIsGeneratingSummary(true);
+        if (article?.file?.id) {
+            try {
+                // console.log(article?.file?.id, 'smldsm')
+                // return
+                const response = await axios.post(hostUrl + `submissions/${article?.file?.id}/summarize`);
+                if (response.data.success) {
+                    const data = response.data.summary;
+                    setSummary(data);
+                    onOpenSummaryDrawer();
+                    toast({
+                        title: "Summary generated successfully",
+                        status: "success",
+                        duration: 2000,
+                        position: "top-right",
+                    });
+                } else {
+                    toast({
+                        title: "Failed to generate summary.",
+                        description: "Failed",
+                        status: "error",
+                        duration: 2000,
+                        position: "top-right",
+                    });
+                }
+                setIsGeneratingSummary(false);
+            } catch (err) {
+                console.error('Error fetching data:', err?.message);
+                toast({
+                    title: "Failed to generate summary.",
+                    description: "Failed",
+                    status: "error",
+                    duration: 2000,
+                    position: "top-right",
+                });
+            } finally {
+                setIsGeneratingSummary(false);
+            }
+        }
+    };
+
+    const openDrawer = ()=>{
+        onOpen();
+    }
+
     return (
         <>
             <div className='min-h-32 h-32 bg-stone-400 relative text-white' style={{backgroundImage: 'url(/images/albert-canite-RG2YD21o81E-unsplash.jpg)', backgroundPosition: 'center center', backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundAttachment: 'scroll'}}>
@@ -111,7 +179,7 @@ const SingleArticle = () => {
             </div>
 
 
-            <section className="sectionspace pb-28">
+            <section className="sectionspace pb-28 min-h-80">
                     <div className="container max-w-6xl mx-auto  pb-12 border-x border-gray-100 mt-8 shadow min-h-screen">
                         <div className=' '>
 
@@ -119,40 +187,45 @@ const SingleArticle = () => {
                                 <div className='w-full lg:w-9/12 flex-1 space-y-8 pb-20 px-8'>
                                 
                                     <div className='space-y-5'>
-                                        <div className=' mt-2 flex-col text-sm'>
-                                            <h4 className='font-bold'> Udeh Praise</h4>
-                                            <p>
-                                                Department of Curriculum and Instructional Technology, Faculty of Education, University of Benin
-                                            </p>
-                                        </div>
-
-                                        <div className='mt-2 flex-col text-sm'>
-                                            <h4 className='font-bold'> Udeh Praise</h4>
-                                            <p>
-                                            Department of Curriculum and Instructional Technology, Faculty of Education, University of Benin
-                                            </p>
-                                        </div>
+                                        {article?.editors.map((editor, index) =>{
+                                            return (
+                                                <div className=' mt-2 flex-col text-sm' key={index}>
+                                                    <h4 className='font-bold'>{getFullName(editor?.editor)}</h4>
+                                                    {/* <p>
+                                                        Department of Curriculum and Instructional Technology, Faculty of Education, University of Benin
+                                                    </p> */}
+                                                </div>
+                                            )
+                                        })}
                                     </div>
 
                                     <div className='mt-2 flex-col text-sm'>
                                         <h4 className='font-bold'>Keywords</h4>
                                         <p>
-                                            Department, Faculty of Education, University of Benin
+                                            {article?.keywords && JSON.parse(article?.keywords).map((keyword, index, array) =>{
+                                                return (
+                                                    <span key={index} className='capitalize'>{keyword}{index < array.length - 1 && ', '}</span>
+                                                )
+                                            })}
                                         </p>
                                     </div>
-
 
                                     <div>
                                         <h3 className='font-bold text-lg mb-2'>Abstract</h3>
                                         <div className='text-justify'>
-                                            Lorem ipsum dolor sit amet consectetur, adipisicing elit. Minus fugit delectus laborum blanditiis, rem ipsa deleniti non, dolores mollitia, odio veritatis eligendi voluptatum adipisci aspernatur numquam corporis magnam itaque dolor repellendus. Nam esse placeat vel accusamus neque at et facilis pariatur ratione. Quas blanditiis labore tenetur quaerat fugiat aut magni expedita ratione totam voluptates veritatis odio ex, earum aperiam illo nemo sapiente deleniti delectus qui eius explicabo maxime, porro vero aliquid! Aperiam quidem facilis nisi numquam nemo sed, repellendus, cum officia beatae veritatis, ratione soluta repellat dolore repudiandae! Cum optio, ducimus esse tempora ipsum quisquam facere temporibus nobis sint laborum aperiam quaerat beatae voluptatem sunt ipsam magni, fugiat exercitationem, consequuntur nulla voluptatum perferendis ut quod nesciunt unde! Eius consectetur, natus neque soluta iusto, doloremque architecto nobis facere suscipit hic perferendis accusamus consequuntur expedita impedit eveniet consequatur, animi nemo iste voluptates quasi. Magni repellat inventore laborum aspernatur. Repellat totam maiores exercitationem!
+                                            <div className="" dangerouslySetInnerHTML={{ __html: article?.abstract}}></div>
                                         </div>
                                     </div>
                                 </div>
                                 <div className='w-full lg:w-3/12 border-l'>
                                     <div>
+                                        <div className='pb-4 border-b px-4 flex gap-2'>
+                                            <ArticleRecoSearchForm onOpen={onOpen} article={article} setRecommendation={setRecommendation}/>
+                                            {recommendation.length > 0 && (<button type='button' onClick={openDrawer} className='btn-primary text-sm rounded p-2'><Menu size={22}></Menu></button>)}
+                                        </div>
+
                                         <div className='pb-4 border-b px-4'>
-                                            <Link href={'/journals/'+journalIdNum} className="rounded relative h-[200px] md:h-[300px] overflow-hidden">
+                                            <div className="rounded relative h-[200px] md:h-[300px] overflow-hidden">
                                                 <Image 
                                                     src={`/images/albert-canite-RG2YD21o81E-unsplash.jpg`} 
                                                     alt={'journal one'} 
@@ -164,35 +237,46 @@ const SingleArticle = () => {
                                                     placeholder="blur"
                                                     blurDataURL={blurDataUrl}
                                                 />
-                                            </Link>
-                                        </div>
-                                        <div className='py-4 border-b px-4'>
-                                            <div className='flex items-center justify-start gap-2'>
-                                                <button className='flex items-center justify-center gap-1 rounded-md border border-[#008080] p-2 px-3 text-xs min-w-[90px] text-[#008080]'>
-                                                    <DocumentExport/> PDF
-                                                </button>
-                                                <button className='flex items-center justify-center gap-1 rounded-md border border-[#008000] bg-[#008000] p-2 px-3 text-xs min-w-[90px] text-white'>
-                                                    <Recycle/> Summarize
-                                                </button>
                                             </div>
                                         </div>
+
+                                        {article?.file ? 
+                                            <div className='py-4 border-b px-4'>
+                                                <div className='flex items-center justify-start gap-2'>
+                                                    <Link href={`${article?.file?.file_url}`} download target='_blank' className='flex items-center justify-center gap-1 rounded-md border border-[#008080] p-2 px-3 text-xs min-w-[90px] text-[#008080]'>
+                                                        <DocumentExport/> PDF
+                                                    </Link>
+                                                    <button disabled={isGeneratingSummary} onClick={getArticleSummary} className='flex items-center justify-center gap-1 rounded-md border border-[#008000] bg-[#008000] p-2 px-3 text-xs min-w-[90px] text-white'>
+                                                        {isGeneratingSummary ? <><span className="animate-spin">⏳</span> Summarizing... </>: <><Recycle/> Summarize</>}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        : ''}
                                         <div className='py-4 border-b px-4'>
                                             <div className='flex gap-2 flex-col'>
                                                 <span className='text-[13px] min-w-[90px] text-[#0000008A]'>
                                                     Published
                                                 </span>
                                                 <span className='text-sm text-[#000000DE]'>
-                                                    2024-07-22
+                                                    {(article?.datePublished)}
                                                 </span>
                                             </div>
                                         </div>
-                                        <div className='py-4 border-b px-4'>
+                                        <div className='py-4 border-b px-4 space-y-3'>
+                                            <div className='flex gap-2 flex-col'>
+                                                <span className='text-[13px] min-w-[90px] text-[#0000008A]'>
+                                                    Issue
+                                                </span>
+                                                <span className='text-sm text-[#000000DE]'>
+                                                    {article?.issue?.title}
+                                                </span>
+                                            </div>
                                             <div className='flex gap-2 flex-col'>
                                                 <span className='text-[13px] min-w-[90px] text-[#0000008A]'>
                                                     Section
                                                 </span>
                                                 <span className='text-sm text-[#000000DE]'>
-                                                    Articles
+                                                    {article?.section?.title}
                                                 </span>
                                             </div>
                                         </div>
@@ -202,6 +286,13 @@ const SingleArticle = () => {
                         </div>
                     </div>
             </section>
+
+            {article ? 
+                <ArticleSearchDrawer isOpen={isOpen} onClose={onClose} currentArticle={article} recommendation={recommendation}/>
+            : '' }
+
+            <ArticleSummaryDrawer isOpen={isOpenSummaryDrawer} onClose={onCloseSummaryDrawer} currentArticle={article} summary={summary}/>
+            
         </>
     )
 }

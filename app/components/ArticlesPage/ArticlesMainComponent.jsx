@@ -14,6 +14,7 @@ import {
     BreadcrumbSeparator,
   } from '@chakra-ui/react'
 import Footer from '../HomePage/Footer';
+import { Eye } from 'iconsax-react';
 
 
 const ArticlesMainComponent = () => {
@@ -105,12 +106,9 @@ const ArticlesMainComponent = () => {
                                                         Udeh Praise
                                                     </span>
                                                     <div className='flex items-center justify-start gap-2'>
-                                                        <button className='flex items-center justify-center gap-1 rounded-md border border-[#008080] p-2 px-3 text-xs min-w-[90px] text-[#008080]'>
-                                                            <DocumentExport/> PDF
-                                                        </button>
-                                                        <button className='flex items-center justify-center gap-1 rounded-md border border-[#008000] bg-[#008000] p-2 px-3 text-xs min-w-[90px] text-white'>
-                                                            <Recycle/> Summary
-                                                        </button>
+                                                        <Link href={'/journals/' + item?.journalId+ '/articles/' + item.id} className='flex items-center justify-center gap-1 rounded-md border border-[#008080] p-2 px-3 text-xs min-w-[90px] text-[#008080]'>
+                                                            <Eye size={14}/> View
+                                                        </Link>
                                                     </div>
                                                 </div>
                                             )))

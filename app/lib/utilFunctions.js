@@ -220,7 +220,6 @@ export function getGeneratedPassword(){
 
 export function shortenTitle(title, number = 20) {
   // console.log(title?.length)
-  console.log(title?.length)
   if (title?.length < number) {
     // If the address is too short to be shortened, return it as is
     return title;

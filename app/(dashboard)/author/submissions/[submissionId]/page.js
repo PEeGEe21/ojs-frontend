@@ -204,7 +204,7 @@ const SingleSubmission = () => {
     }
 
     useEffect(()=>{
-        // fetchUsers();
+        fetchUsers();
         fetchSectionsData();
         fetchSubmissionFiles();
         fetchIssuesData();

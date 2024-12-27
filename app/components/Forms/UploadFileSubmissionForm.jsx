@@ -146,7 +146,6 @@ const UploadFileSubmissionForm = ({
 
   
       console.log(filePath, fileExt, 'fileExt')
-      // Upload to Supabase storage
       const { data, error } = await supabase.storage
         .from('uploads') // Your bucket name
         .upload(filePath, file)

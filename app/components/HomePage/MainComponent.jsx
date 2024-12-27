@@ -16,6 +16,7 @@ import { getFullName } from '../../utils/common'
 const MainComponent = () => {
     const [user, setUser] = useState(null)
     const [journals, setJournals] = useState([]);
+    const [editors, setEditors] = useState([]);
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -37,26 +38,45 @@ const MainComponent = () => {
         getUser()
     }, [])
 
-    useEffect(() => {
-        const fetchJournals = async () => {
-          // setIsLoading(true);
-          setError(null);
-          try {
-            const response = await fetch(hostUrl + 'journals');
-            if (!response.ok) {
-              throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            setJournals(data.data);
-          } catch (error) {
-            console.error('Failed to fetch journals:', error);
-            setError('Failed to fetch journals. Please try again later.');
-          } finally {
-            setIsLoading(false);
+    const fetchJournals = async () => {
+        // setIsLoading(true);
+        setError(null);
+        try {
+          const response = await fetch(hostUrl + 'journals');
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
           }
-        };
-    
+          const data = await response.json();
+          setJournals(data.data);
+        } catch (error) {
+          console.error('Failed to fetch journals:', error);
+          setError('Failed to fetch journals. Please try again later.');
+        } finally {
+          setIsLoading(false);
+        }
+    };
+
+    const fetchEditors = async () => {
+        // setIsLoading(true);
+        setError(null);
+        try {
+          const response = await fetch(hostUrl + 'users/role/4');
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const data = await response.json();
+          setEditors(data.users);
+        } catch (error) {
+          console.error('Failed to fetch editors:', error);
+          setError('Failed to fetch editors. Please try again later.');
+        } finally {
+          setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchJournals();
+        fetchEditors();
     }, []);
 
     const start = (role) => {
@@ -69,39 +89,42 @@ const MainComponent = () => {
     return (
         <>
             <Navbar user={user} start={start}/>
-            <section className="px-4 text-center mt-4 sm:mt-10 md:mt-14 xl:mt-20 max-w-6xl mx-auto py-8 md:py-20 lg:py-32">
-                <h1 className="text-3xl font-bold text-gray-900 md:text-4xl xl:text-6xl xl:leading-tight"> 
-                    Journal Management for Seamless Publishing<br className="hidden sm:inline"/> 
-                </h1>
-                <h2 className="mt-6 leading-snug text-gray-500 xl:mt-5 xl:text-xl"> 
-                    Seamlessly Manage, Publish, and Distribute Unlimited Journals<br className="hidden sm:inline"/> 
-                    with Ease Across Our Comprehensive Platform. 
-                </h2>
-                <div className="relative mt-6 flex flex-col items-center justify-center gap-2">
-                    <div className="flex items-center justify-between text-base">
+            <section className="px-4 text-left max-w-6xl mx-auto pt-16 pb-20">
+                <div className='max-w-3xl '>
 
-                        {!user ? 
-                            (
-                                <>
+                    <h1 className="text-3xl font-bold text-gray-900 md:text-4xl xl:text-6xl leading-tight lg:leading-[3.75rem]"> 
+                        Journal Management for Seamless Publishing<br className="hidden sm:inline"/> 
+                    </h1>
+                    <h2 className="mt-6 leading-snug text-gray-500 xl:mt-5 xl:text-xl"> 
+                        Seamlessly Manage, Publish, and Distribute Unlimited Journals<br className="hidden sm:inline"/> 
+                        with Ease Across Our Comprehensive Platform. 
+                    </h2>
+                    <div className="relative mt-6 flex flex-row items-center justify-start gap-2">
+                        <div className="flex items-center justify-between text-base">
 
-                                    <Link className="bg-[#013434] border border-[#013434] text-[#fff] px-6 py-2 text-base" href="/auth/signup">Register with us</Link>
-                                    <div className="flex items-center">
-                                        <Link href="#features" className="inline-block w-auto px-2 py-2.5 font-semibold">
-                                            <span className="border-b-2 border-gray-300">Learn more</span>
-                                        </Link>
-                                    </div>
-                                </>
+                            {!user ? 
+                                (
+                                    <>
 
-                            ):( 
-                                <Link 
-                                    href={'/articles'} 
-                                    className="bg-[#008080] hover:bg-[#062F2F] border border-[#062F2F] text-[#fff] px-6 py-2 text-base rounded-lg flex items-center gap-2 min-h-[48px]">
-                                        View Articles  <span><ArrowRight size={15}/></span>
-                                </Link>
-                            )
-                        }
+                                        <Link className="bg-[#013434] border border-[#013434] text-[#fff] px-6 py-2 text-base" href="/auth/signup">Register with us</Link>
+                                        <div className="flex items-center">
+                                            <Link href="#features" className="inline-block w-auto px-2 py-2.5 font-semibold">
+                                                <span className="border-b-2 border-gray-300">Learn more</span>
+                                            </Link>
+                                        </div>
+                                    </>
 
-                        
+                                ):( 
+                                    <Link 
+                                        href={'/articles'} 
+                                        className="bg-[#008080] hover:bg-[#062F2F] border border-[#062F2F] text-[#fff] px-6 py-2 text-base rounded-lg flex items-center gap-2 min-h-[48px]">
+                                            View Articles  <span><ArrowRight size={15}/></span>
+                                    </Link>
+                                )
+                            }
+
+                            
+                        </div>
                     </div>
                 </div>
             </section>
@@ -143,9 +166,9 @@ const MainComponent = () => {
                                                 <div className="py-4 mb-4 flex flex-col gap-2 px-5 text-center">
                                                     <span className="text-gray-900 text-lg mb-2 font-semibold">{journal.name}</span>
                                                     <span className="text-gray-700 leading-none text-sm mb-2">Editor: <b className='capitalize'>{getFullName(journal?.editor)}</b></span>
-                                                    <span className="text-gray-700 leading-none text-sm mb-2">
+                                                    {/* <span className="text-gray-700 leading-none text-sm mb-2">
                                                         Affiliation: University of Nigeria, Nsukka, Nigeria.
-                                                    </span>
+                                                    </span> */}
                                                 </div>
                                             </div>
                                         </Link>
@@ -171,7 +194,7 @@ const MainComponent = () => {
                 </div>
             </section>
 
-            <EditorsCarousel/>
+            <EditorsCarousel EditorsList={editors}/>
 
             <Footer/>
         </>

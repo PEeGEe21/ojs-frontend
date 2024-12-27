@@ -33,7 +33,7 @@ const CollectionItem = ({ index, data, setSubmissions }) => {
     //     }
     // }, [data]);
 
-    console.log(data);
+    // console.log(data);
     // const status = useMemo(() => {
     //     const now = Date.now();
     //     const start_date = new Date(data?.start_date);

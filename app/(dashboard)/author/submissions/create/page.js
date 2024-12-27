@@ -34,8 +34,9 @@ import { Progress, useToast } from "@chakra-ui/react";
 import { hostUrl } from "../../../../lib/utilFunctions";
 import axios from "axios";
 import { JournalContext } from "../../../../utils/journalContext";
-import {modules, styles, openai} from "../../../../lib/constants";
+import {modules, styles, openai, noOfWords} from "../../../../lib/constants";
 import Swal from 'sweetalert2';
+import { generateAbstract } from "../../../../utils/ai";
 
 const steps = [
     { title: "Section Policy", description: "select the type of airdrop to use" },
@@ -75,6 +76,7 @@ export default function CreateSubmission() {
     const [subTitle, setSubTitle] = useState('');
     const [abstract, setAbstract] = useState('');
     const [isGenerating, setIsGenerating] = useState(false)
+    const [wordNumber, setNoOfWords] = useState("");
     const stepperRef = useRef(null);
     const MAX_TAGS = 10;
 
@@ -590,7 +592,7 @@ export default function CreateSubmission() {
     const isActive = (index) => activeStep === index;
     const isCompleted = (index) => activeStep > index;
 
-    const generateAbstract = async () => {
+    const handleGenerateAbstract = async () => {
         const fullTitle = `${prefix ? prefix + ': ' : ''}${title}${subTitle ? ' - ' + subTitle : ''}`;
 
         // console.log(fullTitle, 'generated')
@@ -609,24 +611,37 @@ export default function CreateSubmission() {
     
         setIsGenerating(true)
         try {
-          const response = await openai.chat.completions.create({
-            model: "gpt-4o-mini",
-            messages: [
-              {
-                role: "system", 
-                content: "You are an academic writing assistant. Generate a professional, concise abstract based on the given title."
-              },
-              {
-                role: "user", 
-                content: `Generate a scholarly abstract for a research paper with the following title: "${fullTitle}". The abstract should be approximately 250-300 words, highlighting the research problem, methodology, key findings, and significance.`
-              }
-            ],
-            max_tokens: 350,
-            temperature: 0.7
-          })
-    
-          const generatedAbstract = response.choices[0].message.content || ''
-          setAbstract(generatedAbstract)
+            //   const response = await openai.chat.completions.create({
+            //     model: "gpt-4o-mini",
+            //     messages: [
+            //       {
+            //         role: "system", 
+            //         content: "You are an academic writing assistant. Generate a professional, concise abstract based on the given title."
+            //       },
+            //       {
+            //         role: "user", 
+            //         content: `Generate a scholarly abstract for a research paper with the following title: "${fullTitle}". The abstract should be approximately 250-300 words, highlighting the research problem, methodology, key findings, and significance.`
+            //       }
+            //     ],
+            //     max_tokens: 350,
+            //     temperature: 0.7
+            //   })
+        
+            //   const generatedAbstract = response.choices[0].message.content || ''
+            //   setAbstract(generatedAbstract)
+            const generatedAbstract = await generateAbstract(title, wordNumber)
+            // const cleanedAbstract = generatedAbstract
+            // .replace(/^Abstract:?\s*/i, '')
+            // .trim();
+
+            let cleanedAbstract = generatedAbstract.replace(/^(Title|Abstract):.*$/m, '').trim();
+            setAbstract(cleanedAbstract);
+            toast({
+                title: "Abstract generated successfully",
+                status: "success",
+                duration: 2000,
+                position: "top-right",
+              });
         } catch (error) {
             toast({
                 title: "Failed to generate abstract. Please try again.",
@@ -640,6 +655,10 @@ export default function CreateSubmission() {
           setIsGenerating(false)
         }
       }
+
+      const handleSelectChange = (event) => {
+        setNoOfWords(event.target.value);
+      };
 
       const deleteUpload = (uploadId) => {
         Swal.fire({
@@ -1124,22 +1143,50 @@ export default function CreateSubmission() {
                                                             onChange={(value) => {
                                                                 setAbstract(value);
                                                             }}
-                                                            className="border border-[#524F4D] h-auto min-h-72"
+                                                            readOnly={isGenerating}
+                                                            className={`border border-[#524F4D] h-auto min-h-72 ${
+                                                                isGenerating ? 'opacity-50' : ''
+                                                            }`} 
                                                         />
 
-                                                        <div className="mt-4 w-full flex items-center justify-end">
-
+                                                        <div className="mt-4 w-full flex items-end justify-start gap-2">
+                                                        {/* bg-[#008080] hover:bg-[#008080] */}
+                                                            <div className=' flex flex-col gap-1'>
+                                                                <label 
+                                                                    htmlFor="no_of_words"
+                                                                    className="text-sm text-[#212121] semibold ">
+                                                                    No of Words
+                                                                </label>
+                                                                <select id='no_of_words' name='no_of_words' className='border-[#524F4D] border bg-transparent h-10 rounded-md focus:outline-0 px-2 text-sm' value={wordNumber??''} onChange={handleSelectChange}>
+                                                                    <option value="">Select No of Words</option>
+                                                                    {noOfWords.map((word) => (
+                                                                        <option key={word.id} value={word.value}>
+                                                                        {word.value}
+                                                                        </option>
+                                                                    ))}
+                                                                </select>
+                                                            </div>
 
                                                             <button
                                                                 disabled={isGenerating}
-                                                                onClick={generateAbstract}
-                                                                className="bg-[#008080] hover:bg-[#008080]  whitespace-nowrap w-full md:w-auto
-                                                                disabled:opacity-50 disabled:cursor-not-allowed rounded-lg 
+                                                                onClick={handleGenerateAbstract}
+                                                                className="btn-primary whitespace-nowrap w-full md:w-auto
+                                                                disabled:opacity-50 disabled:cursor-not-allowed rounded 
                                                                 transition-all duration-75 border-none px-5 
-                                                                font-medium p-3 text-base text-white block"
+                                                                font-medium py-3 text-sm text-white block gap-2"
                                                             >
-                                                                {isGenerating ? 'Generating...' : 'Generate Abstract'}
+                                                                {isGenerating ? <><span className="animate-spin">⏳</span> Generating... </>: 'Generate Abstract'}
                                                             </button>
+
+                                                            {abstract && (
+                                                            <button
+                                                                onClick={() => setAbstract('')}
+                                                                className="btn-danger whitespace-nowrap px-5 py-3 rounded text-sm"
+                                                                disabled={isGenerating}
+                                                            >
+                                                                Clear
+                                                            </button>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </div>

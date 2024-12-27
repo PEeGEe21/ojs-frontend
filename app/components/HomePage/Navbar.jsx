@@ -2,13 +2,15 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import NavbarSearchForm from '../Forms/ArticleRecoSearchForm'
 // import "../../styles/navbar.css";
-import { ArrowDown, ArrowDown2, Global } from 'iconsax-react';
+import { ArrowDown, ArrowDown2, Global, SearchNormal1 } from 'iconsax-react';
 import { shortenTitle } from '../../lib/utilFunctions';
 // import { MenuContext } from '@/app/utils/context';
 
 const Navbar = ({user, start}) => {
   // const { toggle, showMenu } = useContext(MenuContext) || {};
+
   const showMenu = null;
   return (
     <>
@@ -19,7 +21,7 @@ const Navbar = ({user, start}) => {
       </marquee>)}
       
       <header
-        className="z-50 shadow-md"
+        className="z-50"
         style={{ position: 'relative' }}
       >
         <div className="container mx-auto max-w-[750px] md:max-w-[970px] lg:max-w-[1170px] px-4">
@@ -74,15 +76,28 @@ const Navbar = ({user, start}) => {
             </div> */}
 
             <div className="order-2 block w-auto text-center">
-              <div className="navbar-menu flex items-center justify-end gap-5  ">
-                
-              {user ? 
+              <div className="navbar-menu flex items-center justify-end gap-2  ">
                   <Link
-                    className="text-[#11161F] hover:text-[#013434] px-2 md:px-6 py-2 menu relative text-center font-semibold group"
+                    className="text-[#11161F] hover:text-[#013434] px-2 md:px-3 py-2 menu relative text-center font-semibold group"
                     href={
                       '/'
                     }
                     target="_blank"
+                  >
+                    <div className='relative'>
+                      <span>Docs</span>
+                      <span className="block absolute left-0 bottom-0 h-1 bg-[#013434] w-0 group-hover:w-full transition-all duration-300"></span>
+                    </div>
+                    
+                  </Link>
+
+                
+              {user ? <>
+                  <Link
+                    className="text-[#11161F] hover:text-[#013434] px-2 md:px-3 py-2 menu relative text-center font-semibold group"
+                    href={
+                      '/articles'
+                    }
                   >
                     <div className='relative'>
                       <span>Articles</span>
@@ -90,14 +105,29 @@ const Navbar = ({user, start}) => {
                     </div>
                     
                   </Link>
+                  <Link
+                    className="text-[#11161F] hover:text-[#013434] px-2 md:px-3 py-2 menu relative text-center font-semibold group"
+                    href={
+                      '/issues'
+                    }
+                  >
+                    <div className='relative'>
+                      <span>Issues</span>
+                      <span className="block absolute left-0 bottom-0 h-1 bg-[#013434] w-0 group-hover:w-full transition-all duration-300"></span>
+                    </div>
+                    
+                  </Link>
+                  </>
                 : <></>
               }
+              
+
                 {/* 1E1E1E */}
                 {!user ? 
                   <>
                   <Link
                     href="/auth/login"
-                    className="text-[#11161F] hover:text-[#013434]  px-6 py-2 rounded-lg text-center font-semibold group"
+                    className="text-[#11161F] hover:text-[#013434]  px-3 py-2 rounded-lg text-center font-semibold group"
                   >
                     <div className='relative'>
                       Login
@@ -142,6 +172,7 @@ const Navbar = ({user, start}) => {
           </nav>
         </div>
       </header>
+
     </>
   );
 };
