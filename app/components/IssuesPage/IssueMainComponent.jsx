@@ -75,8 +75,8 @@ const IssueMainComponent = () => {
                             (<div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 mt-8 scroll-container pb-5 md:py-0">
                                 {issues?.map((issue, index)=>{
                                     return(
-                                        // <Link href={`/issues/${issue?.id}`} key={issue?.id}>
-                                            <Link href={`/issues/${issue?.id}`} className="group rounded-md overflow-hidden hover:shadow-lg transition duration-300 ease border  ">
+                                        // <Link href={`/issues/${issue?.id}`}>
+                                            <Link href={`/issues/${issue?.id}`} key={issue?.id} className="group rounded-md overflow-hidden hover:shadow-lg transition duration-300 ease border  ">
                                                 <div className="rounded-t relative h-[200px] md:h-[300px] overflow-hidden">
                                                         <Image 
                                                             src={`/images/albert-canite-RG2YD21o81E-unsplash.jpg`} 
