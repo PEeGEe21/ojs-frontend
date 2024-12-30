@@ -23,9 +23,11 @@ import Image from 'next/image';
 import { Category } from 'react-iconly';
 // import { LogoutIcon } from './IconComponent';
 import './nav.css';
+import { start } from '../../utils/common';
 
-const Sidebar = ({ isOpen, toggleSidebar, userRole, user_roles=[]}) => {
+const Sidebar = ({ isOpen, toggleSidebar, userRole, user, user_roles=[]}) => {
   const pathname = usePathname();
+  const { push } = useRouter();
   const [activeDropdowns, setActiveDropdowns] = useState([]);
   const [currentMenu, setCurrentMenu] = useState([]);
   const [isDropdown, setIsDropdown] = useState(true);
@@ -74,26 +76,26 @@ const Sidebar = ({ isOpen, toggleSidebar, userRole, user_roles=[]}) => {
       isDropdownMenu: false,
       rolesPermitted: [1]
     },
-    {
-      label: 'Analytics',
-      href: '/admin/analytics',
-      action: (e, index) => {
-        e.preventDefault();
-        showDropdown(index);
-      },
-      icon: <Briefcase size={16} />,
-      projects: true,
-      isDropdownMenu: false,
-      rolesPermitted: [1],
-      submenu: [
-        {
-          label: 'Project 1',
-          href: '/admin/analytics/project/1',
-          icon: <Category size={16} />,
-          isDropdownMenu: false,
-        }
-      ]
-    },
+    // {
+    //   label: 'Analytics',
+    //   href: '/admin/analytics',
+    //   action: (e, index) => {
+    //     e.preventDefault();
+    //     showDropdown(index);
+    //   },
+    //   icon: <Briefcase size={16} />,
+    //   projects: true,
+    //   isDropdownMenu: false,
+    //   rolesPermitted: [1],
+    //   submenu: [
+    //     {
+    //       label: 'Project 1',
+    //       href: '/admin/analytics/project/1',
+    //       icon: <Category size={16} />,
+    //       isDropdownMenu: false,
+    //     }
+    //   ]
+    // },
     {
       label: 'Users & Roles',
       href: '/admin/users',
@@ -204,12 +206,12 @@ const Sidebar = ({ isOpen, toggleSidebar, userRole, user_roles=[]}) => {
                     alt="logo dash"
                   />
                 </Link> */}
-                <Link
-                  href={'/dashboard'}
+                <button type='button'
+                  onClick={()=>start((user?.user_default_role).toLowerCase(), push)}
                   className="flex items-center w-full justify-center h-full text-white capitalize text-2xl "
                 >
                   OJS
-                </Link>
+                </button>
               </div>
             </div>
           </div>

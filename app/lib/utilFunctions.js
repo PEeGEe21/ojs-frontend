@@ -162,7 +162,7 @@ export const _getUser = () => {
 export const handleRedirect = (role, push) => {  
     const routes = {
         author: '/author/submissions',
-        admin: '/admin/analytics',
+        admin: '/admin/submissions',
     };
     push(routes[role] || '/auth/login');
 };

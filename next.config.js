@@ -11,17 +11,25 @@ const withPWA = require('next-pwa')({
 });
 
 module.exports = withPWA({
-  // other configs
   reactStrictMode: false,
   
+  // Add the images configuration here
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'aatztzctibcyonrllngy.supabase.co',
+        pathname: '/storage/v1/object/public/**',
+      },
+    ],
+  },
+  
   webpack: (config, { isServer }) => {
-    // Handle .node files
     config.module.rules.push({
       test: /\.node$/,
       use: 'node-loader'
     });
 
-    // Resolve fallback for client-side
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,

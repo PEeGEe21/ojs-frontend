@@ -20,8 +20,13 @@ import useTags from "../../../../hooks/useTags";
 import { JournalContext } from "../../../../utils/journalContext";
 import UpdateSubmissionIssuesForm from "../../../../components/Forms/UpdateSubmissionIssuesForm"
 import UpdateSubmissionTitleForm from "../../../../components/Forms/UpdateSubmissionTitleForm"
+import UpdateKeywordsForm from "../../../../components/Forms/UpdateKeywordsForm"
 import Link from "next/link";
 import { LoaderIcon } from "../../../../components/IconComponent";
+import PDFViewer from "../../../../components/PDFViewer"
+import ContributorsTableList from "../../../../components/Tables/ContributorsTableList";
+import AddSubmissionContributorModal from "../../../../components/Modals/AddSubmissionContributorModal";
+import UpdateSubmissionContributorModal from "../../../../components/Modals/UpdateSubmissionContributorModal";
 
 const SingleSubmission = () => {
     const { selectedJournal } = useContext(JournalContext);
@@ -29,10 +34,12 @@ const SingleSubmission = () => {
     const [user, setUser ] = useState(null);
     const [submission, setSubmission ] = useState(null);
     const [submissionFiles, setSubmissionFiles ] = useState([]);
+    const [contributors, setSubmissionContributors ] = useState([]);
     const [sections, setSections ] = useState([]);
     const [uploads, setUploads ] = useState([]);
     const [users, setUsers ] = useState([]);
     const [issues, setIssues ] = useState([]);
+    const [updatedTags, setUpdatedTags ] = useState([]);
     const [title, setTitle] = useState("");
     const [prefix, setPrefix] = useState("");
     const [subTitle, setSubTitle] = useState("");
@@ -43,6 +50,7 @@ const SingleSubmission = () => {
     const [abstract, setAbstract] = useState("");
     const [currentUpload, setCurrentUpload] = useState(null);
     const [currentViewUpload, setViewCurrentUpload] = useState(null);
+    const [currentContributor, setCurrentContributor] = useState(null);
     const [editors, setEditors] = useState([])
     const [userEditors, setUserEditors] = useState([])
     const [showReviews, setShowReviews] = useState(false)
@@ -56,6 +64,19 @@ const SingleSubmission = () => {
         isOpen: uploadFileIsOpen,
         onOpen: onUploadFileOpen,
         onClose: onUploadFileClose,
+    } = useDisclosure();
+
+
+    const {
+        isOpen: addContributorIsOpen,
+        onOpen: onAddContributorOpen,
+        onClose: onAddContributorClose,
+    } = useDisclosure();
+
+    const {
+        isOpen: updateContributorIsOpen,
+        onOpen: onUpdateContributorOpen,
+        onClose: onUpdateContributorClose,
     } = useDisclosure();
 
     const {
@@ -89,7 +110,7 @@ const SingleSubmission = () => {
 
     const MAX_TAGS = 10;
 
-    const { tags, handleAddTag, handleRemoveTag } = useTags(MAX_TAGS); // pass the maximum tags
+    const { tags, setInitialTags } = useTags(MAX_TAGS); // pass the maximum tags
   
     useEffect(() => {
         const getUser = async ()=>{
@@ -107,6 +128,7 @@ const SingleSubmission = () => {
         };
         getUser();
     }, []);
+
 
 
     const fetchUsers = async () => {
@@ -151,6 +173,8 @@ const SingleSubmission = () => {
         }
     };
 
+
+
     const fetchData = async () => {
         if (id) {
             try {
@@ -159,9 +183,11 @@ const SingleSubmission = () => {
                     const data = await res.json();
                     const submission = data.submission
                     setSubmission(submission)
+                    setSubmissionContributors(submission.contributors)
                     setEditors(submission.editors)
                     setUsers(data.users)
 
+                    // console.log(tags, keywords)
                     // setTitle(submission.title);
                     // setPrefix(submission.prefix);
                     // setSubTitle(submission.subTitle);
@@ -439,14 +465,8 @@ const SingleSubmission = () => {
         try {
                 
             const updatedRecord = { ...record, is_main: record.is_main ? 0 : 1 };
-            const updatedDataSource = submissionFiles.map(item => 
-                item.id === record.id ? updatedRecord : item
-            );
-    
             await axios.post(hostUrl + `submissions/${submission?.id}/submission-files/toggle-main/`+record?.id);
-
             // setSubmissionFiles(updatedDataSource);
-    
             setTimeout(() => {
                 fetchSubmissionFiles();
                 setIsSavingFileStatus({
@@ -544,244 +564,257 @@ const SingleSubmission = () => {
                             </TabList>
                             <TabPanels>
                                 <TabPanel className="px-0 py-0">
+                                {currentViewUpload ? 
                                     <div>
-                                        <div className="bg-white min-h-[500px] p-4">
-                                            <div className="flex w-full gap-3 flex-wrap lg:flex-nowrap">
-                                            {/*  */}
-                                                <div className=" px-3 md:p-4 py-3 rounded-lg w-full lg:w-8/12">
-                                                    <div>
-                                                        <div className="flex items-center justify-between gap-2">
+                                        <PDFViewer fileUrl={currentViewUpload?.file_url??'/doc/0.18676590481212108.pdf'} />
+                                        <div className="flex items-center justify-end mt-2">
+                                            <button onClick={()=>{setViewCurrentUpload(null)}} className="btn btn-red rounded ">
+                                                Close
+                                            </button>
+                                        </div>
 
-                                                            <h3 className="font-medium text-[#212121] text-base">
-                                                                Submission Files
-                                                            </h3>
-                                                            <button 
-                                                                onClick={onUploadFileOpen}
-                                                                className="w-auto whitespace-nowrap py-2 md:py-2 px-3 md:px-3 bg-[#313131] text-white transition ease-in duration-200 text-center font-semibold shadow-md rounded flex items-center justify-center gap-2 text-xs"
-                                                            >
-                                                                <p className="">Upload File</p>
-                                                            </button>
-                                                        </div>
+                                    </div>
+                                    :<>
+                                        <div>
+                                            <div className="bg-white min-h-[500px] p-4">
+                                                <div className="flex w-full gap-3 flex-wrap lg:flex-nowrap">
+                                                {/*  */}
+                                                    <div className=" px-3 md:p-4 py-3 rounded-lg w-full lg:w-8/12">
                                                         <div>
-                                                            <div className="overflow-x-auto md:overflow-x-auto py-4 text-[#313131] scrollbar-change rounded-md">
-                                                                <Table variant='unstyled' className=' table-bordered'>
-                                                                    <Thead className='bg-[#F7FAFC] border-b border-[#e7ecf1]'>
-                                                                    <Tr>
-                                                                        <Th width={10}>#</Th>
-                                                                        <Th width={'30%'}>Title</Th>
-                                                                        <Th width={'30%'}>Date</Th>
-                                                                        <Th width={'30%'}>Is Main</Th>
-                                                                        <Th>Action</Th>
-                                                                    </Tr>
-                                                                    </Thead>
-                                                                    <Tbody className=' w-full px-4 divide-y divide-[#e7ecf1]'>
+                                                            <div className="flex items-center justify-between gap-2">
 
-                                                                        {submissionFiles?.length < 1 &&
-                                                                            <Tr>
-                                                                                <Td colSpan={8} className="px-2 py-4 text-base whitespace-nowrap text-center">
-                                                                                    <span className="text-[#313131] text-base">
-                                                                                        No data found
-                                                                                    </span>
-                                                                                </Td>
-                                                                            </Tr>
-                                                                        }
+                                                                <h3 className="font-medium text-[#212121] text-base">
+                                                                    Submission Files
+                                                                </h3>
+                                                                <button 
+                                                                    onClick={onUploadFileOpen}
+                                                                    className="w-auto whitespace-nowrap py-2 md:py-2 px-3 md:px-3 bg-[#313131] text-white transition ease-in duration-200 text-center font-semibold shadow-md rounded flex items-center justify-center gap-2 text-xs"
+                                                                >
+                                                                    <p className="">Upload File</p>
+                                                                </button>
+                                                            </div>
+                                                            <div>
+                                                                <div className="overflow-x-auto md:overflow-x-auto py-4 text-[#313131] scrollbar-change rounded-md">
+                                                                    <Table variant='unstyled' className=' table-bordered'>
+                                                                        <Thead className='bg-[#F7FAFC] border-b border-[#e7ecf1]'>
+                                                                        <Tr>
+                                                                            <Th width={10}>#</Th>
+                                                                            <Th width={'30%'}>Title</Th>
+                                                                            <Th width={'30%'}>Date</Th>
+                                                                            <Th width={'30%'}>Is Main</Th>
+                                                                            <Th>Action</Th>
+                                                                        </Tr>
+                                                                        </Thead>
+                                                                        <Tbody className=' w-full px-4 divide-y divide-[#e7ecf1]'>
 
-                                                                        {submissionFiles?.length > 0 && submissionFiles?.map((upload, index) => {
-
-                                                                            return (
-                                                                                <Tr key={index} className='px-4 hover:bg-[#F7FAFC]'>
-                                                                                    <Td className="px-2 py-4 text-base whitespace-nowrap">
+                                                                            {submissionFiles?.length < 1 &&
+                                                                                <Tr>
+                                                                                    <Td colSpan={8} className="px-2 py-4 text-base whitespace-nowrap text-center">
                                                                                         <span className="text-[#313131] text-base">
-                                                                                            {index + 1}
+                                                                                            No data found
                                                                                         </span>
                                                                                     </Td>
-                                                                                    <Td className="px-2 py-4 whitespace-nowrap">
-                                                                                        <div className='flex items-start justify-between text-sm'>
-                                                                                            <p>
-                                                                                                {upload.title}
-                                                                                            </p>
-                                                                                        </div>
-                                                                                    </Td>
-                                                                                    <Td className="px-2 py-4 whitespace-nowrap">
-                                                                                        <div className='flex items-start justify-between text-sm'>
-                                                                                            <p>
-                                                                                                {formatMomentDate(upload.createdAt, false)}
-                                                                                            </p>
-                                                                                        </div>
-                                                                                    </Td>
+                                                                                </Tr>
+                                                                            }
 
-                                                                                    <Td className="px-2 py-4 whitespace-nowrap">
-                                                                                        <div className='flex items-start justify-between text-sm'>
-                                                                                            <button
-                                                                                                className={`btn btn-sm flex items-center gap-2 ${upload.is_main ? 'btn-success' : 'btn-danger'}`}
-                                                                                                disabled={isSavingFileStatus[upload.id] || upload.is_main}
-                                                                                                aria-disabled={isSavingFileStatus[upload.id] || upload.is_main}
-                                                                                                onClick={
-                                                                                                    ()=>toggleCurrentFileStatus(upload, index, upload.is_main)
-                                                                                                }
-                                                                                                >
-                                                                                                    {isSavingFileStatus[upload.id] ? (
-                                                                                                        <>
-                                                                                                            <LoaderIcon
-                                                                                                                extraClass="text-white h-5 w-5"
-                                                                                                                className="animate-spin mr-1"
-                                                                                                            />
-                                                                                                        </>
-                                                                                                    ) : (
-                                                                                                        upload.is_main ? 'Main' : 'Not Inactive'
-                                                                                                    )}
-                                                                                                    
-                                                                                            </button>
-                                                                                        </div>
-                                                                                    </Td>
-                                                                                    
-                                                                                    <Td className="px-2 py-4 text-sm whitespace-nowrap">
-                                                                                        <div className="text-[#313131] text-xs flex items-center justify-center gap-2 flex-row">
-                                                                                            {upload.file_type == 'pdf' ? 
-                                                                                                <Tooltip hasArrow label='view' placement='top'>
-                                                                                                    <button onClick={()=>handleOpenCurrentUpload(upload)} className='btn px-2 py-1 btn-primary btn border border-[#e1e5ec] rounded !text-[#fff] flex items-center'>
-                                                                                                        <Eye size={16}/>
+                                                                            {submissionFiles?.length > 0 && submissionFiles?.map((upload, index) => {
+
+                                                                                return (
+                                                                                    <Tr key={index} className='px-4 hover:bg-[#F7FAFC]'>
+                                                                                        <Td className="px-2 py-4 text-base whitespace-nowrap">
+                                                                                            <span className="text-[#313131] text-base">
+                                                                                                {index + 1}
+                                                                                            </span>
+                                                                                        </Td>
+                                                                                        <Td className="px-2 py-4 whitespace-nowrap">
+                                                                                            <div className='flex items-start justify-between text-sm'>
+                                                                                                <p>
+                                                                                                    {upload.title}
+                                                                                                </p>
+                                                                                            </div>
+                                                                                        </Td>
+                                                                                        <Td className="px-2 py-4 whitespace-nowrap">
+                                                                                            <div className='flex items-start justify-between text-sm'>
+                                                                                                <p>
+                                                                                                    {formatMomentDate(upload.createdAt, false)}
+                                                                                                </p>
+                                                                                            </div>
+                                                                                        </Td>
+
+                                                                                        <Td className="px-2 py-4 whitespace-nowrap">
+                                                                                            <div className='flex items-start justify-between text-sm'>
+                                                                                                <button
+                                                                                                    className={`btn btn-sm flex items-center gap-2 ${upload.is_main ? 'btn-success' : 'btn-danger'}`}
+                                                                                                    disabled={isSavingFileStatus[upload.id] || upload.is_main}
+                                                                                                    aria-disabled={isSavingFileStatus[upload.id] || upload.is_main}
+                                                                                                    onClick={
+                                                                                                        ()=>toggleCurrentFileStatus(upload, index, upload.is_main)
+                                                                                                    }
+                                                                                                    >
+                                                                                                        {isSavingFileStatus[upload.id] ? (
+                                                                                                            <>
+                                                                                                                <LoaderIcon
+                                                                                                                    extraClass="text-white h-5 w-5"
+                                                                                                                    className="animate-spin mr-1"
+                                                                                                                />
+                                                                                                            </>
+                                                                                                        ) : (
+                                                                                                            upload.is_main ? 'Main' : 'Not Inactive'
+                                                                                                        )}
+                                                                                                        
+                                                                                                </button>
+                                                                                            </div>
+                                                                                        </Td>
+                                                                                        
+                                                                                        <Td className="px-2 py-4 text-sm whitespace-nowrap">
+                                                                                            <div className="text-[#313131] text-xs flex items-center justify-center gap-2 flex-row">
+                                                                                                {upload.file_type == 'pdf' ? 
+                                                                                                    <Tooltip hasArrow label='view' placement='top'>
+                                                                                                        <button onClick={()=>handleOpenCurrentUpload(upload)} className='btn px-2 py-1 btn-primary btn border border-[#e1e5ec] rounded !text-[#fff] flex items-center'>
+                                                                                                            <Eye size={16}/>
+                                                                                                        </button>
+                                                                                                    </Tooltip>
+                                                                                                : <>
+                                                                                                    <Tooltip hasArrow label='download' placement='top'>
+                                                                                                        <Link href={upload?.file_url} target="_blank" download className='btn px-2 py-1 btn-info btn border border-[#e1e5ec] rounded !text-[#fff] flex items-center'>
+                                                                                                            <DocumentDownload size={16}/>
+                                                                                                        </Link>
+                                                                                                    </Tooltip>
+
+                                                                                                </>}
+
+                                                                                                <Tooltip hasArrow label='delete' placement='top'>
+                                                                                                    <button type="button" onClick={()=>deleteUpload(upload?.id)} className='btn px-2 py-1 btn-red btn border border-[#e1e5ec] rounded !text-[#fff] flex items-center'>
+                                                                                                        <Trash size={16}/>
                                                                                                     </button>
                                                                                                 </Tooltip>
-                                                                                            : <>
-                                                                                                <Tooltip hasArrow label='download' placement='top'>
-                                                                                                    <Link href={upload?.file_url} target="_blank" download className='btn px-2 py-1 btn-info btn border border-[#e1e5ec] rounded !text-[#fff] flex items-center'>
-                                                                                                        <DocumentDownload size={16}/>
-                                                                                                    </Link>
-                                                                                                </Tooltip>
+                                                                                            </div>
+                                                                                        </Td>
 
-                                                                                            </>}
+                                                                                    </Tr>
+                                                                                )
+                                                                            })}
+                                                                        </Tbody>
+                                                                    </Table>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div className="px-3 md:p-4 rounded-lg sidebar w-full lg:w-4/12 space-y-4">
+                                                        <div className="space-y-3">
+                                                            {showReviews ? 
+                                                                <>
+                                                                    <button 
+                                                                        className="w-full whitespace-nowrap py-2 md:py-3 px-3 md:px-3 bg-[#008080] text-white transition ease-in duration-200 text-center font-semibold shadow-md rounded flex items-center justify-center gap-2 text-xs"
+                                                                    >
+                                                                        <p className="">Send To Review</p>
+                                                                    </button>
+                                                                    <button 
+                                                                        className="w-full whitespace-nowrap py-2 md:py-3 px-3 md:px-3 bg-[#313131] text-white transition ease-in duration-200 text-center font-semibold shadow-md rounded flex items-center justify-center gap-2 text-xs"
+                                                                    >
+                                                                        <p className="">Accept and Skip Review</p>
+                                                                    </button>
+                                                                </>
+                                                                : <></>
+                                                            }
 
-                                                                                            <Tooltip hasArrow label='delete' placement='top'>
-                                                                                                <button type="button" onClick={()=>deleteUpload(upload?.id)} className='btn px-2 py-1 btn-red btn border border-[#e1e5ec] rounded !text-[#fff] flex items-center'>
-                                                                                                    <Trash size={16}/>
-                                                                                                </button>
-                                                                                            </Tooltip>
-                                                                                        </div>
-                                                                                    </Td>
+                                                            {submission?.issue?.published_status || submission?.issue?.published_status ? 
+                                                                <div className="text-sm">
+                                                                    <p><strong>Submission Published.</strong></p>
+                                                                </div>
+                                                            : ''}
 
-                                                                                </Tr>
+                                                            {submission?.status !== 0 && submission?.issue?.published_status == 0 ? 
+                                                                <div className="text-sm">
+                                                                    <p><strong>Submission {submission?.status == 1 ? 'Accepted' : ''}{submission?.status == 2 ? 'Rejected' : ''}.</strong></p>
+                                                                </div>
+                                                            : ''}
+
+                                                            {submission?.status !== 0 ? 
+                                                                <div className="text-sm">
+                                                                    <span className="underline cursor-pointer" onClick={()=>{setChangeAcceptanceStatus(!changeAcceptanceStatus)}}>Change Decision</span>
+                                                                </div>
+                                                            : ''}
+
+
+                                                            {submission?.status == 0 || changeAcceptanceStatus ? 
+                                                                <>
+                                                                    <button onClick={()=>acceptSubmission()}
+                                                                        className="w-full whitespace-nowrap py-2 md:py-3 px-3 md:px-3 bg-[#008000] border border-transparent text-white transition ease-in duration-200 text-center font-semibold shadow-md rounded flex items-center justify-center gap-2 text-xs"
+                                                                    >
+                                                                        <p className="">Accept Submission</p>
+                                                                    </button>
+
+                                                                    <button onClick={()=>declineSubmission()}
+                                                                        className="w-full whitespace-nowrap py-2 md:py-3 px-3 md:px-3 bg-[#c51b26] border border-transparent text-white transition ease-in duration-200 text-center font-semibold shadow-md rounded flex items-center justify-center gap-2 text-xs"
+                                                                    >
+                                                                        <p className="">Decline Submission</p>
+                                                                    </button>
+                                                                </>
+                                                            : ''}
+                                                        </div>
+                                                        <div>
+                                                            <div className="flex items-center justify-between gap-2 bg-[#eee] p-2">
+                                                                <h3 className="text-[#212121] text-base font-semibold">
+                                                                    Participants
+                                                                </h3>
+                                                                <button  
+                                                                    onClick={onAttachEditorOpen}
+                                                                    className="w-auto whitespace-nowrap py-2 md:py-2 px-3 md:px-3 bg-[#313131] text-white transition ease-in duration-200 text-center font-semibold shadow-md rounded flex items-center justify-center gap-2 text-xs"
+                                                                >
+                                                                    <p className="">Assign</p>
+                                                                </button>
+                                                            </div>
+                                                            {editors.length < 1 ? 
+                                                                <div className="p-3 shadow">
+                                                                    <p className="text-sm">Assign an editor to enable the editorial decisions for this stage.</p>
+                                                                </div>
+                                                            : <></>}
+
+                                                            {editors.length > 0 ? 
+                                                                <div className="pb-4">
+                                                                    <div className="flex items-center justify-between gap-2 mb-2 bg-[#eee] p-2">
+                                                                        <h3 className="text-[#212121] text-sm font-semibold">
+                                                                            Editor{editors.length > 1 ?'s':''}
+                                                                        </h3>
+                                                                    </div>                                                                        
+                                                                    <div className="space-y-3" >
+                                                                        {editors?.map((item, index )=>{
+                                                                            return(
+                                                                                <div className="flex items-center justify-between" key={index}>
+                                                                                    <p className="text-sm">{getFullName(item.editor)}.</p>
+                                                                                    <span onClick={()=>removeEditor(item.editor.id)} className="text-[#c51b26] cursor-pointer">
+                                                                                        <Trash size={15} />
+                                                                                    </span>
+                                                                                </div>
+
                                                                             )
                                                                         })}
-                                                                    </Tbody>
-                                                                </Table>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div className="px-3 md:p-4 rounded-lg sidebar w-full lg:w-4/12 space-y-4">
-                                                    <div className="space-y-3">
-                                                        {showReviews ? 
-                                                            <>
-                                                                <button 
-                                                                    className="w-full whitespace-nowrap py-2 md:py-3 px-3 md:px-3 bg-[#008080] text-white transition ease-in duration-200 text-center font-semibold shadow-md rounded flex items-center justify-center gap-2 text-xs"
-                                                                >
-                                                                    <p className="">Send To Review</p>
-                                                                </button>
-                                                                <button 
-                                                                    className="w-full whitespace-nowrap py-2 md:py-3 px-3 md:px-3 bg-[#313131] text-white transition ease-in duration-200 text-center font-semibold shadow-md rounded flex items-center justify-center gap-2 text-xs"
-                                                                >
-                                                                    <p className="">Accept and Skip Review</p>
-                                                                </button>
-                                                            </>
-                                                            : <></>
-                                                        }
-
-                                                        {submission?.issue?.published_status || submission?.issue?.published_status ? 
-                                                            <div className="text-sm">
-                                                                <p><strong>Submission Published.</strong></p>
-                                                            </div>
-                                                        : ''}
-
-                                                        {submission?.status !== 0 && submission?.issue?.published_status == 0 ? 
-                                                            <div className="text-sm">
-                                                                <p><strong>Submission {submission?.status == 1 ? 'Accepted' : ''}{submission?.status == 2 ? 'Rejected' : ''}.</strong></p>
-                                                            </div>
-                                                        : ''}
-
-                                                        {submission?.status !== 0 ? 
-                                                            <div className="text-sm">
-                                                                <span className="underline cursor-pointer" onClick={()=>{setChangeAcceptanceStatus(!changeAcceptanceStatus)}}>Change Decision</span>
-                                                            </div>
-                                                        : ''}
-
-
-                                                        {submission?.status == 0 || changeAcceptanceStatus ? 
-                                                            <>
-                                                                <button onClick={()=>acceptSubmission()}
-                                                                    className="w-full whitespace-nowrap py-2 md:py-3 px-3 md:px-3 bg-[#008000] border border-transparent text-white transition ease-in duration-200 text-center font-semibold shadow-md rounded flex items-center justify-center gap-2 text-xs"
-                                                                >
-                                                                    <p className="">Accept Submission</p>
-                                                                </button>
-
-                                                                <button onClick={()=>declineSubmission()}
-                                                                    className="w-full whitespace-nowrap py-2 md:py-3 px-3 md:px-3 bg-[#c51b26] border border-transparent text-white transition ease-in duration-200 text-center font-semibold shadow-md rounded flex items-center justify-center gap-2 text-xs"
-                                                                >
-                                                                    <p className="">Decline Submission</p>
-                                                                </button>
-                                                            </>
-                                                        : ''}
-                                                    </div>
-                                                    <div>
-                                                        <div className="flex items-center justify-between gap-2 bg-[#eee] p-2">
-                                                            <h3 className="text-[#212121] text-base font-semibold">
-                                                                Participants
-                                                            </h3>
-                                                            <button  
-                                                                onClick={onAttachEditorOpen}
-                                                                className="w-auto whitespace-nowrap py-2 md:py-2 px-3 md:px-3 bg-[#313131] text-white transition ease-in duration-200 text-center font-semibold shadow-md rounded flex items-center justify-center gap-2 text-xs"
-                                                            >
-                                                                <p className="">Assign</p>
-                                                            </button>
-                                                        </div>
-                                                        {editors.length < 1 ? 
-                                                            <div className="p-3 shadow">
-                                                                <p className="text-sm">Assign an editor to enable the editorial decisions for this stage.</p>
-                                                            </div>
-                                                        : <></>}
-
-                                                        {editors.length > 0 ? 
-                                                            <div className="pb-4">
-                                                                <div className="flex items-center justify-between gap-2 mb-2 bg-[#eee] p-2">
-                                                                    <h3 className="text-[#212121] text-sm font-semibold">
-                                                                        Editor{editors.length > 1 ?'s':''}
-                                                                    </h3>
-                                                                </div>                                                                        
-                                                                <div className="space-y-3" >
-                                                                    {editors?.map((item, index )=>{
-                                                                        return(
-                                                                            <div className="flex items-center justify-between" key={index}>
-                                                                                <p className="text-sm">{getFullName(item.editor)}.</p>
-                                                                                <span onClick={()=>removeEditor(item.editor.id)} className="text-[#c51b26] cursor-pointer">
-                                                                                    <Trash size={15} />
-                                                                                </span>
-                                                                            </div>
-
-                                                                        )
-                                                                    })}
+                                                                    </div>
+                                                                    
                                                                 </div>
-                                                                
-                                                            </div>
-                                                        : <></>}
-                                                    </div>
-
-                                                    <div className="py-4">
-                                                        
-                                                        <div className="flex items-center justify-between gap-2 mb-2 bg-[#eee] p-2">
-                                                            <h3 className="text-[#212121] text-sm font-semibold">
-                                                                Author
-                                                            </h3>
+                                                            : <></>}
                                                         </div>
-                                                        <div className="">
-                                                            <p className="text-sm">{getFullName(submission?.user)}.</p>
+
+                                                        <div className="py-4">
+                                                            
+                                                            <div className="flex items-center justify-between gap-2 mb-2 bg-[#eee] p-2">
+                                                                <h3 className="text-[#212121] text-sm font-semibold">
+                                                                    Author
+                                                                </h3>
+                                                            </div>
+                                                            <div className="">
+                                                                <p className="text-sm">{getFullName(submission?.user)}.</p>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
 
+                                            </div>
                                         </div>
-                                    </div>
+                                    </>
+                                }
                                 </TabPanel>
                                 {/* <TabPanel className="px-0 py-0">
                                     <div>
@@ -913,7 +946,14 @@ const SingleSubmission = () => {
                             <TabPanel className="px-0 py-0">
                                 <div>
                                     <div className="bg-white min-h-[500px] p-4">
-                                        <div>
+                                        <div className=" px-3 md:p-4 py-3 rounded-lg w-full">
+                                            <ContributorsTableList
+                                                contributors={contributors} 
+                                                fetchData={fetchData} 
+                                                onAddContributorOpen={onAddContributorOpen} 
+                                                onUpdateContributorOpen={onUpdateContributorOpen} 
+                                                setCurrentContributor={setCurrentContributor}
+                                            />
                                         </div>
                                     </div>
                                 </div>
@@ -922,39 +962,7 @@ const SingleSubmission = () => {
                                 <div>
                                     <div className="bg-white min-h-[500px] p-4">
                                         <div>
-                                            <div className=" px-3 md:px-6 py-3 md:py-6">
-                                                <div className="">
-                                                    <div className="flex w-full gap-5 items-center flex-wrap lg:flex-nowrap">
-                                                        <div className="mb-6 flex flex-col gap-1 relative w-full lg:w-1/2">
-                                                            <label
-                                                                htmlFor="name"
-                                                                className="text-sm text-[#212121] mb-1"
-                                                            >
-                                                                KeyWords
-                                                            </label>
-
-                                                            <TagField
-                                                                tags={tags}
-                                                                addTag={handleAddTag}
-                                                                removeTag={handleRemoveTag}
-                                                                maxTags={MAX_TAGS}
-                                                            />
-                                                        </div>
-
-                                                    </div>
-                                                </div>
-                                                <Box mt={4}>
-                                                    <div className="flex items-center justify-end w-full gap-3 flex-wrap">
-                                                        <button
-                                                            className="bg-[#DA5921] hover:bg-[#DA5921] min-w-[200px] whitespace-nowrap w-full md:w-auto
-                                                            disabled:opacity-50 disabled:cursor-not-allowed rounded-lg 
-                                                            transition-all duration-75 border-none px-5 
-                                                            font-medium p-3 text-base text-white block">
-                                                            Save
-                                                        </button>
-                                                    </div>
-                                                </Box>
-                                            </div>
+                                            <UpdateKeywordsForm submission={submission} fetchData={fetchData}/>
                                         </div>
                                     </div>
                                 </div>
@@ -1044,6 +1052,21 @@ const SingleSubmission = () => {
                 isOpen={unPublishSubmissionIsOpen}
                 onClose={onUnPublishSubmissionClose}
                 submission={submission}
+                fetchData={fetchData}
+            />
+
+            <AddSubmissionContributorModal
+                isOpen={addContributorIsOpen}
+                onClose={onAddContributorClose}
+                submission={submission}
+                fetchData={fetchData}
+            />
+
+            <UpdateSubmissionContributorModal
+                isOpen={updateContributorIsOpen}
+                onClose={onUpdateContributorClose}
+                submission={submission}
+                contributor={currentContributor}
                 fetchData={fetchData}
             />
         </>

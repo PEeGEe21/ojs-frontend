@@ -41,14 +41,14 @@ const Submission = () => {
                     placeholder="Search"
                   />
                 </div>
-                <div className="text-md  flex flex-row items-center justify-end gap-6  w-full  mt-3 md:mt-0 flex-wrap md:flex-nowrap ">
+                {/* <div className="text-md  flex flex-row items-center justify-end gap-6  w-full  mt-3 md:mt-0 flex-wrap md:flex-nowrap ">
                     <Link
                         href={"/admin/submissions/create"}
                         className="w-auto whitespace-nowrap py-2 md:py-3 px-3 md:px-5 bg-[#313131] text-white transition ease-in duration-200 text-center text-sm font-semibold shadow-md rounded flex items-center justify-center gap-2 "
                     >
                         <p className="">Create Submission</p>
                     </Link>
-                </div>
+                </div> */}
               </div>
 
 
@@ -95,11 +95,11 @@ const Submission = () => {
                     _selected={{ color: "#313131", backgroundColor:"#FFFFFF", borderTop:"1px", borderTopColor: "#0F1B2D"}}
                   >
                     <span className="py-2 min-w-[150px]">
-                      My Submissions
+                      Submissions
                     </span>
                   
                   </Tab>
-                  <Tab 
+                  {/* <Tab 
                     // onSelect={}
                     className=" border-[#3B3939] text-[#313131]"
                     _hover={{ color: "#FFFFFF", backgroundColor:"#313131",  borderTop:"1px", borderTopColor: "#FFF" }}
@@ -119,7 +119,7 @@ const Submission = () => {
                     <span className="py-2  min-w-[150px]">
                     Active
                     </span>
-                  </Tab>
+                  </Tab> */}
                 </TabList>
                 <TabPanels>
                   <TabPanel className="px-0 py-0">
@@ -135,7 +135,7 @@ const Submission = () => {
                     </div>
 
                   </TabPanel>
-                  <TabPanel className="px-0 py-0">
+                  {/* <TabPanel className="px-0 py-0">
                     <div>
                       <div className="bg-white min-h-[500px]">
 
@@ -148,7 +148,7 @@ const Submission = () => {
 
                       </div>
                     </div>
-                  </TabPanel>
+                  </TabPanel> */}
                 </TabPanels>
               </Tabs>
             </div>

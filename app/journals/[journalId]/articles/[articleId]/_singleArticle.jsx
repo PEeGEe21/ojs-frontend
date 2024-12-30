@@ -186,14 +186,14 @@ const SingleArticle = () => {
                             <div className="flex gap-4 flex-wrap border-b">
                                 <div className='w-full lg:w-9/12 flex-1 space-y-8 pb-20 px-8'>
                                 
-                                    <div className='space-y-5'>
-                                        {article?.editors.map((editor, index) =>{
+                                    <div className='space-y-3'>
+                                        {article?.contributors.map((contributor, index) =>{
                                             return (
                                                 <div className=' mt-2 flex-col text-sm' key={index}>
-                                                    <h4 className='font-bold'>{getFullName(editor?.editor)}</h4>
-                                                    {/* <p>
-                                                        Department of Curriculum and Instructional Technology, Faculty of Education, University of Benin
-                                                    </p> */}
+                                                    <h4 className='font-semibold capitalize'>{contributor?.public_name??''} {getFullName(contributor)}</h4>
+                                                    <p>
+                                                        {contributor?.affiliation??''}
+                                                    </p>
                                                 </div>
                                             )
                                         })}

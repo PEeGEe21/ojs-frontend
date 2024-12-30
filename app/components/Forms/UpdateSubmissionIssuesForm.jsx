@@ -78,6 +78,18 @@ const UpdateSubmissionIssuesForm = ({
 
     if (submission) {
       try {
+        if(!section){
+          toast.error("Please Choose a Section");
+          setIsSaving(false);
+          return
+        }
+
+        if(!datePublished){
+          toast.error("Enter Date Published");
+          setIsSaving(false);
+          return
+        }
+
         const payload = {
           pages: parseInt(pages),
           urlPath: urlPath,
@@ -230,7 +242,7 @@ const UpdateSubmissionIssuesForm = ({
                             Saving..
                           </>
                         ) : (
-                        <>Save</>
+                          <>Save</>
                         )}
                       </button>
                   </div>

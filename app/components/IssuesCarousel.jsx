@@ -6,7 +6,7 @@ import 'slick-carousel/slick/slick-theme.css';
 // import './testimonial.css'
 import Image from 'next/image';
 import { blurDataUrl } from '../lib/constants';
-import { dateFormat, shortenTitle } from '../lib/utilFunctions';
+import { dateFormat, shortenTitle, slugify } from '../lib/utilFunctions';
 import Link from 'next/link';
 
 // Custom arrow components
@@ -130,8 +130,8 @@ const IssuesCarousel = ({ data }) => {
                                             <div className="relative overflow-hidden all-authors">
                                                 <div className="rounded relative h-[200px] overflow-hidden">
                                                     <Image 
-                                                        src={issue?.cover_url??'/images/albert-canite-RG2YD21o81E-unsplash.jpg'} 
-                                                        alt={'journal one'} 
+                                                        src={`${issue?.cover_image_url??'/images/albert-canite-RG2YD21o81E-unsplash.jpg'}`} 
+                                                        alt={`${issue?.title ? slugify(issue?.title) : 'alt'}`}
                                                         className="w-full h-full object-cover object-center transition-transform duration-300 ease-in-out group-hover:scale-105" 
                                                         height={300}
                                                         width={800}

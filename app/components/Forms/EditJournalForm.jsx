@@ -17,7 +17,7 @@ import { LoaderIcon } from '../IconComponent';
 import { Check } from 'iconsax-react';
 import dynamic from "next/dynamic";
 import { modules } from '../../lib/constants';
-import { getFullName } from '../../utils/common';
+import { getFullName, uploadFile } from '../../utils/common';
 import { hostUrl } from '../../lib/utilFunctions';
 
 
@@ -42,7 +42,9 @@ const EditJournalForm = ({
     slug: currentJournal?.slug??'',
     file_url: '',
   });
+  const [file, setFile] = useState("");
   const [fileName, setFileName] = useState(currentJournal?.file_name??"");
+  const [fileNameExt, setFileNameExt] = useState("");
   const [note, setNote] = useState(currentJournal?.note??"");
 
   const chakraToast = useToast();
@@ -94,7 +96,6 @@ const EditJournalForm = ({
         }
 
         const { name, editor, slug, accronym } = inputs;
-        // const { name, description } = inputs;
 
         var payload = {
           name,
@@ -105,6 +106,13 @@ const EditJournalForm = ({
           editorId: parseInt(editor),
           file_name: fileName,
         };
+
+        if(file){
+          const downloadURL = await uploadFile(file);
+
+          if (downloadURL)
+            payload.file_url = downloadURL;
+        }
 
         const res = await axios.post(hostUrl + `journals/update-journal/${currentJournal?.id}`, payload);
 
@@ -140,12 +148,14 @@ const EditJournalForm = ({
     onClose();
     setCurrentJournal(null);
   }
-
   const handleFileChange = (e) => {
     const file = e.target.files[0];
+
     if (file) {
-        console.log("file", file);
-        setFileName(file.name);
+        setFile(file);
+        const nameWithoutExtension = file.name.split('.').slice(0, -1).join('.');
+        setFileName(nameWithoutExtension);
+        setFileNameExt(file.name);
     } else {
         setFileName("");
     }

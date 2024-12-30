@@ -21,7 +21,7 @@ import {
   } from '@chakra-ui/react'
 import { ChevronRight, DocumentExport, Recycle } from '@carbon/icons-react'
 import Link from 'next/link'
-import { dateFormat, formatMomentDate, hostUrl, shortenTitle } from '../../lib/utilFunctions';
+import { dateFormat, formatMomentDate, hostUrl, shortenTitle, slugify } from '../../lib/utilFunctions';
 import { LoaderIcon } from '../../components/IconComponent';
 import ArticleSummaryDrawer  from '../../components/Drawer/ArticleSummaryDrawer';
 import axios from 'axios';
@@ -179,8 +179,8 @@ const IssuesPage = () => {
                                 <div className='w-full lg:w-4/12 flex-1'>
                                     <div className="rounded relative h-[200px] md:h-[300px] overflow-hidden">
                                         <Image 
-                                            src={`/images/albert-canite-RG2YD21o81E-unsplash.jpg`} 
-                                            alt={'journal one'} 
+                                            src={`${issue?.cover_image_url??'/images/albert-canite-RG2YD21o81E-unsplash.jpg'}`} 
+                                            alt={`${issue?.title ? slugify(issue?.title) : 'alt'}`} 
                                             className="w-full h-full object-cover object-center transition-transform duration-300 ease-in-out group-hover:scale-105" 
                                             height={300}
                                             width={800}

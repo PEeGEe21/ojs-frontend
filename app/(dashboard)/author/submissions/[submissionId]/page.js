@@ -3,12 +3,14 @@ import { Box, Progress, Tab, TabIndicator, Table, TabList, TabPanel, TabPanels, 
 import UploadFileSubmissionModal from "../../../../components/Modals/UploadFileSubmissionModal"
 import AssignEditorSubmissionModal from "../../../../components/Modals/AssignEditorSubmissionModal"
 import AssignIssueSubmissionModal from "../../../../components/Modals/AssignIssueSubmissionModal"
+import AddSubmissionContributorModal from "../../../../components/Modals/AddSubmissionContributorModal"
+import UpdateSubmissionContributorModal from "../../../../components/Modals/UpdateSubmissionContributorModal"
 import "react-quill-new/dist/quill.snow.css";
-import { ArrowLeft, DocumentDownload, Eye, Trash } from 'iconsax-react'
+import { ArrowLeft, Check, DocumentDownload, Eye, TagCross, Trash } from 'iconsax-react'
 import { useParams, useRouter } from 'next/navigation'
 import React, { useContext, useEffect, useMemo, useState } from 'react'
 import { formatMomentDate, hostUrl } from "../../../../lib/utilFunctions";
-import { getFullName } from "../../../../utils/common";
+import { getContributorRole, getFullName } from "../../../../utils/common";
 import Swal from 'sweetalert2';
 import axios from "axios";
 import { modules, styles } from "../../../../lib/constants";
@@ -18,8 +20,11 @@ import useTags from "../../../../hooks/useTags";
 import { JournalContext } from "../../../../utils/journalContext";
 import UpdateSubmissionIssuesForm from "../../../../components/Forms/UpdateSubmissionIssuesForm"
 import UpdateSubmissionTitleForm from "../../../../components/Forms/UpdateSubmissionTitleForm"
+import UpdateKeywordsForm from "../../../../components/Forms/UpdateKeywordsForm"
+import ContributorsTableList from "../../../../components/Tables/ContributorsTableList"
 import PDFViewer from "../../../../components/PDFViewer"
 import Link from "next/link";
+import { Checkmark, Close } from "@carbon/icons-react";
 
 const SingleSubmission = () => {
     const { selectedJournal } = useContext(JournalContext);
@@ -27,6 +32,7 @@ const SingleSubmission = () => {
     const [user, setUser ] = useState(null);
     const [submission, setSubmission ] = useState(null);
     const [submissionFiles, setSubmissionFiles ] = useState([]);
+    const [contributors, setSubmissionContributors ] = useState([]);
     const [sections, setSections ] = useState([]);
     const [uploads, setUploads ] = useState([]);
     const [users, setUsers ] = useState([]);
@@ -41,6 +47,7 @@ const SingleSubmission = () => {
     const [abstract, setAbstract] = useState("");
     const [currentUpload, setCurrentUpload] = useState(null);
     const [currentViewUpload, setViewCurrentUpload] = useState(null);
+    const [currentContributor, setCurrentContributor] = useState(null);
     const [editors, setEditors] = useState([]);
 
     const [showReviews, setShowReviews] = useState(false)
@@ -52,6 +59,18 @@ const SingleSubmission = () => {
         isOpen: uploadFileIsOpen,
         onOpen: onUploadFileOpen,
         onClose: onUploadFileClose,
+    } = useDisclosure();
+
+    const {
+        isOpen: addContributorIsOpen,
+        onOpen: onAddContributorOpen,
+        onClose: onAddContributorClose,
+    } = useDisclosure();
+
+    const {
+        isOpen: updateContributorIsOpen,
+        onOpen: onUpdateContributorOpen,
+        onClose: onUpdateContributorClose,
     } = useDisclosure();
 
     const {
@@ -123,6 +142,7 @@ const SingleSubmission = () => {
                     const submission = data.submission
                     setSubmission(submission)
                     setEditors(submission.editors)
+                    setSubmissionContributors(submission.contributors)
                     setUsers(data.users)
 
                     // setTitle(submission.title);
@@ -291,10 +311,14 @@ const SingleSubmission = () => {
         });
     };
 
+
+
     const handleOpenCurrentUpload = (upload) =>{
         // if(upload.file_type === )
             setViewCurrentUpload(upload)
     }
+
+
     return (
         <>
             <div className="flex flex-row items-center justify-start gap-4 mb-8">
@@ -571,7 +595,14 @@ const SingleSubmission = () => {
                             <TabPanel className="px-0 py-0">
                                 <div>
                                     <div className="bg-white min-h-[500px] p-4">
-                                        <div>
+                                        <div className=" px-3 md:p-4 py-3 rounded-lg w-full">
+                                            <ContributorsTableList 
+                                                contributors={contributors} 
+                                                fetchData={fetchData} 
+                                                onAddContributorOpen={onAddContributorOpen} 
+                                                onUpdateContributorOpen={onUpdateContributorOpen} 
+                                                setCurrentContributor={setCurrentContributor}
+                                            />
                                         </div>
                                     </div>
                                 </div>
@@ -580,39 +611,7 @@ const SingleSubmission = () => {
                                 <div>
                                     <div className="bg-white min-h-[500px] p-4">
                                         <div>
-                                            <div className=" px-3 md:px-6 py-3 md:py-6">
-                                                <div className="">
-                                                    <div className="flex w-full gap-5 items-center flex-wrap lg:flex-nowrap">
-                                                        <div className="mb-6 flex flex-col gap-1 relative w-full lg:w-1/2">
-                                                            <label
-                                                                htmlFor="name"
-                                                                className="text-sm text-[#212121] mb-1"
-                                                            >
-                                                                KeyWords
-                                                            </label>
-
-                                                            <TagField
-                                                                tags={tags}
-                                                                addTag={handleAddTag}
-                                                                removeTag={handleRemoveTag}
-                                                                maxTags={MAX_TAGS}
-                                                            />
-                                                        </div>
-
-                                                    </div>
-                                                </div>
-                                                <Box mt={4}>
-                                                    <div className="flex items-center justify-end w-full gap-3 flex-wrap">
-                                                        <button
-                                                            className="bg-[#DA5921] hover:bg-[#DA5921] min-w-[200px] whitespace-nowrap w-full md:w-auto
-                                                            disabled:opacity-50 disabled:cursor-not-allowed rounded-lg 
-                                                            transition-all duration-75 border-none px-5 
-                                                            font-medium p-3 text-base text-white block">
-                                                            Save
-                                                        </button>
-                                                    </div>
-                                                </Box>
-                                            </div>
+                                            <UpdateKeywordsForm submission={submission} fetchData={fetchData}/>
                                         </div>
                                     </div>
                                 </div>
@@ -658,6 +657,21 @@ const SingleSubmission = () => {
                 onClose={onAssignIssueClose}
                 submission={submission}
                 issuesList={issues}
+                fetchData={fetchData}
+            />
+
+            <AddSubmissionContributorModal
+                isOpen={addContributorIsOpen}
+                onClose={onAddContributorClose}
+                submission={submission}
+                fetchData={fetchData}
+            />
+
+            <UpdateSubmissionContributorModal
+                isOpen={updateContributorIsOpen}
+                onClose={onUpdateContributorClose}
+                submission={submission}
+                contributor={currentContributor}
                 fetchData={fetchData}
             />
 

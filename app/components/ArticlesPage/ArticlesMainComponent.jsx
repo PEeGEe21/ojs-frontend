@@ -40,12 +40,6 @@ const ArticlesMainComponent = () => {
         getUser()
     }, [])
 
-    const start = (role) => {
-        setTimeout(() => {
-            handleRedirect(role, push);
-        }, 300);
-    }
-
     useEffect(()=>{
         const fetchData = async () => {
             try {
@@ -69,7 +63,7 @@ const ArticlesMainComponent = () => {
 
   return (
     <>
-        <Navbar user={user} start={start}/>
+        <Navbar user={user}/>
         <div className='min-h-32 h-32 bg-stone-400 relative text-white' style={{backgroundImage: 'url(/images/albert-canite-RG2YD21o81E-unsplash.jpg)', backgroundPosition: 'center center', backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundAttachment: 'scroll'}}>
             <div className='px-4 max-w-6xl mx-auto h-full items-center justify-center flex text-2xl font-semibold z-[999]'>
                 <span className='z-[10]'>Articles</span>

@@ -2,13 +2,16 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation'
 import NavbarSearchForm from '../Forms/ArticleRecoSearchForm'
 // import "../../styles/navbar.css";
 import { ArrowDown, ArrowDown2, Global, SearchNormal1 } from 'iconsax-react';
 import { shortenTitle } from '../../lib/utilFunctions';
+import { start } from '../../utils/common';
 // import { MenuContext } from '@/app/utils/context';
 
-const Navbar = ({user, start}) => {
+const Navbar = ({user}) => {
+  const { push } = useRouter();
   // const { toggle, showMenu } = useContext(MenuContext) || {};
 
   const showMenu = null;
@@ -24,7 +27,7 @@ const Navbar = ({user, start}) => {
         className="z-50"
         style={{ position: 'relative' }}
       >
-        <div className="container mx-auto max-w-[750px] md:max-w-[970px] lg:max-w-[1170px] px-4">
+        <div className="container max-w-[90rem] mx-auto px-4">
           <nav className="flex  flex-wrap items-center justify-between py-4">
             <div className="lg:order-1 w-auto lg:w-1/4 lg:text-center">
               <Link
@@ -151,7 +154,7 @@ const Navbar = ({user, start}) => {
                   <>
                       <button
                         className="text-[#353535] leading-7 "
-                        onClick={()=>start((user?.user_default_role).toLowerCase())}
+                        onClick={()=>start((user?.user_default_role).toLowerCase(), push)}
                       >
                           {shortenTitle(user?.email)}
                       </button>

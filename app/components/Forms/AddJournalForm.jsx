@@ -17,7 +17,7 @@ import axios from 'axios';
 import { _getUser, hostUrl } from '../../lib/utilFunctions';
 import { LoaderIcon } from '../IconComponent';
 import { modules, permissionLevelList, styles } from '../../lib/constants';
-import { getFullName } from '../../utils/common';
+import { getFullName, uploadFile } from '../../utils/common';
 import { JournalContext } from '../../utils/journalContext';
 
 const AddJournalForm = ({ onClose, dataSource, start, users, loggedInUser }) => {
@@ -32,7 +32,10 @@ const AddJournalForm = ({ onClose, dataSource, start, users, loggedInUser }) => 
     file_url: '',
   });
   const { fetchJournals } = useContext(JournalContext);
+  
+  const [file, setFile] = useState("");
   const [fileName, setFileName] = useState("");
+  const [fileNameExt, setFileNameExt] = useState("");
   const [note, setNote] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -82,14 +85,6 @@ const AddJournalForm = ({ onClose, dataSource, start, users, loggedInUser }) => 
           
         const { name, editor, slug, accronym } = inputs;
 
-        console.log(name,
-          note,
-          slug,
-          accronym,
-          loggedInUser?.id,
-          editor,
-          fileName, loggedInUser)
-        // return
         var payload = {
           name,
           note,
@@ -99,6 +94,11 @@ const AddJournalForm = ({ onClose, dataSource, start, users, loggedInUser }) => 
           editorId: parseInt(editor),
           file_name: fileName,
         };
+
+        const downloadURL = await uploadFile(file);
+
+        if (downloadURL)
+          payload.file_url = downloadURL;
 
         const res = await axios.post(hostUrl + 'journals',
           payload
@@ -136,8 +136,10 @@ const AddJournalForm = ({ onClose, dataSource, start, users, loggedInUser }) => 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-        console.log("file", file);
-        setFileName(file.name);
+        setFile(file);
+        const nameWithoutExtension = file.name.split('.').slice(0, -1).join('.');
+        setFileName(nameWithoutExtension);
+        setFileNameExt(file.name);
     } else {
         setFileName("");
     }

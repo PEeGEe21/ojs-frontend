@@ -19,7 +19,7 @@ export const TagField = ({ tags, addTag, removeTag, maxTags }) => {
 
       if (
         userInput.trim() !== "" &&
-        userInput.length <= 12 &&
+        // userInput.length <= 12 &&
         tags.length < maxTags
       ) {
         addTag(userInput);

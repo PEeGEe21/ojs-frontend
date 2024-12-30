@@ -17,6 +17,7 @@ import axios from 'axios';
 import { _getUser, fetchProjectsById, getGeneratedPassword, hostUrl } from '../../../lib/utilFunctions';
 import { LoaderIcon } from '../../IconComponent';
 import { modules } from '../../../lib/constants';
+import { uploadFile } from '../../../utils/common';
 
 const AddIssueForm = ({
   onClose,
@@ -25,7 +26,13 @@ const AddIssueForm = ({
   allRoles,
 }) => {
   const [isSaving, setIsSaving] = useState(false);
+
+  const [showLoader, setShowLoader] = useState(false);
+  const [file, setFile] = useState("");
   const [fileName, setFileName] = useState("");
+  const [fileNameExt, setFileNameExt] = useState("");
+  const [fileSize, setFileSize] = useState("");
+  const [fileType, setFileType] = useState("");
   const [isAddVolume, setIsAddVolume] = useState(false);
   const [description, setDescription] = useState('');
   const router = useRouter();
@@ -97,6 +104,12 @@ const AddIssueForm = ({
             url_path
           }
 
+          const downloadURL = await uploadFile(file);
+
+
+          if (downloadURL)
+            payload.cover_image_url = downloadURL;
+
           if(fileName !== '')
             payload.cover_image_name = fileName;
 
@@ -128,6 +141,7 @@ const AddIssueForm = ({
         }
         setIsSaving(false);
       } catch (err) {
+        console.log(err)
         chakraToast({
           title: err?.response?.data?.message??'An Error Occurred',
           description: "Error Occured",  
@@ -141,12 +155,22 @@ const AddIssueForm = ({
   };
 
   const handleFileChange = (e) => {
+    setShowLoader(true);
     const file = e.target.files[0];
+
     if (file) {
         console.log("file", file);
-        setFileName(file.name);
+
+        setFile(file);
+        const nameWithoutExtension = file.name.split('.').slice(0, -1).join('.');
+        setFileName(nameWithoutExtension);
+        setFileNameExt(file.name);
+        setFileSize(file.size); // Convert size to KB
+        const extension = file.name.split('.').pop();
+        setFileType(extension); // Extract and display file extension as type
     } else {
         setFileName("");
+        setShowLoader(false);
     }
   };
 
@@ -273,7 +297,7 @@ const AddIssueForm = ({
                         <div className="text-sm text-[#A8B8C2] text-center">
                           {fileName ? (
                             <div className="text-base text-[#FFA178]">
-                                {fileName}
+                                {fileNameExt}
                             </div>
                           ) : (
                             <>

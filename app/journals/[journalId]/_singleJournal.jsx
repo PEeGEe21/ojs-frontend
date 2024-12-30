@@ -20,7 +20,7 @@ import {
   } from '@chakra-ui/react'
 import { ChevronRight, DocumentExport, Recycle } from '@carbon/icons-react'
 import Link from 'next/link'
-import { dateFormat, formatMomentDate, hostUrl, shortenTitle } from '../../lib/utilFunctions';
+import { dateFormat, formatMomentDate, hostUrl, shortenTitle, slugify } from '../../lib/utilFunctions';
 import { LoaderIcon } from '../../components/IconComponent';
 import ArticleSummaryDrawer  from '../../components/Drawer/ArticleSummaryDrawer';
 import IssuesCarousel  from '../../components/IssuesCarousel';
@@ -237,8 +237,8 @@ const SingleJournal = () => {
                                 <div className='w-full lg:w-4/12 flex-1'>
                                     <div className="rounded relative h-[200px] md:h-[300px] overflow-hidden">
                                         <Image 
-                                            src={`/images/albert-canite-RG2YD21o81E-unsplash.jpg`} 
-                                            alt={'journal one'} 
+                                            src={`${journal?.file_url??'/images/albert-canite-RG2YD21o81E-unsplash.jpg'}`} 
+                                            alt={`${journal?.slug ? slugify(journal?.slug) : journal?.name}`} 
                                             className="w-full h-full object-cover object-center transition-transform duration-300 ease-in-out group-hover:scale-105" 
                                             height={300}
                                             width={800}
@@ -284,8 +284,8 @@ const SingleJournal = () => {
                                                     className="group rounded-md overflow-hidden hover:shadow-lg transition duration-300 ease border border-gray-200 w-full flex flex-col md:flex-row justify-start">
                                                     <div className="rounded-t relative h-[200px] w-full md:w-[150px] overflow-hidden ">
                                                             <Image 
-                                                                src={`/images/albert-canite-RG2YD21o81E-unsplash.jpg`} 
-                                                                alt={'heree'} 
+                                                                src={`${latestIssue?.cover_image_url??'/images/albert-canite-RG2YD21o81E-unsplash.jpg'}`} 
+                                                                alt={`${latestIssue?.title ? slugify(latestIssue?.title) : 'alt'}`} 
                                                                 className="w-full h-full object-cover object-center transition-transform duration-300 ease-in-out group-hover:scale-105" 
                                                                 height={300}
                                                                 width={800}

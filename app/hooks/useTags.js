@@ -17,9 +17,13 @@ const useTags = (maxTags = 5) => {
   const handleRemoveTag = (tag) =>
     setTags(tags.filter((t) => t !== tag));
 
+  const setInitialTags = (initialTags) => {
+    setTags(initialTags.slice(0, maxTags));
+  }
+
   // Return tags and functions from the hook
 
-  return { tags, handleAddTag, handleRemoveTag };
+  return { tags, handleAddTag, handleRemoveTag, setInitialTags };
 };
 
 export default useTags;

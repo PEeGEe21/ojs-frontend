@@ -372,7 +372,6 @@ export default function CreateSubmission() {
             abstract: abstract,
             keywords: JSON.stringify(tags) ,
         };
-        console.log(data, 'data')
 
         try {
             setShowLoader(true);

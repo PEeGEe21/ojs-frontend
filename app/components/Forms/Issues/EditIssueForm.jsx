@@ -17,6 +17,7 @@ import axios from 'axios';
 import { _getUser, fetchProjectsById, getGeneratedPassword, hostUrl } from '../../../lib/utilFunctions';
 import { LoaderIcon } from '../../IconComponent';
 import { modules, permissionLevelList } from '../../../lib/constants';
+import { uploadFile } from '../../../utils/common';
 
 const EditIssueForm = ({
   onClose,
@@ -30,7 +31,9 @@ const EditIssueForm = ({
   const [user, setUser] = useState(null);
   const [showRoles, setShowRoles] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [fileName, setFileName] = useState(currentIssue?.fileName??"");
+  const [file, setFile] = useState("");
+  const [fileName, setFileName] = useState(currentIssue?.cover_image_name??"");
+  const [fileNameExt, setFileNameExt] = useState("");
   const [description, setDescription] = useState(currentIssue?.description??'');
   const chakraToast = useToast();
   const router = useRouter();
@@ -101,8 +104,15 @@ const EditIssueForm = ({
             url_path
           }
 
-          if(fileName !== '')
-            payload.fileName = fileName;
+          if(file){
+            const downloadURL = await uploadFile(file);
+
+            if (downloadURL)
+              payload.cover_image_url = downloadURL;
+
+            if(fileName !== '')
+              payload.cover_image_name = fileName;
+          }
 
           if(currentIssue){
 
@@ -151,13 +161,24 @@ const EditIssueForm = ({
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
+
     if (file) {
         console.log("file", file);
-        setFileName(file.name);
+
+        setFile(file);
+        const nameWithoutExtension = file.name.split('.').slice(0, -1).join('.');
+        setFileName(nameWithoutExtension);
+        setFileNameExt(file.name);
     } else {
         setFileName("");
     }
   };
+
+  const resetFileUpload = () => {
+    setFile(null);
+    setFileName('');
+    setFileNameExt('');
+  }
 
   // console.log(status, 'status')
   return (
@@ -289,6 +310,11 @@ const EditIssueForm = ({
                         onChange={handleFileChange}
                     />
                 </label>
+                <div className='flex items-center justify-end w-full'>
+                  <button className='btn-danger p-2 text-xs rounded' type='button' onClick={resetFileUpload}>
+                    clear
+                  </button>
+                </div>
               </div>
 
             <div className="mb-4 flex flex-col gap-1">

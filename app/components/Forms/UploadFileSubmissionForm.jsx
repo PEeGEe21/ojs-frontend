@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 // import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 // import { storage } from '../../lib/firebase';
 import { supabase } from '../../lib/supabase';
+import { uploadFile } from '../../utils/common';
 import {
   Modal,
   ModalOverlay,
@@ -133,41 +134,6 @@ const UploadFileSubmissionForm = ({
     return true;
   };
 
-  const uploadFile = async (file) => {
-    try {
-      if (!file) {
-        throw new Error('No file selected');
-      }
-  
-      // Generate a unique filename
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${Math.random()}.${fileExt}`
-      const filePath = `${fileName}`
-
-  
-      console.log(filePath, fileExt, 'fileExt')
-      const { data, error } = await supabase.storage
-        .from('uploads') // Your bucket name
-        .upload(filePath, file)
-  
-      if (error) {
-        throw error;
-      }
-  
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('uploads')
-        .getPublicUrl(filePath)
-
-      // console.log(publicUrl, 'fileExt')
-  
-
-      return publicUrl;
-    } catch (error) {
-      // console.error('Upload error:', error.message);
-      throw error;
-    }
-  };
 
   // firebase
   // const uploadFile = async (file) => {
@@ -257,7 +223,7 @@ const UploadFileSubmissionForm = ({
         setFileName("");
         setShowLoader(false);
     }
-};
+  };
 
   return (
     <>

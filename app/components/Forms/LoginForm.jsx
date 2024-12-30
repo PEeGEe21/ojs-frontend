@@ -43,7 +43,7 @@ const LoginForm = () => {
           setAuthToken(token);
           setTimeout(() => {
             if(user?.defaultRole?.id == 1) {
-              push(`/admin/analytics`);
+              push(`/admin/submissions`);
             }
             if(user?.defaultRole?.id == 3) {
               push(`/author/submissions`);

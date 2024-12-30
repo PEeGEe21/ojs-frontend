@@ -1,5 +1,10 @@
 'use client';
 import OpenAI from 'openai';
+import { Coin, Coin1, Crown, Crown1, DocumentText, DollarCircle, Home2, Messages } from "iconsax-react";
+import { AirdropIcon, CarbonReview, LockIcon2, Locking, PeopleCommunity, Shuttle, Shuttle2, StakeIcon } from "../components/IconComponent";
+import { DataTableReference } from "@carbon/icons-react";
+import { Icon } from "@iconify/react";
+// import { Shuttle2 } from '../components/IconComponent';
 
 export const openai = new OpenAI({
   apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
@@ -258,3 +263,91 @@ export const noOfWords = [
     value: "200-300"
   },
 ]
+
+export const contributorRolesList = [
+  {
+    id: 1,
+    title: 'Author'
+  },
+  {
+    id: 2,
+    title: 'Translator'
+  }
+]
+
+export const forProjectOwners =[
+  {
+    id: 1,
+    icon: '📝',    
+    // icon: <Shuttle2 size={32}/>,    
+    title: 'Smart Submission',
+    subtitle: 'Experience seamless manuscript submission and review with our AI-powered editorial workflow system.'
+  },
+  {
+    id: 2,
+    icon: '🧠',
+    // icon: <Crown1 size={32} />,    
+    title: 'AI Summarizer',
+    subtitle: 'Advanced machine learning creates concise summaries of research papers for quick understanding and review.'
+  },
+  {
+    id: 3,
+    icon:  '📄',    
+    // icon:  <Locking size={32} />,    
+    title: 'Abstract Generator',
+    subtitle: 'AI-powered tool assists authors in creating structured, comprehensive abstracts from full manuscripts.'
+  },
+  {
+    id: 4,
+    icon: '🏷️',    
+    // icon: <DataTableReference size={32}/>,    
+    title: 'Auto Index',
+    subtitle: 'Automated metadata extraction and classification streamlines the indexing of published articles.'
+  },
+  {
+    id: 5,
+    icon:  '📚',    
+    // icon:  <DataTableReference size={32}/>,    
+    title: 'Issue Manager',
+    subtitle: 'Easily organize and publish journal issues with customizable layouts and scheduling tools.'
+  },
+  {
+    id: 6,
+    icon:  '👥',    
+    // icon:  <Icon icon="material-symbols-light:security" width={32} height={32} />,    
+    title: 'User Access',
+    subtitle: 'Flexible user roles and permissions system for editors, reviewers, authors, and readers.'
+  },
+]
+
+export const ourUsersComments =[
+  {
+    id: 1,
+    icon: '📝',    
+    name: 'Prof. Michael Rodriguez',
+    expertise: 'Managing Editor, International Review of Applied Sciences',
+    subtitle: 'As a managing editor of multiple journals, the automated indexing system has been a game-changer. The accuracy of metadata extraction is impressive, and it\'s significantly reduced our administrative workload.'
+  },
+  {
+    id: 2,
+    icon: '🧠',
+    name: 'Dr. Emily Thompson',
+    expertise: 'Senior Editor, European Journal of Clinical Research',
+    subtitle: 'The intuitive user interface and robust permission system make managing our large editorial team seamless. It\'s particularly helpful for our global team working across different time zones.'
+  },
+  {
+    id: 3,
+    icon:  '📄',    
+    name: 'Prof. James Adebayo',
+    expertise: 'Executive Editor, African Journal of Medical Sciences',
+    subtitle: 'The issue management system has streamlined our publication process enormously. What used to take weeks of coordination can now be accomplished in days with better accuracy.'
+  },
+  {
+    id: 4,
+    icon: '🏷️',    
+    name: 'Dr. Yuki Tanaka',
+    expertise: 'Lead Editor, Asia-Pacific Journal of Technology',
+    subtitle: 'The smart submission system has transformed how we handle manuscripts. The AI assistance in processing and organizing submissions has made our editorial decisions more efficient and data-driven.'
+  }
+]
+  

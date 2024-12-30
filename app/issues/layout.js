@@ -28,15 +28,9 @@ const IssueLayout = ({children}) => {
         getUser()
     }, [])
 
-    const start = (role) => {
-        setTimeout(() => {
-            handleRedirect(role, push);
-        }, 300);
-    }
-
     return (
         <>
-            <Navbar user={user} start={start}/>
+            <Navbar user={user}/>
                 {children}
             <Footer/>
         </>
