@@ -7,6 +7,7 @@ import 'slick-carousel/slick/slick-theme.css';
 import Image from 'next/image';
 import { blurDataUrl } from '../../lib/constants';
 import { getFullName } from '../../utils/common';
+import Link from 'next/link';
 
 // Custom arrow components
 const NextArrow = ({ onClick }) => (
@@ -58,7 +59,7 @@ const PrevArrow = ({ onClick }) => (
 const EditorsCarousel = ({EditorsList}) => {
     const settings = {
         dots: false,
-        infinite: false,
+        infinite: true,
         speed: 1000,
         slidesToShow: 2,
         slidesToScroll: 1,
@@ -155,57 +156,64 @@ const EditorsCarousel = ({EditorsList}) => {
         <section className="py-24 sectionspace">
             <div className="container max-w-[90rem] mx-auto px-4 py-5">
                 <div>
-                    <div className="mt-3 lg:mt-6 py-5 lg:flex-1 ">
-                        <div className='grid gap-3 grid-cols-1 md:grid-cols-2 items-center'>
+                    <div className='grid gap-3 grid-cols-1 md:grid-cols-2 items-center'>
 
-                            <div>
-                                <div className='flex flex-col gap-4 max-w-[576px]'>
-                                    <h2 className=' leading-6 font-semibold text-xl md:text-2xl lg:text-4xl leading-[37.8px]'>
-                                        Meet our very able Editors who keep us sane
-                                    </h2>
-                                    <p className='max-w-[42rem]'>Spend less time writing UI code and more time building a great experience for your customers.</p>
-                                    <ul className='list-disc pl-4 space-y-6 mt-4 text-sm'>
-                                        <li className='text-[#52525b]'><p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatibus, sapiente!</p></li>
-                                        <li className='text-[#52525b]'><p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatibus, sapiente!</p></li>
-                                        <li className='text-[#52525b]'><p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatibus, sapiente!</p></li>
-                                    </ul>
-                                </div>
-
+                        <div>
+                            <div className='flex flex-col gap-4 max-w-[576px]'>
+                                <h2 className='font-semibold text-xl md:text-2xl lg:text-4xl leading-[37.8px]'>
+                                    Get to Know Our Esteemed Team of Editors
+                                </h2>
+                                <p className='max-w-[42rem]'>
+                                    Collaborate with dedicated experts who ensure the quality and credibility of your submissions, helping to elevate the impact of your research.
+                                </p>
+                                {/* <ul className='list-disc pl-4 space-y-6 mt-4 text-sm'>
+                                    <li className='text-[#52525b]'><p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatibus, sapiente!</p></li>
+                                    <li className='text-[#52525b]'><p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatibus, sapiente!</p></li>
+                                    <li className='text-[#52525b]'><p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatibus, sapiente!</p></li>
+                                </ul> */}
+                                <div className='w-full flex items-start justify-start'>
+                                    <Link
+                                        href="/auth/signup" 
+                                        className="flex items-center justify-center rounded-md border border-[#008080] p-3 px-5 text-sm min-w-[200px] h-12 text-white bg-[#008080]">Get Started
+                                    </Link>
+                                </div> 
                             </div>
-                            <div>
-                                <Slider {...settings}>
-                                        {EditorsList.map((editor, index)=>(
-                                            <div className="popular-authors relative rounded overflow-hidden shadow-md " key={editor.id}>
-                                                <div className="">
-                                                    <div className="relative overflow-hidden all-authors">
-                                                        <div className="rounded-t relative h-[200px] md:h-[300px] overflow-hidden">
-                                                            <Image 
-                                                                src={editor?.image?? '/images/avatar-1.png'} 
-                                                                alt={getFullName(editor)} 
-                                                                className="w-full h-full object-cover object-center transition-transform duration-300 ease-in-out group-hover:scale-105" 
-                                                                height={300}
-                                                                width={800}
-                                                                quality={100}
-                                                                sizes="(max-width: 768px) 100vw, 800px"
-                                                                placeholder="blur"
-                                                                blurDataURL={blurDataUrl}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div className="px-4 py-2 md:py-4 flex flex-col gap-2 text-left mt-0 lg:mt-2">
-                                                    <div>
-                                                        <span className="book-title text-gray-900 text-lg">{getFullName(editor)}</span>
+
+                        </div>
+                        <div>
+                            <Slider {...settings}>
+                                    {EditorsList.map((editor, index)=>(
+                                        <div className="popular-authors relative rounded overflow-hidden shadow-md " key={editor.id}>
+                                            <div className="">
+                                                <div className="relative overflow-hidden all-authors">
+                                                    <div className="rounded-t relative h-[250px] md:h-[300px] overflow-hidden">
+                                                        <Image 
+                                                            src={editor?.image?? '/images/avatar-1.png'} 
+                                                            alt={getFullName(editor)} 
+                                                            className="w-full h-full object-cover object-center transition-transform duration-300 ease-in-out group-hover:scale-105" 
+                                                            height={300}
+                                                            width={800}
+                                                            quality={100}
+                                                            sizes="(max-width: 768px) 100vw, 800px"
+                                                            placeholder="blur"
+                                                            blurDataURL={blurDataUrl}
+                                                        />
                                                     </div>
                                                 </div>
                                             </div>
-                                        ))}
-                                    
-                                </Slider>
-                            </div>                        
+                                            
+                                            <div className="px-4 py-2 md:py-4 flex flex-col gap-2 text-left mt-0 lg:mt-2">
+                                                <div>
+                                                    <span className="book-title text-gray-900 text-lg">{getFullName(editor)}</span>
+                                                    {/* <span className="book-title text-gray-900 text-base">{getFullName(editor)}</span> */}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                
+                            </Slider>
+                        </div>                        
 
-                        </div>
                     </div>
                 </div>
             </div>

@@ -323,31 +323,54 @@ export const forProjectOwners =[
 export const ourUsersComments =[
   {
     id: 1,
-    icon: '📝',    
+    image: '/images/users/300_17.jpg',    
     name: 'Prof. Michael Rodriguez',
     expertise: 'Managing Editor, International Review of Applied Sciences',
     subtitle: 'As a managing editor of multiple journals, the automated indexing system has been a game-changer. The accuracy of metadata extraction is impressive, and it\'s significantly reduced our administrative workload.'
   },
   {
     id: 2,
-    icon: '🧠',
+    image: '/images/users/300_25.jpg',    
     name: 'Dr. Emily Thompson',
     expertise: 'Senior Editor, European Journal of Clinical Research',
     subtitle: 'The intuitive user interface and robust permission system make managing our large editorial team seamless. It\'s particularly helpful for our global team working across different time zones.'
   },
   {
     id: 3,
-    icon:  '📄',    
+    image: '/images/users/300_15.jpg',    
     name: 'Prof. James Adebayo',
     expertise: 'Executive Editor, African Journal of Medical Sciences',
     subtitle: 'The issue management system has streamlined our publication process enormously. What used to take weeks of coordination can now be accomplished in days with better accuracy.'
   },
   {
     id: 4,
-    icon: '🏷️',    
+    image: '/images/users/300_5.jpg',    
     name: 'Dr. Yuki Tanaka',
     expertise: 'Lead Editor, Asia-Pacific Journal of Technology',
     subtitle: 'The smart submission system has transformed how we handle manuscripts. The AI assistance in processing and organizing submissions has made our editorial decisions more efficient and data-driven.'
+  }
+]
+
+export const frequentlyAskedQuestions = [
+  {
+    id: 1,
+    question: 'What is an AI-Enhanced Open Journal System?',
+    answer: ' An AI-Enhanced Open Journal System is a publishing platform that combines traditional journal management features with artificial intelligence capabilities. It streamlines the submission, review, and publication process while offering advanced features like automated summarization, abstract generation, and intelligent manuscript processing.'
+  },
+  {
+    id: 2,
+    question: 'How secure is my research data on your platform?',
+    answer: 'Our system employs industry-standard encryption and security protocols to protect your research data. We maintain strict access controls, regular security audits, and comply with international data protection regulations. All manuscripts and peer review data are stored on secure servers with regular backups.'
+  },
+  {
+    id: 3,
+    question: 'How does the AI-powered abstract generation work?',
+    answer: 'The AI abstract generator analyzes your full manuscript and creates a structured abstract following standard academic conventions. It identifies key research components (methodology, results, conclusions) and generates a concise summary. Authors can review and modify the generated abstract before finalizing.'
+  },
+  {
+    id: 4,
+    question: 'What are the costs associated with using the system?',
+    answer: 'We offer free pricing for all journal sizes and feature requirements.'
   }
 ]
   

@@ -3,6 +3,7 @@ import React, {useState, useEffect} from 'react'
 import Image from 'next/image'
 import Navbar from './Navbar'
 import Footer from './Footer'
+import Faq from './Faq'
 import EditorsCarousel from './EditorsCarousel'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -111,7 +112,7 @@ const MainComponent = () => {
                                 ):( 
                                     <Link 
                                         href={'/articles'} 
-                                        className="bg-[#008080] hover:bg-[#062F2F] border border-[#062F2F] text-[#fff] px-6 py-2 text-base rounded-lg flex items-center gap-2 min-h-[48px]">
+                                        className="bg-[#008080] hover:bg-[#062F2F] border border-[#008080] hover:border-[#062F2F] text-[#fff] px-6 py-2 text-base rounded-lg flex items-center gap-2 min-h-[48px]">
                                             View Articles  <span><ArrowRight size={15}/></span>
                                     </Link>
                                 )
@@ -125,7 +126,7 @@ const MainComponent = () => {
             
             <section className='py-12 lg:py-24'>
                 <div className='container max-w-[90rem] mx-auto px-4'>
-                    <div className='mb-5 text-center max-w-3xl mx-auto space-y-4'>
+                    <div className='mb-5 lg:mb-[64px] text-center max-w-3xl mx-auto space-y-4'>
                         <h2 className='font-semibold text-xl md:text-2xl lg:text-4xl leading-[37.8px]'>
                             Our AI-Enhanced Open Journal System Features
                         </h2>
@@ -157,80 +158,93 @@ const MainComponent = () => {
                 </div>
             </section>
 
-            <section className="py-24 bg-[#f7f7f7]">
-                <div className="container max-w-[90rem] mx-auto px-4"> 
-                    <div className="flex items-center justify-center flex-row pb-6">
-                        <div className="flex flex-col justify-center text-center">
-                            <h2 className='font-semibold text-xl md:text-2xl lg:text-4xl leading-[37.8px]'>
-                                Our Journals
-                            </h2>
-                            <h5 className="mt-2 text-sm">Discover Our Most Popular Editions</h5>
+            {journals.length > 0 && (
+                <section className="py-24 bg-[#f7f7f7]">
+                    <div className="container max-w-[90rem] mx-auto px-4"> 
+                        <div className="flex items-center justify-center flex-row pb-6">
+                            {/* <div className="flex flex-col justify-center text-center">
+                                <h2 className='font-semibold text-xl md:text-2xl lg:text-4xl leading-[37.8px]'>
+                                    Explore Our Journals and Featured Editions
+                                </h2>
+                                <h5 className="mt-2 text-sm">
+                                </h5>
+                            </div> */}
+                            <div className='mb-5 lg:mb-[64px] text-center max-w-3xl mx-auto space-y-4'>
+                                <h2 className='font-semibold text-xl md:text-2xl lg:text-4xl leading-[37.8px]'>
+                                Explore Our Journals and Featured Editions
+                                </h2>
+                                <p className='text-base leading-[28px]'>
+                                Dive into our collection of journals and explore the most popular editions, featuring groundbreaking research and insightful articles.
+                            </p>
                         </div>
-                    </div>
-                
+                        </div>
 
-                    <div className="mt-6 lg:mt-0 lg:flex-1">
-                        {!isLoading ?                         
-            
-                             (<div>
-                            
-                                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 my-8 pb-5">
-                                    {journals.map((journal, index)=>(
-                                        <Link href={`/journals/${journal.id}`} key={journal.id}>
-                                            <div className="group rounded-md overflow-hidden shadow-md hover:shadow-lg transition duration-300 ease border">
-                                                <div className="rounded-t relative h-[300px] overflow-hidden">
-                                                    <Image
-                                                        src={`${journal?.file_url??'/images/albert-canite-RG2YD21o81E-unsplash.jpg'}`} 
-                                                        alt={`${journal?.slug ? slugify(journal?.slug) : journal?.name}`} 
-                                                        className="w-full h-full object-cover object-center transition-transform duration-300 ease-in-out group-hover:scale-105 "
-                                                        height={300}
-                                                        width={800}
-                                                        quality={100}
-                                                        sizes="(max-width: 768px) 100vw, 800px"
-                                                        placeholder="blur"
-                                                        blurDataURL={blurDataUrl}
-                                                    />
-                                                    <div className="tg-hovercontent"></div>
+                        
+                    
+
+                        <div className="mt-6 lg:mt-0 lg:flex-1">
+                            {!isLoading ?                         
+                
+                                (<div>
+                                
+                                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 my-8 pb-5">
+                                        {journals.slice(0, 3).map((journal, index)=>(
+                                            <Link href={`/journals/${journal.id}`} key={journal.id}>
+                                                <div className="group rounded-md overflow-hidden shadow-md hover:shadow-lg transition duration-300 ease border">
+                                                    <div className="rounded-t relative h-[300px] overflow-hidden">
+                                                        <Image
+                                                            src={`${journal?.file_url??'/images/albert-canite-RG2YD21o81E-unsplash.jpg'}`} 
+                                                            alt={`${journal?.slug ? slugify(journal?.slug) : journal?.name}`} 
+                                                            className="w-full h-full object-cover object-center transition-transform duration-300 ease-in-out group-hover:scale-105 "
+                                                            height={300}
+                                                            width={800}
+                                                            quality={100}
+                                                            sizes="(max-width: 768px) 100vw, 800px"
+                                                            placeholder="blur"
+                                                            blurDataURL={blurDataUrl}
+                                                        />
+                                                        <div className="tg-hovercontent"></div>
+                                                    </div>
+                                            
+                                                    <div className="py-4 mb-4 flex flex-col gap-2 px-5 text-center">
+                                                        <span className="text-gray-900 text-lg mb-2 font-semibold">{journal.name}</span>
+                                                        <span className="text-gray-700 leading-none text-sm mb-2">Editor: <b className='capitalize'>{getFullName(journal?.editor)}</b></span>
+                                                        {/* <span className="text-gray-700 leading-none text-sm mb-2">
+                                                            Affiliation: University of Nigeria, Nsukka, Nigeria.
+                                                        </span> */}
+                                                    </div>
                                                 </div>
+                                            </Link>
                                         
-                                                <div className="py-4 mb-4 flex flex-col gap-2 px-5 text-center">
-                                                    <span className="text-gray-900 text-lg mb-2 font-semibold">{journal.name}</span>
-                                                    <span className="text-gray-700 leading-none text-sm mb-2">Editor: <b className='capitalize'>{getFullName(journal?.editor)}</b></span>
-                                                    {/* <span className="text-gray-700 leading-none text-sm mb-2">
-                                                        Affiliation: University of Nigeria, Nsukka, Nigeria.
-                                                    </span> */}
-                                                </div>
-                                            </div>
-                                        </Link>
-                                    
-                                    ))}   
-                                </div>
+                                        ))}   
+                                    </div>
 
-                                <div className='mx-auto flex items-center justify-center'>
-                                    <Link href="/journals" className="flex items-center justify-center rounded-md border border-[#008080] p-3 px-5 text-sm min-w-[250px] text-white bg-[#008080]">View All Journals</Link>
-                                </div> 
-                            
-                            </div>)
+                                    <div className='mx-auto flex items-center justify-center'>
+                                        <Link href="/journals" className="flex items-center justify-center rounded-md border border-[#008080] p-3 px-5 text-sm min-w-[250px] text-white bg-[#008080]">View All Journals</Link>
+                                    </div> 
+                                
+                                </div>)
 
-                        :
-                            (<div className="h-full flex items-center justify-center">
-                                <LoaderIcon extraClass="text-black h-8 w-6"/>
-                            </div>)
-                        }
+                            :
+                                (<div className="h-full flex items-center justify-center">
+                                    <LoaderIcon extraClass="text-black h-8 w-6"/>
+                                </div>)
+                            }
+                        </div>
+
+
+                    
                     </div>
-
-
-                
-                </div>
-            </section>
+                </section>
+            )}
 
             <EditorsCarousel EditorsList={editors}/>
 
-            <section className='py-12 lg:py-24'>
+            <section className='py-12 lg:py-24 bg-[#f9fafb]'>
                 <div className='container max-w-[90rem] mx-auto px-4'>
-                    <div className='mb-5 text-center max-w-3xl mx-auto space-y-4'>
+                    <div className='mb-5 text-center max-w-3xl mx-auto'>
                         <h2 className='font-semibold text-xl md:text-2xl lg:text-4xl leading-[37.8px]'>
-                            Hear from <span className='bg-[#008080] px-2 text-white'>Top-Tier</span> Experts
+                            Hear From <span className='bg-[#008080] px-2 text-white rounded'>Top-Tier</span> Experts
                         </h2>
                     </div>
 
@@ -252,8 +266,12 @@ const MainComponent = () => {
                                             {item.expertise}
                                         </div>
                                     </div>
-                                    <span className='card-icon h-14 w-14 rounded-full p-3 text-[#FFA178] bg-[#414040] inline-block flex items-center justify-center text-2xl'>
-                                        {item.icon}
+                                    <span className='card-icon h-14 w-14 rounded-full text-[#FFA178] bg-[#414040] inline-block flex items-center justify-center text-2xl'>
+                                        {/* <div className="rounded-t relative h-10 w-10 overflow-hidden"> */}
+
+                                            <Image src={item?.image??'/images/avatar-1.png'} alt={'heree'} width={100} height={100} className='w-full h-full rounded-full' />
+                                        {/* </div> */}
+                                        {/* {item.icon} */}
                                     </span>
                                 </div>
                             </div>
@@ -261,6 +279,8 @@ const MainComponent = () => {
                     </div>
                 </div>
             </section>
+
+            <Faq/>
             
             <Footer/>
         </>
