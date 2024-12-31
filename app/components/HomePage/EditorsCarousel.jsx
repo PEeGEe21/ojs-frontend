@@ -161,7 +161,7 @@ const EditorsCarousel = ({EditorsList}) => {
                         <div>
                             <div className='flex flex-col gap-4 max-w-[576px]'>
                                 <h2 className='font-semibold text-xl md:text-2xl lg:text-4xl leading-[37.8px]'>
-                                    Get to Know Our Esteemed Team of Editors
+                                    Get to Know <span className='underline underline-offset-8' style={{textDecorationColor: '#008080'}}>Our Esteemed Team of Editors</span>
                                 </h2>
                                 <p className='max-w-[42rem]'>
                                     Collaborate with dedicated experts who ensure the quality and credibility of your submissions, helping to elevate the impact of your research.
@@ -182,8 +182,8 @@ const EditorsCarousel = ({EditorsList}) => {
                         </div>
                         <div>
                             <Slider {...settings}>
-                                    {EditorsList.map((editor, index)=>(
-                                        <div className="popular-authors relative rounded overflow-hidden shadow-md " key={editor.id}>
+                                    {EditorsList?.map((editor, index)=>(
+                                        <div className="popular-authors relative rounded overflow-hidden shadow-md " key={editor?.id}>
                                             <div className="">
                                                 <div className="relative overflow-hidden all-authors">
                                                     <div className="rounded-t relative h-[250px] md:h-[300px] overflow-hidden">
@@ -205,7 +205,7 @@ const EditorsCarousel = ({EditorsList}) => {
                                             <div className="px-4 py-2 md:py-4 flex flex-col gap-2 text-left mt-0 lg:mt-2">
                                                 <div>
                                                     <span className="book-title text-gray-900 text-lg">{getFullName(editor)}</span>
-                                                    {/* <span className="book-title text-gray-900 text-base">{getFullName(editor)}</span> */}
+                                                    <span className="book-title text-gray-900 text-base">{editor?.profile?.bio}</span>
                                                 </div>
                                             </div>
                                         </div>

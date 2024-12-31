@@ -16,7 +16,7 @@ const Faq = () => {
             <div className="container max-w-[90rem] mx-auto px-4 py-5">
                     <div className='mb-5 lg:mb-[64px] text-center max-w-3xl mx-auto space-y-4'>
                         <h2 className='font-semibold text-xl md:text-2xl lg:text-4xl leading-[37.8px]'>
-                            Frequently Asked Questions
+                            Frequently <span className='underline underline-offset-8' style={{textDecorationColor: '#008080'}}>Asked Questions</span>
                         </h2>
                         <p className='text-base leading-[28px]'>
                             Easy answers to the product questions we get most often.
