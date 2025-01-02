@@ -348,7 +348,7 @@ const RolesTable = () => {
         setStatusState(key);
         
         
-        if(currentRole){
+        // if(currentRole){
             
             setIsSavingStatus({
                 [key]: true
@@ -382,7 +382,7 @@ const RolesTable = () => {
                 });
                 toast.error(err.message);
             }
-        }
+        // }
     };
 
     const start = () => {

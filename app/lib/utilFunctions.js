@@ -229,6 +229,16 @@ export function shortenTitle(title, number = 20) {
   return `${start}...`;
 }
 
+export function shortenText(title, number = 20, slice=14) {
+  if (title?.length < number) {
+    // If the address is too short to be shortened, return it as is
+    return title;
+  }
+
+  const start = title?.slice(0, slice);
+  return `${start}...`;
+}
+
 export const ToasterAlert = (message, type) => {
   let alertTypes = {
     success: successtoastOptions,

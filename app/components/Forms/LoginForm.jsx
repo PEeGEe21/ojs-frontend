@@ -15,7 +15,6 @@ const LoginForm = () => {
   const [email, setEmail] = useState(searchParams.get('email'));
   const [password, setPassword] = useState('');
   const newCustomer = searchParams.get('new');
-
   const [error, setError] = useState(null);
   const [errMessage, setErrMessage] = useState(null);
   const [loading, setLoading] = useState(false);

@@ -22,9 +22,11 @@ import {successOptions} from '../../lib/constants';
 import { Edit, PenTool, PenTool2, Trash } from 'iconsax-react';
 import toast from 'react-hot-toast';
 import EditUserModal from '../Modals/user/EditUserModal';
-import { getRandomRoles } from '../../utils/common';
+import { getRandomRoles, logout } from '../../utils/common';
 import { hostUrl } from '../../lib/utilFunctions';
 import axios from 'axios';
+import { Recycle } from '@carbon/icons-react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 const EditableCell = ({
     editing,
@@ -92,6 +94,8 @@ const UsersTable = () => {
     const [statusState, setStatusState] = useState('');
     const [isSavingStatus, setIsSavingStatus] = useState({});
     const [roles, setRoles] = useState([]);
+    const [error, setError] = useState(null);
+    const [errMessage, setErrMessage] = useState(null);
     const {
         isOpen: userEditIsOpen,
         onOpen: onUserEditOpen,
@@ -99,6 +103,8 @@ const UsersTable = () => {
     } = useDisclosure();
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 10; // Update with your actual page size
+    const router = useRouter();
+    const { push } = useRouter();
 
     const fetchData = async () => {
         try {
@@ -136,6 +142,72 @@ const UsersTable = () => {
     const cancel = (page) => {
         setEditingKey('');
         setCurrentPage(page);
+    };
+
+    const loginAsUser = (user) => {
+        logout();
+        router.push('/auth/login');
+        toast.success('Successfully logged out')
+        setTimeout(()=>{
+            loginUser(user);
+        }, 300)
+    }
+
+    const loginUser = async (user) => {
+        setLoading(true);
+    
+        axios
+          .post(`${hostUrl}auth/login-in-as`, {
+            email: user.email,
+          })
+          .then((res) => {
+            if (res.data.success) {
+              // toast.success(res.data.message, 'success');
+              let token = res?.data?.access_token;
+              let user = res?.data?.user;
+              // const role = res?.data?.user?.role;
+              localStorage.setItem('accessOJSUserToken', token);
+              localStorage.setItem('ojs-user', JSON.stringify(user));
+            //   setAuthToken(token);
+              setTimeout(() => {
+                if(user?.defaultRole?.id == 1) {
+                    push(`/admin/submissions`);
+                    toast.success(res.data.message);
+                }
+                if(user?.defaultRole?.id == 3) {
+                    push(`/author/submissions`);
+                    toast.success(res.data.message);
+                }
+              }, 300);
+            } else {
+              setError(true);
+              let message = '';
+              if (!res.data?.message) {
+                message = 'An error occurred';
+              } else {
+                message = res.data?.message;
+              }
+              setErrMessage(message);
+              // ToasterAlert(message, 'error');
+              toast.error(message);
+    
+            }
+    
+            setLoading(false);
+          })
+          .catch((err) => {
+            console.log('err', err);
+            setError(true);
+            setErrMessage(err?.response?.data?.message);
+            toast.error(err?.response?.data?.message);
+    
+            // ToasterAlert(err?.response?.data?.message, 'error');
+            setLoading(false);
+    
+            setTimeout(()=>{
+              setError(false);
+            }, 6000)
+          });
     };
 
     const columns = [
@@ -178,6 +250,22 @@ const UsersTable = () => {
         },
         {
             key: '5',
+            title: 'Roles',
+            dataIndex: 'roles',
+            editable: false,
+            render: (text, record, index) => (
+
+                <Space size="small">
+                    {record?.roles.map((role, index, array) => (
+                        <span key={index}>
+                            {role?.role?.name}{index < array.length - 1 && ', '}
+                        </span>
+                    ))}
+                </Space>
+            ),
+        },
+        {
+            key: '6',
             title: 'Status',
             dataIndex: 'status',
             editable: false,
@@ -209,7 +297,7 @@ const UsersTable = () => {
         },
         {
             title: 'Action',
-            key: '6',
+            key: '7',
             render: (_, record) => {
                 const editable = isEditing(record);
                 return editable ? (
@@ -242,6 +330,7 @@ const UsersTable = () => {
                                 <Edit size={14}/>Edit
                             </button> */}
                             <button className='flex btn btn-red items-center gap-1 text-xs  ' onClick={(e)=>deleteUser(record)}><Trash size={12}/> Delete</button>
+                            <button className='flex btn btn-warning items-center gap-1 text-xs  ' onClick={(e)=>loginAsUser(record)}><Recycle size={12}/> Login As</button>
                         </Space>
                     )
             

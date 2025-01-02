@@ -4,8 +4,20 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation'
 import NavbarSearchForm from '../Forms/ArticleRecoSearchForm'
+import {
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  MenuItemOption,
+  MenuGroup,
+  MenuOptionGroup,
+  MenuDivider,
+  IconButton,
+  Portal
+} from '@chakra-ui/react';
 // import "../../styles/navbar.css";
-import { ArrowDown, ArrowDown2, Global, SearchNormal1 } from 'iconsax-react';
+import { ArrowDown, ArrowDown2, Global, LogoutCurve, SearchNormal1, User } from 'iconsax-react';
 import { shortenTitle } from '../../lib/utilFunctions';
 import { start } from '../../utils/common';
 // import { MenuContext } from '@/app/utils/context';
@@ -152,22 +164,56 @@ const Navbar = ({user}) => {
                   </>
                   : 
                   <>
-                      <button
+                      <Menu className=" bg-card-background" >
+                        <MenuButton>
+                          <div className="flex items-center justify-start gap-2 bg-card-background rounded-l-full h-auto">
+                            <div className='h-10 w-10 rounded-full bg-[#414040] inline-block flex items-center justify-center text-2xl'>
+                                <Image 
+                                  src={user?.avatar??'/images/avatar-1.png'} alt={'heree'} width={100} height={100} className='w-full h-full rounded-full object-cover' />
+                            </div>
+  
+                            <div className="hidden md:flex flex-col items-start text-sm text-[#353535] pr-2 py-2">
+                              <span>
+                                {`${
+                                  user?.email ? user?.email.substring(0, 15) : ''
+                                }`}
+                                ...
+                              </span>
+                            </div>
+                          </div>
+                        </MenuButton>
+                        <Portal className='test-popup'>
+
+                          <MenuList
+                              className="bg-[#0F1B2D] py-2 text-white text-sm border border-[#737272] rounded-md z-[99] w-full "
+                              minWidth="150px"
+                              maxWidth="250px"
+                              sx={{
+                                '--popper-transform-origin': 'top left !important',
+                                transformOrigin: 'top left !important'
+                              }}                   
+                          >
+                            <button
+                              onClick={()=>start((user?.user_default_role).toLowerCase(), push)}
+                              className="hover:bg-[#008080] transition duration-200 ease-in-out px-3 py-3 bg-[#0F1B2D] text-sm whitespace-nowrap flex items-center justify-start gap-2 text-center text-white w-full"
+                            >
+                              <User size={14} color="white" className='hidden md:block'/> <span>Dashboard</span>
+                            </button>
+                            <MenuItem
+                              // onClick={handleLogOut}
+                              className="hover:bg-[#008080] transition duration-200 ease-in-out px-3 py-3 bg-[#0F1B2D] text-sm whitespace-nowrap flex items-center justify-start gap-2 text-center text-white"
+                            >
+                              <LogoutCurve size={14} color="white" className='hidden md:block'/> <span>Sign Out</span>
+                            </MenuItem>
+                          </MenuList>
+                        </Portal>
+                      </Menu>
+                      {/* <button
                         className="text-[#353535] leading-7 "
                         onClick={()=>start((user?.user_default_role).toLowerCase(), push)}
                       >
                           {shortenTitle(user?.email)}
-                      </button>
-                    
-                      {/* <div className="flex items-center justify-start gap-2 bg-card-background rounded-l-full h-auto">
-                        <Image
-                          src={'/images/navbar-img/avatar-1.png'}
-                          alt=""
-                          width={35}
-                          height={35}
-                          className="rounded-full"
-                        />
-                      </div> */}
+                      </button> */}
                   </>
                 }
               </div>

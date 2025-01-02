@@ -27,6 +27,7 @@ import PDFViewer from "../../../../components/PDFViewer"
 import ContributorsTableList from "../../../../components/Tables/ContributorsTableList";
 import AddSubmissionContributorModal from "../../../../components/Modals/AddSubmissionContributorModal";
 import UpdateSubmissionContributorModal from "../../../../components/Modals/UpdateSubmissionContributorModal";
+import { Checkmark, Close } from '@carbon/icons-react';
 
 const SingleSubmission = () => {
     const { selectedJournal } = useContext(JournalContext);
@@ -659,7 +660,7 @@ const SingleSubmission = () => {
                                                                                                                 />
                                                                                                             </>
                                                                                                         ) : (
-                                                                                                            upload.is_main ? 'Main' : 'Not Inactive'
+                                                                                                            upload.is_main ? <Checkmark className="btn-success"/> : <Close className="btn-danger"/> 
                                                                                                         )}
                                                                                                         
                                                                                                 </button>

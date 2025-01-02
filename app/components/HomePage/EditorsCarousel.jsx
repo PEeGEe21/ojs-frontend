@@ -59,7 +59,7 @@ const PrevArrow = ({ onClick }) => (
 const EditorsCarousel = ({EditorsList}) => {
     const settings = {
         dots: false,
-        infinite: true,
+        infinite: EditorsList.length > 2,
         speed: 1000,
         slidesToShow: 2,
         slidesToScroll: 1,

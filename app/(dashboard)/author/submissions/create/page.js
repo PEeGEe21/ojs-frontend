@@ -28,7 +28,6 @@ import useTags  from '../../../../hooks/useTags';
 import { LoaderIcon } from '../../../../components/IconComponent';
 import UploadFileSubmissionModal from '../../../../components/Modals/UploadFileSubmissionModal';
 import { motion } from "framer-motion";
-import { Checkmark } from "@carbon/icons-react";
 import { useRouter } from "next/navigation";
 import { Progress, useToast } from "@chakra-ui/react";
 import { hostUrl } from "../../../../lib/utilFunctions";
@@ -37,6 +36,7 @@ import { JournalContext } from "../../../../utils/journalContext";
 import {modules, styles, openai, noOfWords} from "../../../../lib/constants";
 import Swal from 'sweetalert2';
 import { generateAbstract } from "../../../../utils/ai";
+import { Checkmark, Close } from "@carbon/icons-react";
 
 const steps = [
     { title: "Section Policy", description: "select the type of airdrop to use" },
@@ -77,6 +77,7 @@ export default function CreateSubmission() {
     const [abstract, setAbstract] = useState('');
     const [isGenerating, setIsGenerating] = useState(false)
     const [wordNumber, setNoOfWords] = useState("");
+    const [isSavingFileStatus, setIsSavingFileStatus] = useState({});
     const stepperRef = useRef(null);
     const MAX_TAGS = 10;
 
@@ -699,6 +700,50 @@ export default function CreateSubmission() {
         });
     };
 
+    const toggleCurrentFileStatus = async(record, index, status) => {
+        if(record.is_main)
+            return;
+        let key = record.id
+        var msg = '';
+        if (key == "undefined") {
+            msg = "Record key is not defined:";
+            console.error(msg);
+            Swal.fire('Error!', msg, 'error');
+            return;
+        }
+            
+        setIsSavingFileStatus({
+            [key]: true
+        });
+        try {
+                
+            const updatedRecord = { ...record, is_main: record.is_main ? 0 : 1 };
+            await axios.post(hostUrl + `submissions/${submission?.id}/submission-files/toggle-main/`+record?.id);
+            // setSubmissionFiles(updatedDataSource);
+            setTimeout(() => {
+                fetchSubmissionFiles();
+                setIsSavingFileStatus({
+                    [key]: false
+                });
+
+                msg = 'Successfully '+ (updatedRecord.is_main ? 'Activated' : 'Deactivated')  + '!!'
+                Swal.fire(
+                    'Success!',
+                    msg,
+                    'success'
+                );
+            }, 500);
+    
+        } catch (err) {
+            setIsSavingFileStatus({
+                [key]: false
+            });
+            Swal.fire('Error!', err?.message??'There was an an Error.', 'error');
+        }
+    
+    };
+
+    
     return (
         <>
             <div className="space-y-6">
@@ -1004,6 +1049,29 @@ export default function CreateSubmission() {
                                                                             <p>
                                                                                 {upload.title}
                                                                             </p>
+                                                                        </div>
+                                                                    </Td>
+                                                                    <Td className="px-2 py-4 whitespace-nowrap">
+                                                                        <div className='flex items-start justify-between text-sm'>
+                                                                            <button
+                                                                                className={`btn btn-sm flex items-center gap-2 ${upload.is_main ? 'btn-success' : 'btn-danger'}`}
+                                                                                disabled={isSavingFileStatus[upload.id] || upload.is_main}
+                                                                                aria-disabled={isSavingFileStatus[upload.id] || upload.is_main}
+                                                                                onClick={
+                                                                                    ()=>toggleCurrentFileStatus(upload, index, upload.is_main)
+                                                                                }
+                                                                                >
+                                                                                    {isSavingFileStatus[upload.id] ? (
+                                                                                        <>
+                                                                                            <LoaderIcon
+                                                                                                extraClass="text-white h-5 w-5"
+                                                                                                className="animate-spin mr-1"
+                                                                                            />
+                                                                                        </>
+                                                                                    ) : (
+                                                                                        upload.is_main ? <Checkmark className="btn-success"/> : <Close className="btn-danger"/> 
+                                                                                    )}
+                                                                            </button>
                                                                         </div>
                                                                     </Td>
                                                                     

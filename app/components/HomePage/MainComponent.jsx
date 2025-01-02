@@ -7,7 +7,7 @@ import Faq from './Faq'
 import EditorsCarousel from './EditorsCarousel'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { handleRedirect, hostUrl, slugify } from '../../lib/utilFunctions'
+import { handleRedirect, hostUrl, shortenText, slugify } from '../../lib/utilFunctions'
 import { ArrowRight, ArrowRight2, ArrowRight3 } from 'iconsax-react'
 import { LoaderIcon } from '../IconComponent'
 import { blurDataUrl, forProjectOwners, ourUsersComments } from '../../lib/constants'
@@ -189,8 +189,8 @@ const MainComponent = () => {
                                 
                                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 my-8 pb-5">
                                         {journals.slice(0, 3).map((journal, index)=>(
-                                            <Link href={`/journals/${journal.id}`} key={journal.id}>
-                                                <div className="group rounded-md overflow-hidden shadow-md hover:shadow-lg transition duration-300 ease border">
+                                            // <>
+                                                <Link href={`/journals/${journal.id}`} key={journal.id} className="group rounded-md overflow-hidden shadow-md hover:shadow-lg transition duration-300 ease border">
                                                     <div className="rounded-t relative h-[300px] overflow-hidden">
                                                         <Image
                                                             src={`${journal?.file_url??'/images/albert-canite-RG2YD21o81E-unsplash.jpg'}`} 
@@ -207,14 +207,14 @@ const MainComponent = () => {
                                                     </div>
                                             
                                                     <div className="py-4 mb-4 flex flex-col gap-2 px-5 text-center">
-                                                        <span className="text-gray-900 text-xl mb-2 font-semibold">{journal.name}</span>
-                                                        {/* <span className="text-gray-700 leading-none text-sm mb-2">Editor: <b className='capitalize'>{getFullName(journal?.editor)}</b></span> */}
+                                                        <span className="text-gray-900 text-xl mb-2 font-semibold text-left">{journal.name}</span>
+                                                        <span className="text-gray-700 leading-5 text-sm text-justify">{shortenText(journal?.notePlain, 150, 150)}</span>
                                                         {/* <span className="text-gray-700 leading-none text-sm mb-2">
                                                             Affiliation: University of Nigeria, Nsukka, Nigeria.
                                                         </span> */}
                                                     </div>
-                                                </div>
-                                            </Link>
+                                                </Link>
+                                            // </>
                                         
                                         ))}   
                                     </div>
