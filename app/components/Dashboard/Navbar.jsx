@@ -14,6 +14,7 @@ import {
   Setting3,
   Eye,
   SearchNormal1,
+  User,
   
 } from 'iconsax-react';
 import Image from 'next/image';
@@ -36,6 +37,7 @@ import { Magicpen, More, NoteAdd, Trash, UserAdd } from 'iconsax-react';
 import { JournalContext } from '../../utils/journalContext';
 import toast from 'react-hot-toast';
 import { DashboardMenuContext } from '../../utils/dashboardContext';
+import { logout } from '../../utils/common';
 // import { menuLinks } from "../lib/constants";
 // import "../navbar.css";
 
@@ -53,10 +55,8 @@ const Navbar = ({ user, isLoadingState , userRole}) => {
     handleJournalChange(journal);
   };
 
-  const logout = () => {
-    localStorage.removeItem('ojs-user');
-    localStorage.removeItem('ojs-current-submission');
-    localStorage.removeItem('accessOJSUserToken');
+  const handleLogOut = () => {
+    logout();
     router.push('/auth/login');
     toast.success('Successfully logged out')
   };
@@ -123,13 +123,22 @@ const Navbar = ({ user, isLoadingState , userRole}) => {
                     <Menu className=" bg-card-background" >
                       <MenuButton>
                         <div className="flex items-center justify-start gap-2 bg-card-background rounded-l-full h-auto">
+                          {/* <div>
+
                           <Image
-                            src={`${user?.image ? user?.image : '/images/avatar-1.png'}`}
-                            alt=""
+                            src={`${user?.avatar??'/images/avatar-1.png'}`}
+                            alt="alt"
                             width={35}
                             height={35}
-                            className="rounded-full"
+                            className="rounded-full object-cover"
                           />
+                          </div> */}
+
+                          <div className='h-10 w-10 rounded-full bg-[#414040] inline-block flex items-center justify-center text-2xl'>
+
+                                  <Image src={user?.avatar??'/images/avatar-1.png'} alt={'heree'} width={100} height={100} className='w-full h-full rounded-full object-cover' />
+
+                              </div>
 
                           <div className="hidden md:flex flex-col items-start text-sm text-[#008080] pr-2 py-2">
                             <span>
@@ -156,9 +165,9 @@ const Navbar = ({ user, isLoadingState , userRole}) => {
                           //   '--popper-transform-origin': 'top left',
                           //   transformOrigin: 'top left'
                           // }}
-                          // className="bg-[#008080] py-2 text-white text-sm border border-[#737272] rounded-md z-[99] "
-                          // minWidth="120px"
-                          // maxWidth="150px"
+                          className="bg-[#0F1B2D] py-2 text-white text-sm border border-[#737272] rounded-md z-[99] "
+                          minWidth="150px"
+                          maxWidth="250px"
                           // sx={{
                           //     '&[data-popper-placed]': {
                           //         transformOrigin: 'top left !important',
@@ -172,8 +181,8 @@ const Navbar = ({ user, isLoadingState , userRole}) => {
                           //     transformOrigin: 'top left !important',
                           //   },
                           // }}     
-                          pos="absolute"
-                          right="0"
+                          // pos="absolute"
+                          // right="0"
                           sx={{
                             '--popper-transform-origin': 'top left !important',
                             transformOrigin: 'top left !important'
@@ -192,12 +201,20 @@ const Navbar = ({ user, isLoadingState , userRole}) => {
                         >
                           Settings
                         </MenuItem> */}
+                        <Link
+                          // icon={<LogoutCurve size={14} color="red" />}
+                          // onClick={logout}
+                          href={'/profile'}
+                          className="hover:bg-[#008080] transition duration-200 ease-in-out px-3 py-3 bg-[#0F1B2D] text-sm whitespace-nowrap flex items-center justify-start gap-2 text-center text-white"
+                        >
+                          <User size={14} color="white" className='hidden md:block'/> <span>Profile</span>
+                        </Link>
                         <MenuItem
                           // icon={<LogoutCurve size={14} color="red" />}
-                          onClick={logout}
-                          className="hover:bg-[#034343] transition duration-200 ease-in-out px-2 bg-[#008080] text-sm whitespace-nowrap flex items-center justify-center gap-2 text-center text-white"
+                          onClick={handleLogOut}
+                          className="hover:bg-[#008080] transition duration-200 ease-in-out px-3 py-3 bg-[#0F1B2D] text-sm whitespace-nowrap flex items-center justify-start gap-2 text-center text-white"
                         >
-                          <LogoutCurve size={14} color="red" className='hidden md:block'/> <span>Sign Out</span>
+                          <LogoutCurve size={14} color="white" className='hidden md:block'/> <span>Sign Out</span>
                         </MenuItem>
                       </MenuList>
                       </Portal>

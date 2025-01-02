@@ -191,9 +191,9 @@ const SingleArticle = () => {
                                             return (
                                                 <div className=' mt-2 flex-col text-sm' key={index}>
                                                     <h4 className='font-semibold capitalize'>{contributor?.public_name??''} {getFullName(contributor)}</h4>
-                                                    <p>
+                                                    <i>
                                                         {contributor?.affiliation??''}
-                                                    </p>
+                                                    </i>
                                                 </div>
                                             )
                                         })}

@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import { contributorRolesList, permissionLevelList} from "../lib/constants";
 import { supabase } from '../lib/supabase';
 import { handleRedirect } from "../lib/utilFunctions";
@@ -28,6 +29,12 @@ export const start = (role, push=null) => {
       handleRedirect(role, push);
   }, 300);
 }
+
+export const logout = () => {
+  localStorage.removeItem('ojs-user');
+  localStorage.removeItem('ojs-current-submission');
+  localStorage.removeItem('accessOJSUserToken');
+};
 
 export const uploadFile = async (file) => {
   try {

@@ -181,12 +181,13 @@ const EditorsCarousel = ({EditorsList}) => {
 
                         </div>
                         <div>
+                            {EditorsList && (EditorsList.length > 0) && (
                             <Slider {...settings}>
                                     {EditorsList?.map((editor, index)=>(
                                         <div className="popular-authors relative rounded overflow-hidden shadow-md " key={editor?.id}>
                                             <div className="">
                                                 <div className="relative overflow-hidden all-authors">
-                                                    <div className="rounded-t relative h-[250px] md:h-[300px] overflow-hidden">
+                                                    <div className="rounded-t relative h-[250px] overflow-hidden">
                                                         <Image 
                                                             src={editor?.image?? '/images/avatar-1.png'} 
                                                             alt={getFullName(editor)} 
@@ -202,16 +203,17 @@ const EditorsCarousel = ({EditorsList}) => {
                                                 </div>
                                             </div>
                                             
-                                            <div className="px-4 py-2 md:py-4 flex flex-col gap-2 text-left mt-0 lg:mt-2">
+                                            <div className="px-4 py-2 md:py-4 flex flex-col gap-2 text-left min-h-24">
                                                 <div>
-                                                    <span className="book-title text-gray-900 text-lg">{getFullName(editor)}</span>
-                                                    <span className="book-title text-gray-900 text-base">{editor?.profile?.bio}</span>
+                                                    <span className="book-title text-gray-900 text-lg">{getFullName(editor)}</span><br/>
+                                                    <span className="book-title text-gray-900 text-sm"><i>{editor?.profile?.affiliation}</i></span>
                                                 </div>
                                             </div>
                                         </div>
                                     ))}
                                 
                             </Slider>
+                            )}
                         </div>                        
 
                     </div>
