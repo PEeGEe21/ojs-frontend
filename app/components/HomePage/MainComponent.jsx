@@ -139,7 +139,8 @@ const MainComponent = () => {
                     {forProjectOwners.map((item, index)=>(
                         <div key={index} className='card flex flex-col gap-5 bg-white border border-[#eaecf0] rounded-2xl py-4 px-4 min-h-[200px] md:max-h-[250px] lg:max-h-full'>
                             <div>
-                                <span className='card-icon h-14 w-14 rounded-full p-3 text-[#FFA178] bg-[#414040] inline-block flex items-center justify-center text-2xl'>
+                            {/* [#414040] */}
+                                <span className='card-icon h-14 w-14 rounded-full p-3 text-[#FFA178] border border-[#eaecf0] bg-[#414040] inline-block flex items-center justify-center text-2xl'>
                                     {item.icon}
                                 </span>              
                             </div>
@@ -257,8 +258,8 @@ const MainComponent = () => {
                                     </p>
                                 </div>
 
-                                <div className='card-body flex justify-between w-full items-center gap-3'>
-                                    <div className='flex flex-col gap-1 text-[0.875rem]'>
+                                <div className='card-body flex justify-between w-full items-center gap-3 flex-wrap'>
+                                    <div className='flex flex-col gap-1 text-[0.875rem] flex-1'>
                                         <div className='card-title leading-6 font-medium '>
                                             {item.name}
                                         </div>
@@ -266,7 +267,7 @@ const MainComponent = () => {
                                             {item.expertise}
                                         </div>
                                     </div>
-                                    <span className='card-icon h-14 w-14 rounded-full text-[#FFA178] bg-[#414040] inline-block flex items-center justify-center text-2xl'>
+                                    <span className='card-icon h-14 w-14 rounded-full text-[#FFA178] bg-[#414040] inline-block items-center justify-center text-2xl'>
                                         {/* <div className="rounded-t relative h-10 w-10 overflow-hidden"> */}
 
                                             <Image src={item?.image??'/images/avatar-1.png'} alt={'heree'} width={100} height={100} className='w-full h-full rounded-full' />

@@ -26,7 +26,20 @@ const Navbar = ({user}) => {
   const { push } = useRouter();
   // const { toggle, showMenu } = useContext(MenuContext) || {};
 
-  const showMenu = null;
+  // const showMenu = null;
+  const showDashboard = (role) =>{
+    if(role == 'admin'){
+      return true;
+    } else if(role == 'author'){
+      return true;
+    }
+    return false;
+  }
+
+  // useEffect(() => {
+  //   showDashboard(user.user_default_role);
+  // }, [] )
+
   return (
     <>
       
@@ -193,12 +206,15 @@ const Navbar = ({user}) => {
                                 transformOrigin: 'top left !important'
                               }}                   
                           >
-                            <button
-                              onClick={()=>start((user?.user_default_role).toLowerCase(), push)}
-                              className="hover:bg-[#008080] transition duration-200 ease-in-out px-3 py-3 bg-[#0F1B2D] text-sm whitespace-nowrap flex items-center justify-start gap-2 text-center text-white w-full"
-                            >
-                              <User size={14} color="white" className='hidden md:block'/> <span>Dashboard</span>
-                            </button>
+                            {showDashboard(user?.user_default_role) &&
+                              <button
+                                onClick={()=>start((user?.user_default_role).toLowerCase(), push)}
+                                className="hover:bg-[#008080] transition duration-200 ease-in-out px-3 py-3 bg-[#0F1B2D] text-sm whitespace-nowrap flex items-center justify-start gap-2 text-center text-white w-full"
+                              >
+                                <User size={14} color="white" className='hidden md:block'/> <span>Dashboard</span>
+                              </button>
+                            }
+
                             <MenuItem
                               // onClick={handleLogOut}
                               className="hover:bg-[#008080] transition duration-200 ease-in-out px-3 py-3 bg-[#0F1B2D] text-sm whitespace-nowrap flex items-center justify-start gap-2 text-center text-white"
