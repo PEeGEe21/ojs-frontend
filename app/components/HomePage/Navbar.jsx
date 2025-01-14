@@ -19,7 +19,8 @@ import {
 // import "../../styles/navbar.css";
 import { ArrowDown, ArrowDown2, Global, LogoutCurve, SearchNormal1, User } from 'iconsax-react';
 import { shortenTitle } from '../../lib/utilFunctions';
-import { start } from '../../utils/common';
+import { logout, start } from '../../utils/common';
+import toast from 'react-hot-toast';
 // import { MenuContext } from '@/app/utils/context';
 
 const Navbar = ({user}) => {
@@ -35,6 +36,16 @@ const Navbar = ({user}) => {
     }
     return false;
   }
+
+  const handleLogOut = () => {
+    logout();
+    // push('/');
+    toast.success('Successfully logged out')
+    setTimeout(() => {
+        window.location.href = '/';
+    }, 500);
+  };
+
 
   // useEffect(() => {
   //   showDashboard(user.user_default_role);
@@ -216,7 +227,7 @@ const Navbar = ({user}) => {
                             }
 
                             <MenuItem
-                              // onClick={handleLogOut}
+                              onClick={handleLogOut}
                               className="hover:bg-[#008080] transition duration-200 ease-in-out px-3 py-3 bg-[#0F1B2D] text-sm whitespace-nowrap flex items-center justify-start gap-2 text-center text-white"
                             >
                               <LogoutCurve size={14} color="white" className='hidden md:block'/> <span>Sign Out</span>

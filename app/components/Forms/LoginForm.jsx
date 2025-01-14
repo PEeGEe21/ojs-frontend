@@ -8,7 +8,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import SocialLogin from './FormComponents/SocialLogin';
 import { LoaderIcon } from '../IconComponent';
 import setAuthToken from '../../lib/setAuthToken';
-import { hostUrl, ToasterAlert } from '../../lib/utilFunctions';
+import { handleRedirect, hostUrl, ToasterAlert } from '../../lib/utilFunctions';
 
 const LoginForm = () => {
   const searchParams = useSearchParams();
@@ -20,6 +20,21 @@ const LoginForm = () => {
   const [loading, setLoading] = useState(false);
 
   const { push } = useRouter();
+
+  useEffect(()=>{
+      const getUser = async ()=>{
+          try{
+              if (localStorage.getItem('ojs-user')){
+                  const data = await JSON.parse(
+                    localStorage.getItem("ojs-user")
+                  );
+                  handleRedirect((data.user_default_role).toLowerCase(), push)
+              }
+          }catch(err){}
+      };
+      getUser()
+  }, [])
+
 
   const loginUser = async (e) => {
     setLoading(true);

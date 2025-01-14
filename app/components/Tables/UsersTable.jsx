@@ -178,6 +178,10 @@ const UsersTable = () => {
                     push(`/author/submissions`);
                     toast.success(res.data.message);
                 }
+                if(user?.defaultRole?.id == 2) {
+                    push(`/author/submissions`);
+                    toast.success(res.data.message);
+                }
               }, 300);
             } else {
               setError(true);

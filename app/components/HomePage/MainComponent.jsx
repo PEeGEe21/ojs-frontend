@@ -84,45 +84,52 @@ const MainComponent = () => {
     return (
         <>
             <Navbar user={user}/>
-            <section className="px-4 text-left max-w-[90rem] mx-auto pt-16 pb-20">
-                <div className='max-w-3xl '>
+            <div className="relative" style={{backgroundImage: 'url(/images/bg1.jpg)', backgroundPosition: 'center center', backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundAttachment: 'scroll'}}>
+                <section className="px-4 text-left max-w-[90rem] mx-auto pt-16 pb-20 z-[999]" style={{backgroundImage: 'url(/images/bg1.jpg)', backgroundPosition: 'center center', backgroundSize: 'cover', backgroundRepeat: 'no-repeat', backgroundAttachment: 'scroll'}}>
+                    <div className='max-w-3xl  z-[999]'>
 
-                    <h1 className="text-3xl font-bold text-gray-900 md:text-4xl xl:text-6xl leading-tight lg:leading-[3.75rem]"> 
-                        Journal Management for Seamless Publishing<br className="hidden sm:inline"/> 
-                    </h1>
-                    <h2 className="mt-6 leading-snug text-gray-500 xl:mt-5 xl:text-xl"> 
-                        Seamlessly Manage, Publish, and Distribute Unlimited Journals<br className="hidden sm:inline"/> 
-                        with Ease Across Our Comprehensive Platform. 
-                    </h2>
-                    <div className="relative mt-6 flex flex-row items-center justify-start gap-2">
-                        <div className="flex items-center justify-between text-base">
+                        <h1 className="text-3xl font-bold text-white md:text-4xl xl:text-6xl leading-tight lg:leading-[3.75rem] z-[999] relative"> 
+                            Journal Management for Seamless Publishing<br className="hidden sm:inline"/> 
+                        </h1>
+                        <div className='relative z-[999]'>
+                            <h2 className="mt-6 leading-snug text-[#ffff] xl:mt-5 xl:text-xl"> 
+                                Seamlessly Manage, Publish, and Distribute Unlimited Journals<br className="hidden sm:inline"/> 
+                                with Ease Across Our Comprehensive Platform. 
+                            </h2>
+                        </div>
 
-                            {!user ? 
-                                (
-                                    <>
+                        <div className="relative mt-6 flex flex-row items-center justify-start gap-2 z-[999]">
+                            <div className="flex items-center justify-between text-base">
 
-                                        <Link className="bg-[#013434] border border-[#013434] text-[#fff] px-6 py-2 text-base" href="/auth/signup">Register with us</Link>
-                                        <div className="flex items-center">
-                                            <Link href="#features" className="inline-block w-auto px-2 py-2.5 font-semibold">
-                                                <span className="border-b-2 border-gray-300">Learn more</span>
-                                            </Link>
-                                        </div>
-                                    </>
+                                {!user ? 
+                                    (
+                                        <>
 
-                                ):( 
-                                    <Link 
-                                        href={'/articles'} 
-                                        className="bg-[#008080] hover:bg-[#062F2F] border border-[#008080] hover:border-[#062F2F] text-[#fff] px-6 py-2 text-base rounded-lg flex items-center gap-2 min-h-[48px]">
-                                            View Articles  <span><ArrowRight size={15}/></span>
-                                    </Link>
-                                )
-                            }
+                                            <Link className="bg-[#013434] border border-[#013434] text-[#fff] px-6 py-2 text-base" href="/auth/signup">Register with us</Link>
+                                            <div className="flex items-center">
+                                                <Link href="/" className="inline-block w-auto px-2 py-2.5 font-semibold">
+                                                    <span className="border-b-2 border-white text-white">Learn more</span>
+                                                </Link>
+                                            </div>
+                                        </>
 
-                            
+                                    ):( 
+                                        <Link 
+                                            href={'/articles'} 
+                                            className="bg-[#008080] hover:bg-[#062F2F] border border-[#008080] hover:border-[#062F2F] text-[#fff] px-6 py-2 text-base rounded-lg flex items-center gap-2 min-h-[48px]">
+                                                View Articles  <span><ArrowRight size={15}/></span>
+                                        </Link>
+                                    )
+                                }
+
+                                
+                            </div>
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
+                <div className='absolute w-full h-full top-0 left-0 bg-black opacity-70 pointer-events-none'></div>
+
+            </div>
             
             <section className='py-12 lg:py-24'>
                 <div className='container max-w-[90rem] mx-auto px-4'>

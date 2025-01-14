@@ -163,6 +163,7 @@ export const handleRedirect = (role, push) => {
     const routes = {
         author: '/author/submissions',
         admin: '/admin/submissions',
+        reader: '/',
     };
     push(routes[role] || '/auth/login');
 };
