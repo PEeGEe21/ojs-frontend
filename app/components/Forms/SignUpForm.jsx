@@ -29,7 +29,6 @@ const SignUpForm = () => {
     setSignupAs(event.target.value); // Capture the selected radio button value
   };
 
-  console.log('hostUrl', hostUrl);
   const successtoastOptions = {
     duration: 8000,
     position: 'top-right',

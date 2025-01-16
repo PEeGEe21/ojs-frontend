@@ -179,7 +179,7 @@ const UsersTable = () => {
                     toast.success(res.data.message);
                 }
                 if(user?.defaultRole?.id == 2) {
-                    push(`/author/submissions`);
+                    push(`/`);
                     toast.success(res.data.message);
                 }
               }, 300);
