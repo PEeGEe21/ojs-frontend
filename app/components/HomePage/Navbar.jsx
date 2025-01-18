@@ -217,7 +217,7 @@ const Navbar = ({user}) => {
                                 transformOrigin: 'top left !important'
                               }}                   
                           >
-                            {showDashboard(user?.user_default_role) &&
+                            {showDashboard((user?.user_default_role).toLowerCase()) &&
                               <button
                                 onClick={()=>start((user?.user_default_role).toLowerCase(), push)}
                                 className="hover:bg-[#008080] transition duration-200 ease-in-out px-3 py-3 bg-[#0F1B2D] text-sm whitespace-nowrap flex items-center justify-start gap-2 text-center text-white w-full"
