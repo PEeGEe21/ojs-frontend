@@ -124,7 +124,7 @@ export const generateRecommendations = async (title) => {
         model: 'mistralai/Mixtral-8x7B-Instruct-v0.1', // or any other model
         inputs: prompt,
         parameters: {
-            max_new_tokens: 800,
+            max_new_tokens: 1200,
             temperature: 0.5,
             top_p: 0.95,
             return_full_text: false,
@@ -136,6 +136,7 @@ export const generateRecommendations = async (title) => {
     console.log(response.generated_text)
 
     const cleanedOutput = cleanOutput(response.generated_text);
+    console.log(cleanedOutput, 'dsdsd')
     return JSON.parse(cleanedOutput);
 
   } catch (error) {
@@ -191,10 +192,35 @@ const cleanResponse = (responseText) => {
 
 
 
-const cleanOutput = (responseText) => {
-    return responseText
-      .replace(/\[START_INSTRUCTIONS\][\s\S]*?\[END_INSTRUCTIONS\]/, '') // Remove markers and content
-      .trim(); // Remove any leading or trailing whitespace
+// const cleanOutput = (responseText) => {
+//   try{
+//     return responseText
+//       .replace(/\[START_INSTRUCTIONS\][\s\S]*?\[END_INSTRUCTIONS\]/, '') // Remove markers and content
+//       .trim(); // Remove any leading or trailing whitespace
+//   } catch(err){
+// console.log(err)
+//   }
+//   };
+  const cleanOutput = (responseText) => {
+    try {
+      // Remove markers and content
+      let cleanedText = responseText
+        .replace(/\[START_INSTRUCTIONS\][\s\S]*?\[END_INSTRUCTIONS\]/, '')
+        .trim();
+  
+      // Ensure the JSON is properly closed
+      // if (!cleanedText.endsWith('}]')) {
+      //   cleanedText += '}]'; // Attempt to close the JSON array
+      // }
+      // if (cleanedText.substring(cleanedText.length - 2) !== '}]') {
+      //   cleanedText += '}]';
+      // }
+  
+      return cleanedText;
+    } catch (err) {
+      console.error('Error cleaning output:', err);
+      throw err;
+    }
   };
 
 export const testToken = async () => {

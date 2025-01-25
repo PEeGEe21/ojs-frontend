@@ -150,7 +150,7 @@ const UsersTable = () => {
         toast.success('Successfully logged out')
         setTimeout(()=>{
             loginUser(user);
-        }, 300)
+        }, 3000)
     }
 
     const loginUser = async (user) => {
@@ -182,7 +182,7 @@ const UsersTable = () => {
                     push(`/`);
                     toast.success(res.data.message);
                 }
-              }, 300);
+              }, 3000);
             } else {
               setError(true);
               let message = '';
