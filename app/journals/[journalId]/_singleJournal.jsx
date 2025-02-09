@@ -179,7 +179,7 @@ const SingleJournal = () => {
                     });
                 } else {
                     toast({
-                        title: "Failed to generate summary.",
+                        title: response?.data?.error??"Failed to generate summary.",
                         description: "Failed",
                         status: "error",
                         duration: 2000,

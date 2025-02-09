@@ -15,6 +15,7 @@ import {
   } from '@chakra-ui/react'
 import Footer from '../HomePage/Footer';
 import { Eye } from 'iconsax-react';
+import { getFullName } from '../../utils/common';
 
 
 const ArticlesMainComponent = () => {
@@ -97,7 +98,7 @@ const ArticlesMainComponent = () => {
                                                         {item.title}
                                                     </Link>
                                                     <span>
-                                                        Udeh Praise
+                                                        {getFullName(user)}
                                                     </span>
                                                     <div className='flex items-center justify-start gap-2'>
                                                         <Link href={'/journals/' + item?.journalId+ '/articles/' + item.id} className='flex items-center justify-center gap-1 rounded-md border border-[#008080] p-2 px-3 text-xs min-w-[90px] text-[#008080]'>

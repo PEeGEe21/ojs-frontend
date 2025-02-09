@@ -21,9 +21,6 @@ const AssignEditorSubmissionModal = ({
     <Modal isOpen={isOpen} onClose={onClose} isCentered size="xl">
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>
-          Assign Editor
-        </ModalHeader>
 
         <ModalCloseButton />
 
